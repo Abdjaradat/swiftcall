@@ -1,0 +1,170 @@
+[?25l⠋ Fetching available Firebase projects...                                       
+[A[2K⠙ Fetching available Firebase projects...                                       
+[A[2K⠹ Fetching available Firebase projects...                                       
+[A[2K⠸ Fetching available Firebase projects...                                       
+[A[2K⠼ Fetching available Firebase projects...                                       
+[A[2K⠴ Fetching available Firebase projects...                                       
+[A[2K⠦ Fetching available Firebase projects...                                       
+[A[2K⠧ Fetching available Firebase projects...                                       
+[A[2K⠇ Fetching available Firebase projects...                                       
+[A[2K⠏ Fetching available Firebase projects...                                       
+[A[2K⠋ Fetching available Firebase projects...                                       
+[A[2K⠙ Fetching available Firebase projects...                                       
+[A[2K⠹ Fetching available Firebase projects...                                       
+[A[2K⠸ Fetching available Firebase projects...                                       
+[A[2K⠼ Fetching available Firebase projects...                                       
+[A[2K⠴ Fetching available Firebase projects...                                       
+[A[2K⠦ Fetching available Firebase projects...                                       
+[A[2K⠧ Fetching available Firebase projects...                                       
+[A[2K⠇ Fetching available Firebase projects...                                       
+[A[2K⠏ Fetching available Firebase projects...                                       
+[A[2K⠋ Fetching available Firebase projects...                                       
+[A[2K⠙ Fetching available Firebase projects...                                       
+[A[2K⠹ Fetching available Firebase projects...                                       
+[A[2K⠸ Fetching available Firebase projects...                                       
+[A[2K⠼ Fetching available Firebase projects...                                       
+[A[2K⠴ Fetching available Firebase projects...                                       
+[A[2K⠦ Fetching available Firebase projects...                                       
+[A[2K⠧ Fetching available Firebase projects...                                       
+[A[2K⠇ Fetching available Firebase projects...                                       
+[A[2K⠏ Fetching available Firebase projects...                                       
+[A[2K⠋ Fetching available Firebase projects...                                       
+[A[2Ki Found 2 Firebase projects. Selecting project swiftcall-eec90.                 
+[?25hi Selected platforms: android,ios
+[?25l⠋ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠙ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠹ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠸ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠼ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠴ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠦ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠧ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠇ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠏ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠋ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠙ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠹ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠸ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠼ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠴ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠦ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠧ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠇ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠏ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠋ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠙ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠹ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠸ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠼ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2K⠴ Fetching registered android Firebase apps for project swiftcall-eec90         
+[A[2Ki Firebase android app com.swiftcall.app is not registered on Firebase project swiftcall-eec90.
+[?25h[?25l⠋ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠙ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠹ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠸ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠼ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠴ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠦ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠧ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠇ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠏ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠋ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠙ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠹ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠸ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠼ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠴ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠦ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠧ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠇ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠏ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠋ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠙ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠹ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠸ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠼ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠴ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠦ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠧ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠇ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠏ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠋ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠙ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠹ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠸ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠼ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠴ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠦ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠧ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠇ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠏ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠋ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠙ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠹ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠸ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠼ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠴ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠦ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠧ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠇ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠏ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠋ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠙ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠹ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠸ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠼ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠴ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠦ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠧ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠇ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠏ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠋ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠙ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠹ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠸ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠼ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠴ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠦ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠧ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠇ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠏ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠋ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠙ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠹ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠸ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠼ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠴ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠦ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠧ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠇ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠏ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠋ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠙ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠹ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠸ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠼ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠴ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠦ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠧ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠇ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠏ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠋ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠙ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠹ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠸ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠼ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠴ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠦ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠧ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠇ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠏ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠋ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠙ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠹ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠸ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠼ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠴ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠦ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2K⠧ Registering new Firebase android app on Firebase project swiftcall-eec90.     
+[A[2Ki Registered a new Firebase android app on Firebase project swiftcall-eec90.    
+[?25h? Which ios bundle id do you want to use for this configuration, e.g. 'com.example.app'? › [6n
