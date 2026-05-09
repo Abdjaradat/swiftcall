@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace "com.swiftcall.app"
-    compileSdk 36
+    compileSdk 35
     ndkVersion "27.0.12077973"
 
     compileOptions {
@@ -41,4 +41,5 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.2.2"
+    implementation 'androidx.core:core:1.13.1'
 }
