@@ -56,3 +56,4 @@ functions/.runtimeconfig.json
 # Flutter generated iOS
 /ios/Flutter/Generated.xcconfig
 /ios/Flutter/flutter_export_environment.sh
+.aider*
