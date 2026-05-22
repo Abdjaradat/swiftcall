@@ -40,10 +40,12 @@ class CallConnectionService : ConnectionService() {
             setConnectionProperties(PROPERTY_SELF_MANAGED)
             setAudioModeIsVoip(true)
             setCallerDisplayName(callerName, TelecomManager.PRESENTATION_ALLOWED)
+            var caps = Connection.CAPABILITY_HOLD or Connection.CAPABILITY_SUPPORT_HOLD
             if (hasVideo) {
                 setVideoState(android.telecom.VideoProfile.STATE_BIDIRECTIONAL)
-                connectionCapabilities = connectionCapabilities or Connection.CAPABILITY_SUPPORTS_VT_LOCALS or Connection.CAPABILITY_SUPPORTS_VT_REMOTES
+                caps = caps or android.telecom.PhoneAccount.CAPABILITY_VIDEO_CALLING
             }
+            connectionCapabilities = caps
             // Set initial address for the connection
             val address = Uri.fromParts("tel", callerName.replace(" ", ""), null) // Using callerName as a pseudo-number
             setAddress(address, TelecomManager.PRESENTATION_ALLOWED)
