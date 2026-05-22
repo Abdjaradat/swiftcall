@@ -42,7 +42,7 @@ class CallConnectionService : ConnectionService() {
             setCallerDisplayName(callerName, TelecomManager.PRESENTATION_ALLOWED)
             if (hasVideo) {
                 setVideoState(android.telecom.VideoProfile.STATE_BIDIRECTIONAL)
-                connectionCapabilities = connectionCapabilities or Connection.CAPABILITY_SUPPORTS_VT_LOCAL or Connection.CAPABILITY_SUPPORTS_VT_REMOTE
+                connectionCapabilities = connectionCapabilities or Connection.CAPABILITY_SUPPORTS_VT_LOCALS or Connection.CAPABILITY_SUPPORTS_VT_REMOTES
             }
             // Set initial address for the connection
             val address = Uri.fromParts("tel", callerName.replace(" ", ""), null) // Using callerName as a pseudo-number

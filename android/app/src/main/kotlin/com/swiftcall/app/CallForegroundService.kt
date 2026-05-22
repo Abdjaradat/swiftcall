@@ -47,13 +47,13 @@ class CallForegroundService : Service() {
 
                 // Report the incoming call to the TelecomManager
                 val telecomManager = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-                val phoneAccountHandle = PhoneAccountHandle(componentName, CONNECTION_SERVICE_ID)
+                val phoneAccountHandle = PhoneAccountHandle(android.content.ComponentName(this, CallConnectionService::class.java), CONNECTION_SERVICE_ID)
 
                 val extras = Bundle().apply {
                     putString("uuid", uuid)
                     putString("callerName", callerName)
                     putBoolean("hasVideo", hasVideo)
-                    putBoolean(TelecomManager.EXTRA_IS_SELF_MANAGED_CONNECTION, true)
+                    putBoolean(android.telecom.TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, true)
                 }
 
                 try {
