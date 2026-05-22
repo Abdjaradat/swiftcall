@@ -11,6 +11,9 @@ import 'data/services/auth_service.dart';
 import 'data/services/network_bypass_service.dart';
 import 'data/services/notification_service.dart';
 import 'firebase_options.dart';
+import 'services/call_manager.dart'; // Import CallManager
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 @pragma('vm:entry-point')
 Future<void> _bgMessageHandler(RemoteMessage message) async {
