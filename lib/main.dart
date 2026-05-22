@@ -61,5 +61,9 @@ void main() async {
     isDarkMode: isDarkMode,
     locale: locale,
     onboardingDone: onboardingDone,
+    navigatorKey: navigatorKey, // Pass the navigator key
   ));
+
+  // Set the app context for CallManager (used for platform check)
+  CallManager.appContext = navigatorKey.currentContext;
 }

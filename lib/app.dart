@@ -22,12 +22,14 @@ class SwiftCallApp extends StatefulWidget {
   final bool isDarkMode;
   final String locale;
   final bool onboardingDone;
+  final GlobalKey<NavigatorState> navigatorKey; // New property
 
   const SwiftCallApp({
     super.key,
     required this.isDarkMode,
     required this.locale,
     required this.onboardingDone,
+    required this.navigatorKey, // Initialize new property
   });
 
   @override
@@ -181,6 +183,7 @@ class _SwiftCallAppState extends State<SwiftCallApp>
         router: _router,
         onThemeChanged: (v) => setState(() => _isDark = v),
         onLocaleChanged: (v) => setState(() => _locale = v),
+        navigatorKey: widget.navigatorKey, // Pass the navigatorKey
       ),
     );
   }
@@ -192,6 +195,7 @@ class _ThemeLocaleWrapper extends StatelessWidget {
   final GoRouter router;
   final ValueChanged<bool> onThemeChanged;
   final ValueChanged<String> onLocaleChanged;
+  final GlobalKey<NavigatorState> navigatorKey; // New property
 
   const _ThemeLocaleWrapper({
     required this.isDark,
@@ -199,6 +203,7 @@ class _ThemeLocaleWrapper extends StatelessWidget {
     required this.router,
     required this.onThemeChanged,
     required this.onLocaleChanged,
+    required this.navigatorKey, // Initialize new property
   });
 
   @override
@@ -217,6 +222,19 @@ class _ThemeLocaleWrapper extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       routerConfig: router,
+      // Provide the navigatorKey to MaterialApp.router
+      routerDelegate: router.routerDelegate,
+      routeInformationParser: router.routeInformationParser,
+      routeInformationProvider: router.routeInformationProvider,
+      backButtonDispatcher: router.backButtonDispatcher,
+      builder: (context, child) {
+        return Navigator(
+          key: navigatorKey, // Use the global key here
+          onGenerateRoute: (settings) {
+            return MaterialPageRoute(builder: (_) => child!);
+          },
+        );
+      },
     );
   }
 }
