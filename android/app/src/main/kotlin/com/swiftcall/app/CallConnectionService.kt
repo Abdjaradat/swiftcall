@@ -41,7 +41,7 @@ class CallConnectionService : ConnectionService() {
             setAudioModeIsVoip(true)
             setCallerDisplayName(callerName, TelecomManager.PRESENTATION_ALLOWED)
             if (hasVideo) {
-                setVideoState(Connection.STATE_BIDIRECTIONAL)
+                setVideoState(android.telecom.VideoProfile.STATE_BIDIRECTIONAL)
                 connectionCapabilities = connectionCapabilities or Connection.CAPABILITY_SUPPORTS_VT_LOCAL or Connection.CAPABILITY_SUPPORTS_VT_REMOTE
             }
             // Set initial address for the connection
