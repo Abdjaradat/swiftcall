@@ -1,5 +1,7 @@
 package com.swiftcall.app
 
+import android.telecom.ConnectionRequest
+
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -67,7 +69,7 @@ class MainActivity : FlutterActivity() {
         phoneAccountHandle = PhoneAccountHandle(componentName, "SwiftCallConnectionServiceId")
 
         val builder = PhoneAccount.builder(phoneAccountHandle, "SwiftCall")
-            .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER or PhoneAccount.CAPABILITY_SUPPORT_VIDEO_CALLING)
+            .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER or PhoneAccount.CAPABILITY_SUPPORTS_VIDEO_CALLING)
             .setIcon(PhoneAccount.builder(phoneAccountHandle, "SwiftCall").build().icon) // Use default icon or provide a custom one
 
         val phoneAccount = builder.build()
