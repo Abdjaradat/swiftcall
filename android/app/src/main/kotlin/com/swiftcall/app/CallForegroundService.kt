@@ -1,5 +1,7 @@
 package com.swiftcall.app
 
+package com.swiftcall.app
+
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -10,7 +12,10 @@ import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Build
+import android.os.Bundle
 import android.os.IBinder
+import android.telecom.PhoneAccountHandle
+import android.telecom.TelecomManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -22,6 +27,7 @@ class CallForegroundService : Service() {
         private const val CHANNEL_ID = "swiftcall_incoming_call_channel"
         private const val NOTIFICATION_ID = 12345
         private const val TAG = "CallForegroundService"
+        private const val CONNECTION_SERVICE_ID = "SwiftCallConnectionServiceId" // Unique ID for our PhoneAccountHandle
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -39,13 +45,36 @@ class CallForegroundService : Service() {
                 val hasVideo = intent.getBooleanExtra("hasVideo", false)
 
                 startForegroundNotification(uuid, callerName, hasVideo)
+
+                // Report the incoming call to the TelecomManager
+                val telecomManager = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+                val phoneAccountHandle = PhoneAccountHandle(componentName, CONNECTION_SERVICE_ID)
+
+                val extras = Bundle().apply {
+                    putString("uuid", uuid)
+                    putString("callerName", callerName)
+                    putBoolean("hasVideo", hasVideo)
+                    putBoolean(TelecomManager.EXTRA_IS_SELF_MANAGED_CONNECTION, true)
+                }
+
+                try {
+                    telecomManager.addNewIncomingCall(phoneAccountHandle, extras)
+                    Log.d(TAG, "Reported incoming call to TelecomManager for UUID: $uuid")
+                } catch (e: SecurityException) {
+                    Log.e(TAG, "SecurityException: Cannot add new incoming call. Ensure MANAGE_OWN_CALLS permission is declared and granted.", e)
+                    // If permissions are not correct, the call will not be managed by TelecomManager.
+                    // The notification will still show, but answer/decline might not work as expected
+                    // through the ConnectionService.
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to add new incoming call: ${e.message}", e)
+                }
             }
             "end" -> {
                 val uuid = intent.getStringExtra("uuid")
                 if (uuid != null) {
                     CallConnectionService.reportCallEnded(uuid, android.telecom.DisconnectCause.LOCAL)
                 }
-                stopSelf() // Stop the service
+                stopSelf()
             }
             "stop" -> {
                 stopSelf()
