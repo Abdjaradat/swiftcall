@@ -12,6 +12,7 @@ import android.util.Log
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.util.UUID
+import android.telecom.DisconnectCause
 
 class CallConnectionService : ConnectionService() {
 
@@ -25,7 +26,7 @@ class CallConnectionService : ConnectionService() {
         }
 
         fun reportCallEnded(uuid: String, reason: Int) {
-            activeConnections[uuid]?.setDisconnected(reason)
+            activeConnections[uuid]?.setDisconnected(DisconnectCause(reason))
             activeConnections[uuid]?.destroy()
             activeConnections.remove(uuid)
         }
