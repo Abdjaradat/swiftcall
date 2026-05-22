@@ -128,7 +128,7 @@ import CallKit // Import CallKit
         action.fulfill()
     }
 
-    func provider(_ provider: CXProvider, perform action: CXSetSendingVideoCallAction) {
+    func provider(_ provider: CXProvider, perform action: CXSetVideoCallAction) {
         print("CXSetSendingVideoCallAction for UUID: \(action.callUUID) sendingVideo: \(action.isSendingVideo)")
         action.fulfill()
     }
