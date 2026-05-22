@@ -20,8 +20,8 @@ jobs:
     - name: Get dependencies
       run: flutter pub get
 
-    - name: Build iOS (Release, No Codesign)
-      run: flutter build ios --release --no-codesign
+    - name: Build iOS (Simulator, No Codesign)
+      run: flutter build ios --simulator --no-codesign
 
     - name: Upload iOS Artifact
       uses: actions/upload-artifact@v4
