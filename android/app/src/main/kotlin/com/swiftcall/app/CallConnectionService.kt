@@ -17,8 +17,9 @@ class CallConnectionService : ConnectionService() {
         private const val TAG = "CallConnectionService"
         val activeConnections = mutableMapOf<String, CallConnection>()
 
-        fun reportCallEnded(uuid: String, disconnectCause: DisconnectCause) {
-            Log.d(TAG, "Reporting call ended for UUID: $uuid with cause: ${disconnectCause.reason}")
+        fun reportCallEnded(uuid: String, causeCode: Int) {
+            Log.d(TAG, "Reporting call ended for UUID: $uuid with cause code: $causeCode")
+            val disconnectCause = DisconnectCause(causeCode)
             activeConnections[uuid]?.apply {
                 setDisconnected(disconnectCause)
                 destroy()

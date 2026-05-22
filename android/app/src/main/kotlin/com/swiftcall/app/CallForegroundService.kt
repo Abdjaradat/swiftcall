@@ -1,7 +1,5 @@
 package com.swiftcall.app
 
-package com.swiftcall.app
-
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -72,7 +70,7 @@ class CallForegroundService : Service() {
             "end" -> {
                 val uuid = intent.getStringExtra("uuid")
                 if (uuid != null) {
-                    CallConnectionService.reportCallEnded(uuid, android.telecom.DisconnectCause.LOCAL)
+                    CallConnectionService.reportCallEnded(uuid, DisconnectCause.LOCAL)
                 }
                 stopSelf()
             }
