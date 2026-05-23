@@ -1,9 +1,5 @@
-# النسخة القياسية الرسمية المتوافقة مع السيرفر السحابي 100%
-if File.exist?(File.expand_path('podhelper.rb', __FILE__))
-  require File.expand_path('podhelper.rb', __FILE__)
-else
-  require File.expand_path('.symlinks/plugins/flutter_plugin_loader/ios/podhelper.rb', __FILE__)
-end
+# السطر القياسي الرسمي المعتمد في السيرفرات السحابية لفلاتر
+require File.expand_path(File.join('..', '..', '..', 'packages', 'flutter_tools', 'bin', 'podhelper.rb'), __FILE__)
 
 platform :ios, '13.0'
 
@@ -17,10 +13,5 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
-    
-    target.build_configurations.each do |config|
-      # السطر السحري اللي بيكسر عين الفايربيز وبخليه يبني بدون Non-modular errors
-      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
-    end
   end
 end
