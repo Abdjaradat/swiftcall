@@ -1,5 +1,6 @@
-# السطر القياسي الرسمي المعتمد في السيرفرات السحابية لفلاتر
-require File.expand_path(File.join('..', '..', '..', 'packages', 'flutter_tools', 'bin', 'podhelper.rb'), __FILE__)
+# الاستدعاء الذكي والمباشر من جذر الفلاتر بالسيرفر غصب عنه
+flutter_root = ENV['FLUTTER_ROOT'] || File.join('..', '..', '..')
+require File.expand_path(File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'))
 
 platform :ios, '13.0'
 
