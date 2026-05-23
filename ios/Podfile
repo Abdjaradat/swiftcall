@@ -1,27 +1,17 @@
-# السطرين هدول هما السحر اللي ناقص عشان السيرفر يفهم أوامر فلاتر
+# النسخة القياسية الرسمية - بدون أي مسارات يدوية مخربة
 import_path = File.expand_path(File.join('..', '..', '..', 'packages', 'flutter_tools', 'bin', 'podhelper.rb'), __FILE__)
-if File.exist?(import_path)
-  require import_path
-else
-  # مسار احتياطي قياسي في حال اختلف الهيكل السحابي
-  require File.expand_path(File.join(File.dirname(__FILE__), '.symlinks', 'plugins', 'flutter_plugin_loader', 'ios', 'podhelper.rb'))
-end
+# في فلاتر المسار الافتراضي بكون هيك بالظبط:
+require File.expand_path(File.join('..', '..', '..', 'packages', 'flutter_tools', 'bin', 'podhelper.rb'), __FILE__)
 
 platform :ios, '13.0'
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
-  
-  # إجبار الفايربيز يشتغل كـ Modular Framework بشكل صارم
-  pod 'Firebase', :modular_headers => true
-  pod 'FirebaseMessaging', :modular_headers => true
-  pod 'FirebaseCore', :modular_headers => true
-  pod 'FirebaseAuth', :modular_headers => true
-  pod 'FirebaseFirestore', :modular_headers => true
-  pod 'FirebaseStorage', :modular_headers => true
 
-  # جلب كل مكتبات فلاتر الباقية تلقائياً
+  # هاد السطر بس اللي بهمنا عشان الفايربيز مسجنج ينجح بالـ Xcode
+  pod 'FirebaseMessaging', :modular_headers => true
+
   flutter_ios_podfile_setup
 end
 
@@ -30,9 +20,8 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
     
     target.build_configurations.each do |config|
-      # حل مشكلة الفايربيز والـ Non-modular القديمة للـ Compiler
+      # هذا الأمر بجبر الـ Xcode يطنش الـ non-modular headers ويمشي البيلد لآخر خطوة
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
-      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= '$(inherited) '
     end
   end
 end
