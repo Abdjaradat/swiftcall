@@ -7,37 +7,43 @@ class AdService {
   AdService._();
 
   // ─────────────────────────────────────────────────────────────────────────
-  // TEST IDs — يشتغلون فوراً بدون حساب Unity.
-  // بعد تسجيل حساب على https://dashboard.unityads.unity.com
-  // استبدل القيم أدناه بـ Game ID الحقيقي وAd Unit ID الخاص بك.
+  // TEST IDs — تشتغل فوراً بدون حساب Unity.
+  // بعد تسجيل على https://dashboard.unityads.unity.com
+  // استبدل القيم بـ Game ID الحقيقي وAd Unit ID الخاص بك.
   // ─────────────────────────────────────────────────────────────────────────
   static const _androidGameId = '4374435';
   static const _iosGameId     = '4374434';
 
-  String get _gameId      => Platform.isAndroid ? _androidGameId : _iosGameId;
-  String get _rewardedId  => Platform.isAndroid ? 'Rewarded_Android' : 'Rewarded_iOS';
+  String get _gameId     => Platform.isAndroid ? _androidGameId : _iosGameId;
+  String get _rewardedId => Platform.isAndroid ? 'Rewarded_Android' : 'Rewarded_iOS';
 
   bool _initialized = false;
   bool _adLoaded    = false;
 
   Future<void> init() async {
     if (_initialized) return;
-    await UnityAds.init(
+    UnityAds.init(
       gameId: _gameId,
-      testMode: true, // ← اجعلها false عند النشر الحقيقي
+      testMode: true,
       onComplete: () {
         _initialized = true;
         _loadAd();
       },
-      onFailed: (error, message) {},
+      onFailed: (UnityAdsInitializationError error, String message) {
+        _initialized = false;
+      },
     );
   }
 
   void _loadAd() {
     UnityAds.load(
       placementId: _rewardedId,
-      onComplete:  (_) => _adLoaded = true,
-      onFailed:    (_, __, ___) => _adLoaded = false,
+      onComplete: (String placementId) {
+        _adLoaded = true;
+      },
+      onFailed: (String placementId, UnityAdsLoadError error, String message) {
+        _adLoaded = false;
+      },
     );
   }
 
@@ -60,9 +66,19 @@ class AdService {
 
     UnityAds.showVideoAd(
       placementId: _rewardedId,
-      onComplete:  (_) { result = true;  _adLoaded = false; _loadAd(); },
-      onFailed:    (_, __, ___) { result = false; _loadAd(); },
-      onSkipped:   (_) { result = false; _loadAd(); },
+      onComplete: (String placementId) {
+        result = true;
+        _adLoaded = false;
+        _loadAd();
+      },
+      onFailed: (String placementId, UnityAdsShowError error, String message) {
+        result = false;
+        _loadAd();
+      },
+      onSkipped: (String placementId) {
+        result = false;
+        _loadAd();
+      },
     );
 
     while (result == null) {

@@ -1,19 +1,22 @@
-name: Build Debug Artifacts
+name: Build & Release SwiftCall
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:   # also allows manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  # ─────────────────────────────────────────────────────────────────────────────
+  # ───────────────────────────────────────────────────────────────────────────
   # Android Debug APK
-  # → Downloads directly from the Actions tab → Artifacts.
-  # → Enable "Unknown sources" on your phone and open the APK to install.
-  # ─────────────────────────────────────────────────────────────────────────────
+  # ───────────────────────────────────────────────────────────────────────────
   android:
     name: Android Debug APK
     runs-on: ubuntu-latest
+    outputs:
+      apk_path: build/app/outputs/flutter-apk/app-debug.apk
 
     steps:
       - uses: actions/checkout@v4
@@ -36,7 +39,7 @@ jobs:
         run: |
           mkdir -p ~/.android
           echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 -d > ~/.android/debug.keystore
-          echo "✅ SHA-1 for this keystore (already added to Firebase):"
+          echo "✅ SHA-1 for this keystore:"
           keytool -list -v \
             -keystore ~/.android/debug.keystore \
             -alias androiddebugkey \
@@ -51,7 +54,7 @@ jobs:
         run: flutter build apk --debug 2>&1 | tee /tmp/build_log.txt; exit ${PIPESTATUS[0]}
         continue-on-error: true
 
-      - name: Show Kotlin errors
+      - name: Show errors on failure
         if: steps.build_apk.outcome == 'failure'
         run: |
           echo "=== KOTLIN / GRADLE ERRORS ==="
@@ -60,25 +63,50 @@ jobs:
           tail -80 /tmp/build_log.txt
           exit 1
 
+      - name: Rename APK with version
+        run: |
+          BUILD_NUM=${{ github.run_number }}
+          cp build/app/outputs/flutter-apk/app-debug.apk \
+             build/app/outputs/flutter-apk/SwiftCall-v1.0.$BUILD_NUM.apk
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: SwiftCall-Android-debug-${{ github.run_number }}
-          path: build/app/outputs/flutter-apk/app-debug.apk
-          retention-days: 30
+          path: build/app/outputs/flutter-apk/SwiftCall-v1.0.${{ github.run_number }}.apk
+          retention-days: 90
 
-  # ─────────────────────────────────────────────────────────────────────────────
+      - name: Create GitHub Release with APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: "SwiftCall v1.0.${{ github.run_number }}"
+          body: |
+            ## تحميل SwiftCall 📲
+
+            **رابط التحميل المباشر للأندرويد** 👇
+            اضغط على الملف أدناه لتحميل APK
+
+            ### ما الجديد؟
+            - نظام التوكنز والمكافآت
+            - تسجيل الدخول بالإيميل + Google
+            - تذكرني + نسيت كلمة المرور
+            - إعلانات Unity Ads (مكافأة 50 توكن)
+
+            ### كيفية التثبيت
+            1. حمّل ملف APK من الأسفل
+            2. فعّل "مصادر غير معروفة" في إعدادات الهاتف
+            3. افتح الملف وثبّت التطبيق
+
+            > ⚠️ هذا إصدار تجريبي (Debug) للاختبار قبل النشر الرسمي
+          files: |
+            build/app/outputs/flutter-apk/SwiftCall-v1.0.${{ github.run_number }}.apk
+          draft: false
+          prerelease: false
+
+  # ───────────────────────────────────────────────────────────────────────────
   # iOS Unsigned IPA
-  #
-  # Builds an unsigned IPA that can be installed on a real iPhone WITHOUT an
-  # Apple Developer account using one of these free tools:
-  #
-  #   • AltStore   → https://altstore.io  (Windows & Mac)
-  #   • Sideloadly → https://sideloadly.io (Windows & Mac)
-  #
-  # Both tools sign the IPA with your free Apple ID automatically.
-  # Free Apple ID = app works for 7 days, then re-sign via the same tool.
-  # ─────────────────────────────────────────────────────────────────────────────
+  # ───────────────────────────────────────────────────────────────────────────
   ios:
     name: iOS Unsigned IPA
     runs-on: macos-latest
@@ -112,11 +140,11 @@ jobs:
           mkdir -p build/ios/ipa/Payload
           cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
           cd build/ios/ipa
-          zip -r SwiftCall-unsigned.ipa Payload/
+          zip -r SwiftCall-iOS-unsigned.ipa Payload/
 
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
         with:
           name: SwiftCall-iOS-unsigned-${{ github.run_number }}
-          path: build/ios/ipa/SwiftCall-unsigned.ipa
-          retention-days: 30
+          path: build/ios/ipa/SwiftCall-iOS-unsigned.ipa
+          retention-days: 90
