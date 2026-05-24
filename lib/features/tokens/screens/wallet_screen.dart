@@ -570,7 +570,7 @@ class _WalletScreenState extends State<WalletScreen>
                   label: 'مشاركة',
                   onTap: () async {
                     Navigator.pop(ctx);
-                    final result = await Share.shareWithResult(shareText, subject: appName);
+                    final result = await Share.share(shareText, subject: appName);
                     if (result.status == ShareResultStatus.success ||
                         result.status == ShareResultStatus.dismissed) {
                       _awardShareToken();

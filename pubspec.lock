@@ -1107,6 +1107,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.2"
+  share_plus:
+    dependency: "direct main"
+    description:
+      name: share_plus
+      sha256: "59dfd53f497340a0c3a81909b220cfdb9b8973a91055c4e5ab9b9b9ad7c513c0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.0.0"
+  share_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: share_plus_platform_interface
+      sha256: cc012a23fc2d479854e6c80150696c4a5f5bb62cb89af4de1c505cf78d0a5d0b
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.2"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -1296,6 +1312,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  unity_ads_plugin:
+    dependency: "direct main"
+    description:
+      name: unity_ads_plugin
+      sha256: "4ef07e4ccc0cd6a0b9291a5e1b98601931e8e5589abd97c9b1a602648ce0c79e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.30"
   url_launcher:
     dependency: "direct main"
     description:
