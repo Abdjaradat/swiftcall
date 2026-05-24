@@ -15,6 +15,7 @@ part 'call_state.dart';
 class CallBloc extends Bloc<CallEvent, CallState> {
   Timer? _durationTimer;
   StreamSubscription? _callStatusSub;
+  EventsListener<RoomEvent>? _roomListener;
   Duration _elapsed = Duration.zero;
   String? _activeCallId;
 
@@ -28,13 +29,17 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     on<CallSwitchCamera>(_onSwitchCamera);
     on<CallToggleSpeaker>(_onToggleSpeaker);
     on<_CallTick>(_onTick);
+    on<_CallSessionStarted>(_onSessionStarted);
   }
 
-  // ── Tick: runs every second, emitted via add() so the emitter is always fresh
   void _onTick(_CallTick event, Emitter<CallState> emit) {
     if (state is CallActive) {
       emit((state as CallActive).copyWith(duration: event.elapsed));
     }
+  }
+
+  void _onSessionStarted(_CallSessionStarted event, Emitter<CallState> emit) {
+    _startSession(emit, event.isVideo, event.roomName);
   }
 
   Future<void> _onStart(CallStart event, Emitter<CallState> emit) async {
@@ -42,7 +47,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     await _requestCallPermissions(event.isVideo);
 
     final me = await AuthService.instance.getCurrentUserModel();
-    if (me == null) { emit(CallFailed('لم يتم التعرف على المستخدم')); return; }
+    if (me == null) {
+      emit(CallFailed('لم يتم التعرف على المستخدم'));
+      return;
+    }
 
     final roomName = const Uuid().v4().replaceAll('-', '').substring(0, 12);
     final callId   = const Uuid().v4();
@@ -77,12 +85,14 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       identity: me.uid,
       videoEnabled: event.isVideo,
     );
-    if (room == null) { emit(CallFailed('فشل الاتصال بالغرفة')); return; }
+    if (room == null) {
+      emit(CallFailed('فشل الاتصال بالغرفة'));
+      return;
+    }
 
-    // Wait for remote participant before starting the session
-    _waitForRemoteParticipant(emit, event.isVideo, roomName, room);
+    _watchForRemoteParticipant(room, event.isVideo, roomName);
 
-    // Watch for receiver rejecting the call
+    // Watch for receiver rejecting / missing the call
     _callStatusSub?.cancel();
     _callStatusSub = FirebaseFirestore.instance
         .collection('calls')
@@ -92,34 +102,37 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       if (!doc.exists || _activeCallId == null) return;
       final status = doc.data()?['status'] as String?;
       if (status == 'rejected' || status == 'missed') {
-        _onEnd(CallEnd(), emit);
+        add(CallEnd());
       }
     });
   }
 
-  Future<void> _waitForRemoteParticipant(
-    Emitter<CallState> emit, bool isVideo, String roomName, Room room,
-  ) async {
-    // Listen for remote participant joining
-    final listener = room.createListener();
-    listener.on<ParticipantConnectedEvent>((_) {
-      if (state is CallConnecting) {
-        _startSession(emit, isVideo, roomName);
-      }
-    });
+  void _watchForRemoteParticipant(Room room, bool isVideo, String roomName) {
+    _roomListener?.dispose();
+    _roomListener = room.createListener();
 
-    // Also check if already connected (race condition)
+    // Already connected (race condition)
     if (room.remoteParticipants.isNotEmpty) {
-      listener.dispose();
-      _startSession(emit, isVideo, roomName);
+      _roomListener!.dispose();
+      _roomListener = null;
+      add(_CallSessionStarted(isVideo: isVideo, roomName: roomName));
       return;
     }
 
+    _roomListener!.on<ParticipantConnectedEvent>((_) {
+      _roomListener?.dispose();
+      _roomListener = null;
+      add(_CallSessionStarted(isVideo: isVideo, roomName: roomName));
+    });
+
     // Timeout after 45 seconds
     Future.delayed(AppConstants.callTimeout, () {
-      listener.dispose();
-      if (state is CallConnecting) {
-        _onEnd(CallEnd(), emit);
+      if (_roomListener != null) {
+        _roomListener?.dispose();
+        _roomListener = null;
+        if (state is CallConnecting) {
+          add(CallEnd());
+        }
       }
     });
   }
@@ -149,10 +162,16 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       identity: me.uid,
       videoEnabled: event.call.type == CallType.video,
     );
-    if (room == null) { emit(CallFailed('فشل الاتصال')); return; }
+    if (room == null) {
+      emit(CallFailed('فشل الاتصال'));
+      return;
+    }
 
-    // Receiver is the second to join — remote participant should already be there
-    _waitForRemoteParticipant(emit, event.call.type == CallType.video, event.call.roomName!, room);
+    _watchForRemoteParticipant(
+      room,
+      event.call.type == CallType.video,
+      event.call.roomName!,
+    );
   }
 
   Future<void> _onReject(CallReject event, Emitter<CallState> emit) async {
@@ -169,6 +188,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     _durationTimer?.cancel();
     _durationTimer = null;
     _callStatusSub?.cancel();
+    _callStatusSub = null;
+    _roomListener?.dispose();
+    _roomListener = null;
+
     final elapsed = _elapsed;
     _elapsed = Duration.zero;
 
@@ -213,15 +236,12 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     }
   }
 
-  // ── Helpers ───────────────────────────────────────────────
   Future<void> _requestCallPermissions(bool withVideo) async {
     await Permission.microphone.request();
     if (withVideo) await Permission.camera.request();
   }
 
-  // Emits initial CallActive and starts the periodic tick via add()
   void _startSession(Emitter<CallState> emit, bool isVideo, String roomName) {
-    // Speaker ON for video calls, OFF (earpiece) for voice calls
     LiveKitService.instance.enableSpeaker(isVideo);
     _elapsed = Duration.zero;
 
@@ -237,7 +257,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     _durationTimer?.cancel();
     _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       _elapsed += const Duration(seconds: 1);
-      add(_CallTick(_elapsed)); // fires a new event — gets a fresh emitter
+      add(_CallTick(_elapsed));
     });
   }
 
@@ -245,6 +265,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   Future<void> close() {
     _durationTimer?.cancel();
     _callStatusSub?.cancel();
+    _roomListener?.dispose();
     return super.close();
   }
 }

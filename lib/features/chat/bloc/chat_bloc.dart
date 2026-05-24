@@ -23,6 +23,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<ChatDeleteMessage>(_onDeleteMessage);
     on<ChatTypingChanged>(_onTypingChanged);
     on<ChatMarkAsRead>(_onMarkAsRead);
+    on<_ChatTypingUpdated>(_onTypingUpdated);
+  }
+
+  void _onTypingUpdated(_ChatTypingUpdated event, Emitter<ChatState> emit) {
+    if (state is ChatLoaded) {
+      emit((state as ChatLoaded).copyWith(typingUsers: event.typingUsers));
+    }
   }
 
   Future<void> _onLoadMessages(
@@ -31,16 +38,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ) async {
     emit(ChatLoading());
 
+    // Cancel old typing subscription and start a new one for this chat.
+    // Use add() so we never call emit() from outside the event handler.
     _typingSub?.cancel();
     _typingSub = ChatService.instance
         .watchTyping(event.chatId)
-        .listen((typing) {
-      if (state is ChatLoaded) {
-        final current = state as ChatLoaded;
-        final updated = current.copyWith(typingUsers: typing);
-        emit(updated);
-      }
-    });
+        .listen((typing) => add(_ChatTypingUpdated(typing)));
 
     await emit.forEach<List<MessageModel>>(
       ChatService.instance.watchMessages(event.chatId),

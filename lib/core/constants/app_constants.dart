@@ -27,9 +27,8 @@ class AppConstants {
   static const String userIdKey          = 'userId';
 
   // Timeouts
-  static const Duration callTimeout     = Duration(seconds: 45);
-  static const Duration typingTimeout   = Duration(seconds: 3);
-  static const Duration messagePageSize = Duration(seconds: 0); // just for reference
+  static const Duration callTimeout    = Duration(seconds: 45);
+  static const Duration typingTimeout  = Duration(seconds: 3);
 
   // Message limits
   static const int messagesPerPage       = 30;
@@ -39,7 +38,4 @@ class AppConstants {
   // Encryption key (replace with secure key management in production)
   static const String encryptionKey      = 'SwiftCall@2025!#SecureKey32Bytes';
   static const String encryptionIV       = 'SwiftCallIV16B!!';
-
-  // Push notifications handled by Cloud Function (functions/index.js)
-  // triggered on Firestore calls collection creation
 }

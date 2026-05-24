@@ -65,3 +65,8 @@ class ChatMarkAsRead extends ChatEvent {
   final String chatId;
   ChatMarkAsRead(this.chatId);
 }
+
+class _ChatTypingUpdated extends ChatEvent {
+  final Map<String, bool> typingUsers;
+  _ChatTypingUpdated(this.typingUsers);
+}

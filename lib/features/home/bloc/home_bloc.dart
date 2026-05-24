@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import '../../../data/models/chat_model.dart';
@@ -11,8 +10,6 @@ part 'home_event.dart';
 part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  StreamSubscription? _chatsSub;
-
   HomeBloc() : super(HomeInitial()) {
     on<HomeLoadChats>(_onLoadChats);
     on<HomeSearchChanged>(_onSearchChanged);
@@ -135,7 +132,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   @override
   Future<void> close() {
-    _chatsSub?.cancel();
     return super.close();
   }
 }

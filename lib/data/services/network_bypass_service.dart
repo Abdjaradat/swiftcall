@@ -1,19 +1,18 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Handles network bypass for restricted environments.
-/// Supports HTTP/SOCKS5 proxy configuration and fallback TURN servers.
 class NetworkBypassService {
   static NetworkBypassService get instance => _instance;
   static final NetworkBypassService _instance = NetworkBypassService._();
   NetworkBypassService._();
 
-  static const String _proxyHostKey    = 'proxy_host';
-  static const String _proxyPortKey    = 'proxy_port';
-  static const String _proxyUserKey    = 'proxy_user';
-  static const String _proxyPassKey    = 'proxy_pass';
-  static const String _proxyTypeKey    = 'proxy_type';  // 'http' | 'socks5' | 'none'
+  static const String _proxyHostKey     = 'proxy_host';
+  static const String _proxyPortKey     = 'proxy_port';
+  static const String _proxyUserKey     = 'proxy_user';
+  static const String _proxyPassKey     = 'proxy_pass';
+  static const String _proxyTypeKey     = 'proxy_type';
   static const String _bypassEnabledKey = 'bypass_enabled';
 
   ProxyConfig? _activeProxy;
@@ -55,13 +54,14 @@ class NetworkBypassService {
     _activeProxy = config;
   }
 
-  /// Applies proxy to a [Dio] client
+  /// Applies proxy to a [Dio] client (Dio 5.x compatible)
   Dio buildDio() {
     final dio = Dio();
     final proxy = _activeProxy;
     if (proxy == null) return dio;
 
-    (dio.httpClientAdapter as dynamic).onHttpClientCreate = (HttpClient client) {
+    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+      final client = HttpClient();
       client.findProxy = (uri) {
         return proxy.type == ProxyType.socks5
             ? 'SOCKS5 ${proxy.host}:${proxy.port}'
@@ -83,7 +83,6 @@ class NetworkBypassService {
   ProxyConfig? get activeProxy => _activeProxy;
   bool get isEnabled => _activeProxy != null;
 
-  /// Extra TURN/STUN ice servers for WebRTC behind restrictive NATs
   List<Map<String, dynamic>> get iceServers => [
     {'urls': 'stun:stun.l.google.com:19302'},
     {'urls': 'stun:stun1.l.google.com:19302'},

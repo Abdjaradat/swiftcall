@@ -35,3 +35,9 @@ class _CallTick extends CallEvent {
   final Duration elapsed;
   _CallTick(this.elapsed);
 }
+
+class _CallSessionStarted extends CallEvent {
+  final bool isVideo;
+  final String roomName;
+  _CallSessionStarted({required this.isVideo, required this.roomName});
+}
