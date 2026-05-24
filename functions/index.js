@@ -9,6 +9,10 @@
  *  2. cancelCallNotification — fires when call status changes to cancelled/rejected/ended/missed
  *     → Tells the receiver to dismiss the incoming call UI immediately
  *
+ *  3. timeoutStaleCalls — runs every minute via Cloud Scheduler
+ *     → Marks any call still "ringing" after 45 s as "missed"
+ *     → cancelCallNotification then fires and dismisses the UI on both devices
+ *
  * ── iOS VoIP push setup ───────────────────────────────────────────────────────
  * VoIP pushes bypass FCM and go directly to Apple's servers.
  * You must configure three Firebase environment variables before deploying:
@@ -25,6 +29,7 @@
  */
 
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const apn = require("apn");
@@ -280,3 +285,45 @@ exports.cancelCallNotification = onDocumentUpdated(
     );
   }
 );
+
+/**
+ * Scheduled: runs every minute.
+ *
+ * Finds all calls that are still "ringing" but were created more than
+ * CALL_TIMEOUT_SECONDS ago, and marks them "missed".
+ *
+ * This triggers cancelCallNotification, which immediately sends an FCM
+ * call_cancelled message to both parties — dismissing the incoming-call
+ * UI on Android and popping the IncomingCallScreen on iOS/Flutter.
+ */
+const CALL_TIMEOUT_SECONDS = 45;
+
+exports.timeoutStaleCalls = onSchedule("every 1 minutes", async (_event) => {
+  const cutoff = admin.firestore.Timestamp.fromMillis(
+    Date.now() - CALL_TIMEOUT_SECONDS * 1000
+  );
+
+  const snapshot = await admin
+    .firestore()
+    .collection("calls")
+    .where("status", "==", "ringing")
+    .where("timestamp", "<", cutoff)
+    .get();
+
+  if (snapshot.empty) {
+    console.log("[timeoutStaleCalls] No stale calls found.");
+    return;
+  }
+
+  // Batch-write all updates (Firestore max 500 per batch — more than enough here)
+  const batch = admin.firestore().batch();
+  snapshot.docs.forEach((doc) => {
+    batch.update(doc.ref, { status: "missed" });
+  });
+  await batch.commit();
+
+  console.log(
+    `[timeoutStaleCalls] Marked ${snapshot.size} call(s) as missed:`,
+    snapshot.docs.map((d) => d.id).join(", ")
+  );
+});
