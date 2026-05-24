@@ -24,8 +24,9 @@
 - GitHub Actions workflow: Android (Ubuntu) + iOS Simulator (macOS)
 
 ## Current Status
-- **Android CI build**: FAILS — `resource android:attr/lStar not found` in `livekit_client:verifyReleaseResources`
-- **iOS Simulator CI build**: still running (waiting for `pod install`)
+- **iOS CI build**: ✅ SUCCESS (unsigned IPA artifact available)
+- **Android CI build**: FAILS — `debug.keystore` not found (fixed: now generates keystore instead of using secret)
+- **Previous Android error** (`shareWithResult`): ✅ FIXED
 - Local Android build: ✅ succeeds
 
 ## Key Firebase Config
