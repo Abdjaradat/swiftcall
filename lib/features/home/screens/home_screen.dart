@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/router/app_router.dart';
@@ -67,6 +68,16 @@ class _HomeScreenState extends State<HomeScreen>
                   onPressed: _showActionSheet,
                   child: const Icon(Icons.add_rounded, color: Colors.white),
                 ),
+          bottomNavigationBar: Container(
+            color: AppColors.background,
+            child: UnityBannerAd(
+              placementId: 'Banner_Android',
+              onLoad: (_) {},
+              onClick: (_) {},
+              onShown: (_) {},
+              onFailed: (_, __, ___) {},
+            ),
+          ),
         );
       },
     );
