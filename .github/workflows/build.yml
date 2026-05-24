@@ -35,15 +35,13 @@ jobs:
 
       - name: Generate debug keystore
         run: |
-          for dir in "/root/.android" "$HOME/.android"; do
-            mkdir -p "$dir"
-            if ! [ -f "$dir/debug.keystore" ]; then
-              keytool -genkey -v -keystore "$dir/debug.keystore" \
-                -storepass android -alias androiddebugkey -keypass android \
-                -keyalg RSA -keysize 2048 -validity 10000 \
-                -dname "CN=Android Debug,O=Android,C=US"
-            fi
-          done
+          mkdir -p "$HOME/.android"
+          keytool -genkey -v \
+            -keystore "$HOME/.android/debug.keystore" \
+            -storepass android -alias androiddebugkey -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+          ls -la "$HOME/.android/"
 
       - name: Install Flutter dependencies
         run: flutter pub get
@@ -51,6 +49,7 @@ jobs:
       - name: Build release APK
         id: build_apk
         env:
+          GRADLE_OPTS: -Duser.home=$HOME
           RELEASE_KEYSTORE_PATH: /root/.android/debug.keystore
           RELEASE_STORE_PASSWORD: android
           RELEASE_KEY_ALIAS: androiddebugkey
