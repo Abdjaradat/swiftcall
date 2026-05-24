@@ -88,7 +88,34 @@ class _WalletScreenState extends State<WalletScreen>
           if (state is TokenLoaded) {
             return _buildContent(state);
           }
-          return const Center(child: Text('حدث خطأ', style: TextStyle(color: Colors.white)));
+          if (state is TokenError) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
+                  const SizedBox(height: 12),
+                  Text(state.message,
+                      style: const TextStyle(color: Colors.white70, fontSize: 15)),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: () =>
+                        context.read<TokenBloc>().add(TokenLoadWallet()),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('إعادة المحاولة'),
+                  ),
+                ],
+              ),
+            );
+          }
+          return Center(
+            child: ElevatedButton.icon(
+              onPressed: () =>
+                  context.read<TokenBloc>().add(TokenLoadWallet()),
+              icon: const Icon(Icons.refresh),
+              label: const Text('تحميل'),
+            ),
+          );
         },
       ),
     );

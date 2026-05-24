@@ -21,7 +21,12 @@ class TokenService {
 
   Future<TokenWallet> getWallet(String uid) async {
     final snap = await _wallets.doc(uid).get();
-    if (!snap.exists) return TokenWallet(uid: uid, balance: 0);
+    if (!snap.exists) {
+      await initWallet(uid);
+      final snap2 = await _wallets.doc(uid).get();
+      if (!snap2.exists) return TokenWallet(uid: uid, balance: 0);
+      return TokenWallet.fromMap(snap2.data() as Map<String, dynamic>);
+    }
     return TokenWallet.fromMap(snap.data() as Map<String, dynamic>);
   }
 
@@ -40,10 +45,10 @@ class TokenService {
   Future<bool> spendTokens(String uid, int amount, String description) async {
     final wallet = await getWallet(uid);
     if (wallet.balance < amount) return false;
-    await _wallets.doc(uid).update({
+    await _wallets.doc(uid).set({
       'balance': FieldValue.increment(-amount),
       'totalSpent': FieldValue.increment(amount),
-    });
+    }, SetOptions(merge: true));
     await _addTransaction(uid, -amount, 'spend', description);
     return true;
   }
@@ -65,13 +70,13 @@ class TokenService {
         now.year == wallet.adResetDate!.year &&
         now.month == wallet.adResetDate!.month &&
         now.day == wallet.adResetDate!.day;
-    await _wallets.doc(uid).update({
+    await _wallets.doc(uid).set({
       'balance': FieldValue.increment(TokenCosts.watchAdReward),
       'totalEarned': FieldValue.increment(TokenCosts.watchAdReward),
       'lastAdWatched': Timestamp.fromDate(now),
       'dailyAdCount': sameDay ? FieldValue.increment(1) : 1,
       'adResetDate': Timestamp.fromDate(now),
-    });
+    }, SetOptions(merge: true));
     await _addTransaction(uid, TokenCosts.watchAdReward, 'ad', 'شاهدت إعلاناً');
     return true;
   }
@@ -84,24 +89,37 @@ class TokenService {
         now.year == wallet.shareResetDate!.year &&
         now.month == wallet.shareResetDate!.month &&
         now.day == wallet.shareResetDate!.day;
-    await _wallets.doc(uid).update({
+    await _wallets.doc(uid).set({
       'balance': FieldValue.increment(TokenCosts.shareReward),
       'totalEarned': FieldValue.increment(TokenCosts.shareReward),
       'lastShared': Timestamp.fromDate(now),
       'dailyShareCount': sameDay ? FieldValue.increment(1) : 1,
       'shareResetDate': Timestamp.fromDate(now),
-    });
+    }, SetOptions(merge: true));
     await _addTransaction(uid, TokenCosts.shareReward, 'share', 'شاركت التطبيق');
     return true;
   }
 
   Future<List<TokenTransaction>> getTransactions(String uid, {int limit = 20}) async {
-    final snap = await _transactions(uid)
-        .orderBy('createdAt', descending: true)
-        .limit(limit)
-        .get();
-    return snap.docs.map((d) =>
-        TokenTransaction.fromMap(d.data() as Map<String, dynamic>, d.id)).toList();
+    try {
+      final snap = await _transactions(uid)
+          .orderBy('createdAt', descending: true)
+          .limit(limit)
+          .get();
+      return snap.docs.map((d) =>
+          TokenTransaction.fromMap(d.data() as Map<String, dynamic>, d.id)).toList();
+    } catch (_) {
+      // Fallback: fetch without orderBy if index is missing, then sort in Dart
+      try {
+        final snap = await _transactions(uid).limit(limit).get();
+        final list = snap.docs.map((d) =>
+            TokenTransaction.fromMap(d.data() as Map<String, dynamic>, d.id)).toList();
+        list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        return list;
+      } catch (_) {
+        return [];
+      }
+    }
   }
 
   Future<void> _addTransaction(String uid, int amount, String type, String description) async {

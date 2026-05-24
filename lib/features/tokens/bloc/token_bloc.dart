@@ -22,12 +22,15 @@ class TokenBloc extends Bloc<TokenEvent, TokenState> {
     emit(TokenLoading());
     try {
       final uid = _uid;
-      if (uid == null) return;
+      if (uid == null) {
+        emit(TokenError('يجب تسجيل الدخول أولاً'));
+        return;
+      }
       final wallet = await _tokenService.getWallet(uid);
       final transactions = await _tokenService.getTransactions(uid);
       emit(TokenLoaded(wallet: wallet, transactions: transactions));
     } catch (e) {
-      emit(TokenError('فشل تحميل المحفظة'));
+      emit(TokenError('فشل تحميل المحفظة: ${e.toString().split(']').last.trim()}'));
     }
   }
 
