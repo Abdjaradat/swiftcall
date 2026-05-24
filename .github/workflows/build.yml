@@ -1,45 +1,141 @@
-name: Build
+name: Build Debug Artifacts
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:
+  workflow_dispatch:   # also allows manual trigger from GitHub Actions tab
 
 jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Android Debug APK
+  # → Downloads directly from the Actions tab → Artifacts.
+  # → Enable "Unknown sources" on your phone and open the APK to install.
+  # ─────────────────────────────────────────────────────────────────────────────
   android:
+    name: Android Debug APK
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: zulu
           java-version: '17'
+
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.29.2
-      - run: flutter pub get
-      - name: Install Android SDK 35
-        run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35"
-      - run: flutter clean
-      - run: flutter build apk --release
-      - uses: actions/upload-artifact@v4
-        with:
-          name: android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          flutter-version: '3.29.2'
+          cache: true
 
-  ios-simulator:
+      - name: Install Android SDK platform 35
+        run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35"
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SwiftCall-Android-debug-${{ github.run_number }}
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 30
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # iOS Build
+  #
+  # Without secrets  → builds for the iOS Simulator (can test in Xcode Simulator).
+  # With secrets     → builds a signed Ad-Hoc IPA you can install on your iPhone.
+  #
+  # To enable real-device IPA, add these to GitHub → Settings → Secrets → Actions:
+  #   APPLE_CERTIFICATE_BASE64     (base64 of your .p12 distribution certificate)
+  #   APPLE_CERTIFICATE_PASSWORD   (password for the .p12)
+  #   APPLE_PROVISIONING_BASE64    (base64 of your Ad-Hoc .mobileprovision)
+  #   APPLE_TEAM_ID                (10-char Apple Team ID, e.g. ABCDE12345)
+  # ─────────────────────────────────────────────────────────────────────────────
+  ios:
+    name: iOS Build
     runs-on: macos-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.29.2
-      - run: flutter pub get
-      - run: cd ios && pod install
-      - run: flutter build ios --simulator --no-codesign
-      - uses: actions/upload-artifact@v4
+          flutter-version: '3.29.2'
+          cache: true
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Install CocoaPods dependencies
+        run: cd ios && pod install --repo-update
+
+      # ── Simulator build (no secrets needed) ────────────────────────────────
+      - name: Build for iOS Simulator
+        if: ${{ secrets.APPLE_TEAM_ID == '' }}
+        run: flutter build ios --simulator --no-codesign
+
+      - name: Zip Simulator .app
+        if: ${{ secrets.APPLE_TEAM_ID == '' }}
+        run: |
+          cd build/ios/iphonesimulator
+          zip -r SwiftCall-simulator.zip Runner.app
+
+      - name: Upload Simulator artifact
+        if: ${{ secrets.APPLE_TEAM_ID == '' }}
+        uses: actions/upload-artifact@v4
         with:
-          name: ios-simulator
-          path: build/ios/iphonesimulator/Runner.app
+          name: SwiftCall-iOS-Simulator-${{ github.run_number }}
+          path: build/ios/iphonesimulator/SwiftCall-simulator.zip
+          retention-days: 30
+
+      # ── Real-device signed IPA (requires secrets) ──────────────────────────
+      - name: Import signing certificate
+        if: ${{ secrets.APPLE_TEAM_ID != '' }}
+        env:
+          CERT_B64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          CERT_PASS: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          KEYCHAIN=$RUNNER_TEMP/build.keychain
+          security create-keychain -p "" $KEYCHAIN
+          security set-keychain-settings -lut 21600 $KEYCHAIN
+          security unlock-keychain -p "" $KEYCHAIN
+          echo "$CERT_B64" | base64 --decode > $RUNNER_TEMP/cert.p12
+          security import $RUNNER_TEMP/cert.p12 -P "$CERT_PASS" \
+            -A -t cert -f pkcs12 -k $KEYCHAIN
+          security list-keychain -d user -s $KEYCHAIN
+
+      - name: Install provisioning profile
+        if: ${{ secrets.APPLE_TEAM_ID != '' }}
+        env:
+          PROV_B64: ${{ secrets.APPLE_PROVISIONING_BASE64 }}
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROV_B64" | base64 --decode \
+            > ~/Library/MobileDevice/Provisioning\ Profiles/swiftcall.mobileprovision
+
+      - name: Patch ExportOptions with Team ID
+        if: ${{ secrets.APPLE_TEAM_ID != '' }}
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: sed -i '' "s/TEAM_ID_PLACEHOLDER/$TEAM_ID/g" ios/ExportOptions.plist
+
+      - name: Build signed IPA
+        if: ${{ secrets.APPLE_TEAM_ID != '' }}
+        run: |
+          flutter build ipa --release \
+            --export-options-plist=ios/ExportOptions.plist
+
+      - name: Upload IPA artifact
+        if: ${{ secrets.APPLE_TEAM_ID != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: SwiftCall-iOS-AdHoc-${{ github.run_number }}
+          path: build/ios/ipa/*.ipa
+          retention-days: 30

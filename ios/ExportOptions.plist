@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- method: ad-hoc allows installation on registered devices without App Store -->
+  <key>method</key>
+  <string>ad-hoc</string>
+
+  <!-- teamID is injected by the CI workflow via sed before xcodebuild runs -->
+  <key>teamID</key>
+  <string>TEAM_ID_PLACEHOLDER</string>
+
+  <key>compileBitcode</key>
+  <false/>
+
+  <key>signingStyle</key>
+  <string>automatic</string>
+
+  <key>stripSwiftSymbols</key>
+  <true/>
+
+  <key>thinning</key>
+  <string>&lt;none&gt;</string>
+</dict>
+</plist>
