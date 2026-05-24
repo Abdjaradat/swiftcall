@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/services/ad_service.dart';
 import '../../../data/models/token_model.dart';
@@ -408,12 +409,225 @@ class _WalletScreenState extends State<WalletScreen>
   }
 
   void _shareApp() {
-    Share.share(
-      'جرب تطبيق SwiftCall — أفضل تطبيق للمكالمات والدردشة مع العائلة! 🚀\nhttps://github.com/Abdjaradat/swiftcall',
-      subject: 'SwiftCall',
+    const appName   = 'SwiftCall';
+    const appLink   = 'https://github.com/Abdjaradat/swiftcall/releases/latest';
+    const shareText = '🚀 جرّب تطبيق SwiftCall!\n'
+        'أفضل تطبيق مكالمات فيديو وصوت ودردشة مجاناً 💬📞\n'
+        '👇 حمّله الآن:\n$appLink';
+    final whatsappTxt = Uri.encodeComponent(shareText);
+    final telegramTxt = Uri.encodeComponent(shareText);
+    final twitterTxt  = Uri.encodeComponent(
+        '🚀 جرّب SwiftCall — أفضل تطبيق مكالمات مجاني!\n$appLink');
+    final facebookUrl = 'https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(appLink)}';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6C63FF).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text('📤', style: TextStyle(fontSize: 20)),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('شارك التطبيق',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17)),
+                    Text('احصل على +30 توكن لكل مشاركة (3/يوم)',
+                        style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _SharePlatform(
+                  color: const Color(0xFF25D366),
+                  icon: '📱',
+                  label: 'واتساب',
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    final launched = await launchUrl(
+                      Uri.parse('whatsapp://send?text=$whatsappTxt'),
+                      mode: LaunchMode.externalApplication,
+                    ).catchError((_) => false);
+                    if (!launched) {
+                      await launchUrl(Uri.parse('https://wa.me/?text=$whatsappTxt'),
+                          mode: LaunchMode.externalApplication);
+                    }
+                    _awardShareToken();
+                  },
+                ),
+                _SharePlatform(
+                  color: const Color(0xFF2AABEE),
+                  icon: '✈️',
+                  label: 'تيليغرام',
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await launchUrl(
+                      Uri.parse('https://t.me/share/url?url=${Uri.encodeComponent(appLink)}&text=$telegramTxt'),
+                      mode: LaunchMode.externalApplication,
+                    );
+                    _awardShareToken();
+                  },
+                ),
+                _SharePlatform(
+                  color: const Color(0xFF1DA1F2),
+                  icon: '🐦',
+                  label: 'تويتر/X',
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await launchUrl(
+                      Uri.parse('https://twitter.com/intent/tweet?text=$twitterTxt'),
+                      mode: LaunchMode.externalApplication,
+                    );
+                    _awardShareToken();
+                  },
+                ),
+                _SharePlatform(
+                  color: const Color(0xFF1877F2),
+                  icon: '📘',
+                  label: 'فيسبوك',
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await launchUrl(
+                      Uri.parse(facebookUrl),
+                      mode: LaunchMode.externalApplication,
+                    );
+                    _awardShareToken();
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _SharePlatform(
+                  color: const Color(0xFFE1306C),
+                  icon: '📸',
+                  label: 'انستغرام',
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    // Copy link then open Instagram
+                    await Clipboard.setData(const ClipboardData(text: appLink));
+                    final launched = await launchUrl(
+                      Uri.parse('instagram://app'),
+                      mode: LaunchMode.externalApplication,
+                    ).catchError((_) => false);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(launched
+                            ? 'تم نسخ الرابط — الصقه في قصتك أو منشورك!'
+                            : 'تم نسخ الرابط: $appLink'),
+                        backgroundColor: const Color(0xFFE1306C),
+                        behavior: SnackBarBehavior.floating,
+                      ));
+                    }
+                    _awardShareToken();
+                  },
+                ),
+                _SharePlatform(
+                  color: const Color(0xFF4CAF50),
+                  icon: '🔗',
+                  label: 'نسخ الرابط',
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await Clipboard.setData(const ClipboardData(text: appLink));
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('✅ تم نسخ رابط التحميل!'),
+                        backgroundColor: Color(0xFF4CAF50),
+                        behavior: SnackBarBehavior.floating,
+                      ));
+                    }
+                    _awardShareToken();
+                  },
+                ),
+                _SharePlatform(
+                  color: AppColors.primary,
+                  icon: '📤',
+                  label: 'مشاركة',
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    final result = await Share.shareWithResult(shareText, subject: appName);
+                    if (result.status == ShareResultStatus.success ||
+                        result.status == ShareResultStatus.dismissed) {
+                      _awardShareToken();
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) context.read<TokenBloc>().add(TokenShare());
-    });
+  }
+
+  void _awardShareToken() {
+    if (mounted) context.read<TokenBloc>().add(TokenShare());
+  }
+}
+
+class _SharePlatform extends StatelessWidget {
+  final Color color;
+  final String icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _SharePlatform({
+    required this.color,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              shape: BoxShape.circle,
+              border: Border.all(color: color.withOpacity(0.4), width: 1.5),
+            ),
+            child: Center(child: Text(icon, style: const TextStyle(fontSize: 24))),
+          ),
+          const SizedBox(height: 6),
+          Text(label,
+              style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
   }
 }
