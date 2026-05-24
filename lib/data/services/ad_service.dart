@@ -7,12 +7,10 @@ class AdService {
   AdService._();
 
   // ─────────────────────────────────────────────────────────────────────────
-  // TEST IDs — تشتغل فوراً بدون حساب Unity.
-  // بعد تسجيل على https://dashboard.unityads.unity.com
-  // استبدل القيم بـ Game ID الحقيقي وAd Unit ID الخاص بك.
+  // Game ID الحقيقي من Unity Dashboard (حساب jaradatabdullah122)
   // ─────────────────────────────────────────────────────────────────────────
-  static const _androidGameId = '4374435';
-  static const _iosGameId     = '4374434';
+  static const _androidGameId = '800000852';
+  static const _iosGameId     = '800000852';
 
   String get _gameId     => Platform.isAndroid ? _androidGameId : _iosGameId;
   String get _rewardedId => Platform.isAndroid ? 'Rewarded_Android' : 'Rewarded_iOS';
