@@ -73,6 +73,12 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
 
+      - name: Pre-cache iOS Flutter artifacts
+        run: flutter precache --ios
+
+      - name: Clean Pods (force fresh install)
+        run: rm -rf ios/Pods ios/.symlinks ios/Podfile.lock
+
       - name: Install CocoaPods dependencies
         run: cd ios && pod install --repo-update
 
