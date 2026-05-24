@@ -93,7 +93,7 @@ class AuthService {
 
     final userModel = UserModel(
       uid: user.uid,
-      displayName: displayName,
+      name: displayName,
       email: email,
       photoUrl: null,
       isOnline: true,
