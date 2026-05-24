@@ -50,7 +50,7 @@ jobs:
         id: build_apk
         env:
           GRADLE_OPTS: -Duser.home=$HOME
-          RELEASE_KEYSTORE_PATH: /root/.android/debug.keystore
+          RELEASE_KEYSTORE_PATH: $HOME/.android/debug.keystore
           RELEASE_STORE_PASSWORD: android
           RELEASE_KEY_ALIAS: androiddebugkey
           RELEASE_KEY_PASSWORD: android
