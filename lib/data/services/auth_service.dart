@@ -66,15 +66,36 @@ class AuthService {
     final user = cred.user;
     if (user == null) return null;
 
+    final fcmToken = await FirebaseMessaging.instance.getToken().catchError((_) => null);
+
     final doc = await _db.collection('users').doc(user.uid).get();
     if (doc.exists) {
       await _db.collection('users').doc(user.uid).update({
         'isOnline': true,
         'lastSeen': Timestamp.now(),
+        if (fcmToken != null) 'fcmToken': fcmToken,
       });
       return UserModel.fromMap(doc.data()!);
     }
-    return null;
+
+    // حساب موجود في Firebase Auth لكن ليس في Firestore — أنشئه الآن
+    final userModel = UserModel(
+      uid: user.uid,
+      name: user.displayName ?? email.split('@').first,
+      email: email,
+      photoUrl: user.photoURL,
+      isOnline: true,
+      lastSeen: DateTime.now(),
+      fcmToken: fcmToken,
+    );
+    try {
+      await _db
+          .collection('users')
+          .doc(user.uid)
+          .set(userModel.toMap(), SetOptions(merge: true));
+      await TokenService.instance.initWallet(user.uid);
+    } catch (_) {}
+    return userModel;
   }
 
   Future<UserModel?> registerWithEmail(
@@ -131,13 +152,39 @@ class AuthService {
   }
 
   Future<UserModel?> getCurrentUserModel() async {
-    final uid = currentUserId;
-    if (uid == null) return null;
+    final firebaseUser = _auth.currentUser;
+    if (firebaseUser == null) return null;
 
-    final doc = await _db.collection('users').doc(uid).get();
-    if (!doc.exists) return null;
+    try {
+      final doc = await _db.collection('users').doc(firebaseUser.uid).get();
+      if (doc.exists) return UserModel.fromMap(doc.data()!);
 
-    return UserModel.fromMap(doc.data()!);
+      // مستخدم موجود في Firebase Auth بدون Firestore doc — أنشئه تلقائياً
+      final fcmToken = await FirebaseMessaging.instance.getToken().catchError((_) => null);
+      final userModel = UserModel(
+        uid: firebaseUser.uid,
+        name: firebaseUser.displayName ?? firebaseUser.email?.split('@').first ?? 'مستخدم',
+        email: firebaseUser.email ?? '',
+        photoUrl: firebaseUser.photoURL,
+        isOnline: true,
+        lastSeen: DateTime.now(),
+        fcmToken: fcmToken,
+      );
+      await _db.collection('users').doc(firebaseUser.uid)
+          .set(userModel.toMap(), SetOptions(merge: true));
+      await TokenService.instance.initWallet(firebaseUser.uid);
+      return userModel;
+    } catch (_) {
+      // إذا فشل Firestore، أعد UserModel من Firebase Auth مباشرة
+      return UserModel(
+        uid: firebaseUser.uid,
+        name: firebaseUser.displayName ?? firebaseUser.email?.split('@').first ?? 'مستخدم',
+        email: firebaseUser.email ?? '',
+        photoUrl: firebaseUser.photoURL,
+        isOnline: true,
+        lastSeen: DateTime.now(),
+      );
+    }
   }
 
   Future<void> setOnlineStatus(bool isOnline) async {
