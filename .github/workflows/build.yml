@@ -48,13 +48,13 @@ jobs:
 
       - name: Build release APK
         id: build_apk
-        env:
-          GRADLE_OPTS: -Duser.home=$HOME
-          RELEASE_KEYSTORE_PATH: $HOME/.android/debug.keystore
-          RELEASE_STORE_PASSWORD: android
-          RELEASE_KEY_ALIAS: androiddebugkey
-          RELEASE_KEY_PASSWORD: android
-        run: flutter build apk --release 2>&1 | tee /tmp/build_log.txt; exit ${PIPESTATUS[0]}
+        run: |
+          export GRADLE_OPTS="-Duser.home=$HOME"
+          export RELEASE_KEYSTORE_PATH="$HOME/.android/debug.keystore"
+          export RELEASE_STORE_PASSWORD=android
+          export RELEASE_KEY_ALIAS=androiddebugkey
+          export RELEASE_KEY_PASSWORD=android
+          flutter build apk --release 2>&1 | tee /tmp/build_log.txt; exit ${PIPESTATUS[0]}
         continue-on-error: true
 
       - name: Show errors on failure
