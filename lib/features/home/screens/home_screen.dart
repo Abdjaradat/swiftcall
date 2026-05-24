@@ -105,6 +105,11 @@ class _HomeScreenState extends State<HomeScreen>
             onPressed: () =>
                 showSearch(context: context, delegate: _ChatSearch()),
           ),
+        IconButton(
+          icon: const Icon(Icons.account_balance_wallet_rounded, color: Color(0xFF6C63FF)),
+          tooltip: 'محفظة التوكنز',
+          onPressed: () => context.push(AppRouter.wallet),
+        ),
         FutureBuilder<UserModel?>(
           future: AuthService.instance.getCurrentUserModel(),
           builder: (_, snap) {

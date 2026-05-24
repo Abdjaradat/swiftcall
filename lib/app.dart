@@ -20,6 +20,8 @@ import 'features/call_history/bloc/call_history_bloc.dart';
 import 'features/chat/bloc/chat_bloc.dart';
 import 'features/group_call/bloc/group_call_bloc.dart';
 import 'features/home/bloc/home_bloc.dart';
+import 'features/tokens/bloc/token_bloc.dart';
+import 'features/tokens/bloc/token_event.dart';
 
 class SwiftCallApp extends StatefulWidget {
   final bool isDarkMode;
@@ -316,6 +318,7 @@ class _SwiftCallAppState extends State<SwiftCallApp>
         BlocProvider(create: (_) => CallBloc()),
         BlocProvider(create: (_) => GroupCallBloc()),
         BlocProvider(create: (_) => CallHistoryBloc()..add(CallHistoryLoad())),
+        BlocProvider(create: (_) => TokenBloc()..add(TokenLoadWallet())),
       ],
       child: _ThemeLocaleWrapper(
         isDark: _isDark,

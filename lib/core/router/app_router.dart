@@ -17,6 +17,7 @@ import '../../features/home/screens/home_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/legal/legal_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
+import '../../features/tokens/screens/wallet_screen.dart';
 
 class AppRouter {
   static const String onboarding        = '/onboarding';
@@ -30,6 +31,7 @@ class AppRouter {
   static const String incomingGroupCall = '/incoming-group-call';
   static const String createGroupCall   = '/create-group-call';
   static const String settings          = '/settings';
+  static const String wallet            = '/wallet';
   static const String terms             = '/terms';
   static const String privacy           = '/privacy';
 
@@ -111,6 +113,7 @@ class AppRouter {
         ),
 
         GoRoute(path: settings, builder: (_, __) => const SettingsScreen()),
+        GoRoute(path: wallet,   builder: (_, __) => const WalletScreen()),
         GoRoute(
           path: terms,
           builder: (_, __) => const LegalScreen(type: LegalType.terms),

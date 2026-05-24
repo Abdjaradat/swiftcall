@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../models/user_model.dart';
+import 'token_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -53,6 +54,7 @@ class AuthService {
           .collection('users')
           .doc(user.uid)
           .set(userModel.toMap(), SetOptions(merge: true));
+      await TokenService.instance.initWallet(user.uid);
     } catch (_) {}
 
     return userModel;
