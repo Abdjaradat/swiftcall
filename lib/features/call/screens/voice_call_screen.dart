@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
+import '../../../data/services/ad_service.dart';
 import '../bloc/call_bloc.dart';
 
 class VoiceCallScreen extends StatefulWidget {
@@ -57,14 +58,16 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
         }
         if (state is CallEnded) {
           final reason = state.reason;
-          // Normal / cancelled → dismiss immediately with no extra message.
           if (reason == CallEndReason.normal || reason == CallEndReason.cancelled) {
             ctx.pop();
+            AdService.instance.showInterstitialAd();
             return;
           }
-          // No answer / rejected → let the UI render the message for 2 s, then pop.
           Future.delayed(const Duration(seconds: 2), () {
-            if (ctx.mounted) ctx.pop();
+            if (ctx.mounted) {
+              ctx.pop();
+              AdService.instance.showInterstitialAd();
+            }
           });
         }
       },

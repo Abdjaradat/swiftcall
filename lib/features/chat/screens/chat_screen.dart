@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart' hide Config;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:record/record.dart';
+import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/router/app_router.dart';
 import '../../../data/models/message_model.dart';
@@ -77,6 +78,16 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: _buildAppBar(other),
+      bottomNavigationBar: Container(
+        color: AppColors.background,
+        child: UnityBannerAd(
+          placementId: 'Banner_Android',
+          onLoad: (_) {},
+          onClick: (_) {},
+          onShown: (_) {},
+          onFailed: (_, __, ___) {},
+        ),
+      ),
       body: BlocListener<ChatBloc, ChatState>(
         listener: (ctx, state) {
           if (state is ChatLoaded && state.uploadError != null) {

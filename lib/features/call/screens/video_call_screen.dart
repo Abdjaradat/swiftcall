@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:livekit_client/livekit_client.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
+import '../../../data/services/ad_service.dart';
 import '../../../data/services/livekit_service.dart';
 import '../bloc/call_bloc.dart';
 
@@ -68,10 +69,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
           final reason = state.reason;
           if (reason == CallEndReason.normal || reason == CallEndReason.cancelled) {
             ctx.pop();
+            AdService.instance.showInterstitialAd();
             return;
           }
           Future.delayed(const Duration(seconds: 2), () {
-            if (ctx.mounted) ctx.pop();
+            if (ctx.mounted) {
+              ctx.pop();
+              AdService.instance.showInterstitialAd();
+            }
           });
         }
         if (state is CallActive) {

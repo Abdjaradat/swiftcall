@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/router/app_router.dart';
@@ -57,6 +58,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => context.pop(),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        color: AppColors.background,
+        child: UnityBannerAd(
+          placementId: 'Banner_Android',
+          onLoad: (_) {},
+          onClick: (_) {},
+          onShown: (_) {},
+          onFailed: (_, __, ___) {},
         ),
       ),
       body: ListView(
