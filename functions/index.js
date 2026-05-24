@@ -298,6 +298,109 @@ exports.cancelCallNotification = onDocumentUpdated(
  */
 const CALL_TIMEOUT_SECONDS = 45;
 
+/**
+ * Trigger: new group_calls document created.
+ * Notifies all invited participants (excluding the creator) via FCM.
+ */
+exports.sendGroupCallNotification = onDocumentCreated(
+  {
+    document: "group_calls/{callId}",
+    secrets:  [APNS_KEY_ID, APNS_TEAM_ID, APNS_KEY_P8],
+  },
+  async (event) => {
+    const callId = event.params.callId;
+    const call   = event.data.data();
+
+    if (call.status && call.status !== "ringing") return;
+
+    const participants  = call.participants || [];
+    const createdBy     = call.createdBy    || "";
+    const creatorName   = call.creatorName  || "Unknown";
+    const creatorPhoto  = call.creatorPhoto || "";
+    const roomName      = call.roomName     || "";
+    const callType      = call.callType     || "audio";
+
+    // Notify every invited participant (skip creator)
+    const invitedUids = participants
+      .filter((p) => p.uid !== createdBy && p.status === "invited")
+      .map((p) => p.uid);
+
+    if (invitedUids.length === 0) {
+      console.log(`[sendGroupCallNotification] No invited participants for ${callId}`);
+      return;
+    }
+
+    console.log(`[sendGroupCallNotification] callId=${callId}, notifying ${invitedUids.length} participants`);
+
+    await Promise.allSettled(
+      invitedUids.map(async (uid) => {
+        const userDoc  = await admin.firestore().collection("users").doc(uid).get();
+        const userData = userDoc.data();
+        if (!userData) return;
+
+        const fcmToken  = userData.fcmToken;
+        const voipToken = userData.voipToken;
+
+        const callData = {
+          callId,
+          callerId:    createdBy,
+          callerName:  creatorName,
+          callerPhoto: creatorPhoto,
+          callType:    callType,
+          roomName:    roomName,
+          receiverId:  uid,
+          isGroupCall: "true",
+        };
+
+        const tasks = [];
+
+        if (fcmToken) {
+          const message = {
+            token: fcmToken,
+            data: {
+              type:        "group_call",
+              callId,
+              callerId:    createdBy,
+              callerName:  creatorName,
+              callerPhoto: creatorPhoto,
+              callType,
+              roomName,
+              isGroupCall: "true",
+            },
+            android: { priority: "high", ttl: 45000 },
+            apns: {
+              payload: { aps: { "content-available": 1 } },
+              headers: { "apns-priority": "5", "apns-push-type": "background" },
+            },
+          };
+          tasks.push(
+            admin.messaging().send(message).catch((e) =>
+              console.warn(`[FCM] group call to ${uid} failed:`, e.message)
+            )
+          );
+        }
+
+        if (voipToken) {
+          const provider = buildApnProvider(
+            APNS_KEY_ID.value(),
+            APNS_TEAM_ID.value(),
+            APNS_KEY_P8.value(),
+          );
+          if (provider) {
+            tasks.push(
+              sendVoipPush(provider, voipToken, callData)
+                .catch((e) => console.error("[APNs] VoIP push error:", e.message))
+                .finally(() => provider.shutdown())
+            );
+          }
+        }
+
+        await Promise.allSettled(tasks);
+      })
+    );
+  }
+);
+
 exports.timeoutStaleCalls = onSchedule("every 1 minutes", async (_event) => {
   const cutoff = admin.firestore.Timestamp.fromMillis(
     Date.now() - CALL_TIMEOUT_SECONDS * 1000

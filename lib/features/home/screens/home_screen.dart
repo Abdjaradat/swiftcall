@@ -64,8 +64,8 @@ class _HomeScreenState extends State<HomeScreen>
               ? null
               : FloatingActionButton(
                   backgroundColor: AppColors.primary,
-                  onPressed: _showNewChatSheet,
-                  child: const Icon(Icons.edit_rounded, color: Colors.white),
+                  onPressed: _showActionSheet,
+                  child: const Icon(Icons.add_rounded, color: Colors.white),
                 ),
         );
       },
@@ -240,6 +240,78 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
           const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  void _showActionSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.divider,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 8),
+          ListTile(
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.edit_rounded,
+                  color: AppColors.primary, size: 20),
+            ),
+            title: Text('محادثة جديدة',
+                style: GoogleFonts.cairo(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600)),
+            subtitle: Text('ابدأ محادثة مع شخص',
+                style: GoogleFonts.cairo(
+                    color: AppColors.textHint, fontSize: 12)),
+            onTap: () {
+              Navigator.pop(ctx);
+              _showNewChatSheet();
+            },
+          ),
+          ListTile(
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.group_rounded,
+                  color: AppColors.secondary, size: 20),
+            ),
+            title: Text('مكالمة جماعية',
+                style: GoogleFonts.cairo(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600)),
+            subtitle: Text('اتصل مع أكثر من شخص في آنٍ واحد',
+                style: GoogleFonts.cairo(
+                    color: AppColors.textHint, fontSize: 12)),
+            onTap: () {
+              Navigator.pop(ctx);
+              context.push(AppRouter.createGroupCall);
+            },
+          ),
+          SizedBox(height: 16 + MediaQuery.of(ctx).padding.bottom),
         ],
       ),
     );

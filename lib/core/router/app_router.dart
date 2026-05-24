@@ -3,28 +3,35 @@ import 'package:go_router/go_router.dart';
 
 import 'auth_notifier.dart';
 import '../../data/models/call_model.dart';
+import '../../data/models/group_call_model.dart';
 import '../../data/models/user_model.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/call/screens/incoming_call_screen.dart';
 import '../../features/call/screens/video_call_screen.dart';
 import '../../features/call/screens/voice_call_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
+import '../../features/group_call/screens/create_group_call_screen.dart';
+import '../../features/group_call/screens/group_call_screen.dart';
+import '../../features/group_call/screens/incoming_group_call_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/legal/legal_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 
 class AppRouter {
-  static const String onboarding  = '/onboarding';
-  static const String login        = '/login';
-  static const String home         = '/home';
-  static const String chat         = '/chat';
-  static const String videoCall    = '/video-call';
-  static const String voiceCall    = '/voice-call';
-  static const String incomingCall = '/incoming-call';
-  static const String settings     = '/settings';
-  static const String terms        = '/terms';
-  static const String privacy      = '/privacy';
+  static const String onboarding        = '/onboarding';
+  static const String login             = '/login';
+  static const String home              = '/home';
+  static const String chat              = '/chat';
+  static const String videoCall         = '/video-call';
+  static const String voiceCall         = '/voice-call';
+  static const String incomingCall      = '/incoming-call';
+  static const String groupCall         = '/group-call';
+  static const String incomingGroupCall = '/incoming-group-call';
+  static const String createGroupCall   = '/create-group-call';
+  static const String settings          = '/settings';
+  static const String terms             = '/terms';
+  static const String privacy           = '/privacy';
 
   /// Creates the router once. Use [authNotifier] to trigger redirect re-evals.
   static GoRouter build({
@@ -85,6 +92,22 @@ class AppRouter {
           path: incomingCall,
           builder: (_, state) =>
               IncomingCallScreen(call: state.extra as CallModel),
+        ),
+
+        GoRoute(
+          path: groupCall,
+          builder: (_, __) => const GroupCallScreen(),
+        ),
+
+        GoRoute(
+          path: incomingGroupCall,
+          builder: (_, state) => IncomingGroupCallScreen(
+              call: state.extra as GroupCallModel),
+        ),
+
+        GoRoute(
+          path: createGroupCall,
+          builder: (_, __) => const CreateGroupCallScreen(),
         ),
 
         GoRoute(path: settings, builder: (_, __) => const SettingsScreen()),

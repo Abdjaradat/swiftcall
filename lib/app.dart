@@ -11,12 +11,14 @@ import 'core/router/auth_notifier.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/app_settings_notifier.dart';
 import 'data/models/call_model.dart';
+import 'data/models/group_call_model.dart';
 import 'data/services/auth_service.dart';
 import 'data/services/notification_service.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/call/bloc/call_bloc.dart';
 import 'features/call_history/bloc/call_history_bloc.dart';
 import 'features/chat/bloc/chat_bloc.dart';
+import 'features/group_call/bloc/group_call_bloc.dart';
 import 'features/home/bloc/home_bloc.dart';
 
 class SwiftCallApp extends StatefulWidget {
@@ -45,7 +47,9 @@ class _SwiftCallAppState extends State<SwiftCallApp>
   String _locale = 'ar';
 
   StreamSubscription? _incomingCallSub;
+  StreamSubscription? _incomingGroupCallSub;
   String? _lastShownCallId;
+  String? _lastShownGroupCallId;
 
   @override
   void initState() {
@@ -66,6 +70,7 @@ class _SwiftCallAppState extends State<SwiftCallApp>
     _authBloc.stream.listen((state) {
       if (state is AuthAuthenticated) {
         _startIncomingCallListener(state.user.uid);
+        _startIncomingGroupCallListener(state.user.uid);
       } else if (state is AuthUnauthenticated) {
         _stopIncomingCallListener();
       }
@@ -144,7 +149,58 @@ class _SwiftCallAppState extends State<SwiftCallApp>
     _incomingCallSub?.cancel();
     _incomingCallSub = null;
     _lastShownCallId = null;
+    _incomingGroupCallSub?.cancel();
+    _incomingGroupCallSub = null;
+    _lastShownGroupCallId = null;
     NotificationService.instance.cancelCallNotification();
+  }
+
+  // ── Firestore incoming group-call listener ────────────────────────────────
+
+  void _startIncomingGroupCallListener(String myUid) {
+    _incomingGroupCallSub?.cancel();
+    _incomingGroupCallSub = FirebaseFirestore.instance
+        .collection('group_calls')
+        .where('participantUids', arrayContains: myUid)
+        .where('status', isEqualTo: 'ringing')
+        .snapshots()
+        .listen((snap) {
+      for (final change in snap.docChanges) {
+        if (change.type == DocumentChangeType.removed) {
+          final callId = change.doc.id;
+          if (_lastShownGroupCallId == callId) {
+            _lastShownGroupCallId = null;
+            final path =
+                _router.routeInformationProvider.value.uri.path;
+            if (path == AppRouter.incomingGroupCall) _router.pop();
+          }
+          continue;
+        }
+        if (change.type != DocumentChangeType.added) continue;
+
+        final data  = change.doc.data()!;
+        final model = GroupCallModel.fromMap(data, change.doc.id);
+
+        // Creator doesn't get an incoming screen for their own call
+        if (model.createdBy == myUid) continue;
+
+        // Check that this user is still 'invited' (not yet joined/declined)
+        final me = model.participants
+            .where((p) => p.uid == myUid)
+            .firstOrNull;
+        if (me == null || me.status != 'invited') continue;
+
+        if (_lastShownGroupCallId == model.id) continue;
+        _lastShownGroupCallId = model.id;
+
+        HapticFeedback.heavyImpact();
+
+        final currentPath =
+            _router.routeInformationProvider.value.uri.path;
+        if (currentPath == AppRouter.incomingGroupCall) continue;
+        _router.push(AppRouter.incomingGroupCall, extra: model);
+      }
+    });
   }
 
   // ── Navigation helpers ───────────────────────────────────────────────────
@@ -258,6 +314,7 @@ class _SwiftCallAppState extends State<SwiftCallApp>
         BlocProvider(create: (_) => HomeBloc()),
         BlocProvider(create: (_) => ChatBloc()),
         BlocProvider(create: (_) => CallBloc()),
+        BlocProvider(create: (_) => GroupCallBloc()),
         BlocProvider(create: (_) => CallHistoryBloc()..add(CallHistoryLoad())),
       ],
       child: _ThemeLocaleWrapper(
