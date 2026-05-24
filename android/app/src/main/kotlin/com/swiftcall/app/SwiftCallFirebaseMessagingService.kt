@@ -78,7 +78,4 @@ class SwiftCallFirebaseMessagingService : FirebaseMessagingService() {
         } catch (e: Exception) { false }
     }
 
-    override fun onNewToken(token: String) {
-        Log.d(TAG, "FCM token refreshed (Flutter handles Firestore update)")
-    }
 }
