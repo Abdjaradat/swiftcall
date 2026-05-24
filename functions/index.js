@@ -1,69 +1,282 @@
-const functions = require("firebase-functions");
+/**
+ * SwiftCall — Firebase Cloud Functions
+ *
+ * Triggers:
+ *  1. sendCallNotification  — fires when a new call doc is created
+ *     → Sends Android FCM data message  (high-priority, data-only — no notification block)
+ *     → Sends iOS VoIP push via APNs    (PushKit, wakes app even when killed)
+ *
+ *  2. cancelCallNotification — fires when call status changes to cancelled/rejected/ended/missed
+ *     → Tells the receiver to dismiss the incoming call UI immediately
+ *
+ * ── iOS VoIP push setup ───────────────────────────────────────────────────────
+ * VoIP pushes bypass FCM and go directly to Apple's servers.
+ * You must configure three Firebase environment variables before deploying:
+ *
+ *   firebase functions:secrets:set APNS_KEY_ID      # e.g. "ABC1234DEF"
+ *   firebase functions:secrets:set APNS_TEAM_ID     # e.g. "ABCDE12345"
+ *   firebase functions:secrets:set APNS_KEY_P8      # the full .p8 file content
+ *
+ * The .p8 key is created in Apple Developer → Certificates → Keys
+ * (check "Apple Push Notifications service (APNs)").
+ *
+ * Set APNS_PRODUCTION=true when deploying to production (App Store builds).
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
+const apn = require("apn");
+
 admin.initializeApp();
 
-exports.sendCallNotification = functions.firestore
-  .document("calls/{callId}")
-  .onCreate(async (snap, context) => {
-    const call = snap.data();
-    const receiverId = call.receiverId;
+const BUNDLE_ID = "com.swiftcall.app";
 
-    // Get receiver's FCM token
-    const userDoc = await admin.firestore().collection("users").doc(receiverId).get();
-    const token = userDoc.data()?.fcmToken;
-    if (!token) return;
+// ── APNs secrets (set via: firebase functions:secrets:set <NAME>) ─────────────
+const APNS_KEY_ID  = defineSecret("APNS_KEY_ID");
+const APNS_TEAM_ID = defineSecret("APNS_TEAM_ID");
+const APNS_KEY_P8  = defineSecret("APNS_KEY_P8");   // full .p8 file content
 
-    const isVideo = call.type === "video";
-    const payload = {
-      token,
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/**
+ * Builds an APNs Provider for VoIP pushes.
+ * Returns null if secrets are not configured (graceful no-op).
+ */
+function buildApnProvider(keyId, teamId, keyContent) {
+  if (!keyId || !teamId || !keyContent) {
+    console.warn("[APNs] Secrets not configured — iOS VoIP push skipped.");
+    return null;
+  }
+  return new apn.Provider({
+    token: {
+      key:    Buffer.from(keyContent),
+      keyId,
+      teamId,
+    },
+    production: process.env.APNS_PRODUCTION === "true",
+  });
+}
+
+/**
+ * Sends an iOS VoIP push notification via APNs (PushKit).
+ * The apns-push-type header MUST be "voip" and the topic must end with ".voip".
+ */
+async function sendVoipPush(provider, voipToken, callData) {
+  if (!provider || !voipToken) return;
+
+  const note = new apn.Notification();
+  note.topic    = `${BUNDLE_ID}.voip`; // required — must be <bundleId>.voip
+  note.priority = 10;
+  note.expiry   = Math.floor(Date.now() / 1000) + 45; // 45 s TTL — matches ringtone timeout
+
+  // The payload is available as payload.dictionaryPayload in AppDelegate.swift
+  note.payload  = {
+    callId:      callData.callId,
+    callerName:  callData.callerName,
+    callerPhoto: callData.callerPhoto || "",
+    roomName:    callData.roomName    || "",
+    callType:    callData.callType    || "audio",
+  };
+
+  const result = await provider.send(note, voipToken);
+
+  if (result.failed && result.failed.length > 0) {
+    const reason = result.failed[0].response?.reason || "unknown";
+    console.error(`[APNs] VoIP push failed — token=${voipToken.slice(-8)}, reason=${reason}`);
+    // If the token is invalid, clean it from Firestore
+    if (reason === "BadDeviceToken" || reason === "Unregistered") {
+      await admin.firestore()
+        .collection("users")
+        .doc(callData.receiverId)
+        .update({ voipToken: admin.firestore.FieldValue.delete() });
+    }
+  } else {
+    console.log(`[APNs] VoIP push sent — token=...${voipToken.slice(-8)}`);
+  }
+}
+
+/**
+ * Sends a single high-priority FCM data message to all platforms.
+ *
+ * - Android (background/killed): SwiftCallFirebaseMessagingService receives it
+ *   and starts CallForegroundService.
+ * - iOS (foreground): Flutter onMessage handler fires; Firestore listener
+ *   shows the in-app IncomingCallScreen.
+ * - iOS (background/killed): Handled separately via APNs VoIP push (PushKit).
+ *
+ * IMPORTANT: No "notification" block — keeps this a pure data message so the
+ * Android native service (not FCM) controls the UI. Only ONE message is sent
+ * per call to avoid triggering the native service twice.
+ */
+async function sendFcmDataMessage(fcmToken, callData) {
+  if (!fcmToken) return;
+
+  const message = {
+    token: fcmToken,
+    data: {
+      type:        "call",
+      callId:      callData.callId,
+      callerId:    callData.callerId   || "",
+      callerName:  callData.callerName,
+      callerPhoto: callData.callerPhoto || "",
+      callType:    callData.callType   || "audio",
+      roomName:    callData.roomName   || "",
+    },
+    // Android: highest delivery priority, 45 s TTL (matches call timeout)
+    android: {
       priority: "high",
-      data: {
-        type: "call",
-        callId: call.id,
-        callerId: call.callerId,
-        callerName: call.callerName,
-        callerPhoto: call.callerPhoto || "",
-        callType: call.type,
-        roomName: call.roomName || "",
-      },
-      notification: {
-        title: isVideo ? "📹 مكالمة فيديو" : "🎙️ مكالمة صوتية",
-        body: call.callerName,
-        sound: "ringtone.wav",
-      },
-      android: {
-        priority: "high",
-        notification: {
-          channelId: "swiftcall_calls",
-          priority: "max",
-          sound: "ringtone",
-          vibrationPattern: "0, 1000, 500, 1000",
-          fullScreenIntent: true,
-          visibility: "public",
-          notificationPriority: "PRIORITY_MAX",
-          ticker: `مكالمة من ${call.callerName}`,
-        },
-      },
-      apns: {
-        payload: {
-          aps: {
-            alert: {
-              title: isVideo ? "📹 مكالمة فيديو" : "🎙️ مكالمة صوتية",
-              body: call.callerName,
-            },
-            sound: "ringtone.wav",
-            category: "incoming_call",
-            "content-available": 1,
-            "interruption-level": "time-sensitive",
-          },
-        },
-      },
+      ttl:      45000,
+    },
+    // iOS: silent background wakeup (belt-and-suspenders for foreground state;
+    // killed/background state is handled by the VoIP push below).
+    apns: {
+      payload: { aps: { "content-available": 1 } },
+      headers: { "apns-priority": "5", "apns-push-type": "background" },
+    },
+  };
+
+  const response = await admin.messaging().send(message);
+  console.log(`[FCM] Data message sent — ${response}`);
+}
+
+/**
+ * Sends an FCM data message to BOTH platforms to dismiss the call UI.
+ */
+async function sendCancelMessage(fcmToken, callId) {
+  if (!fcmToken) return;
+  const message = {
+    token: fcmToken,
+    data:  { type: "call_cancelled", callId },
+    android: { priority: "high" },
+    apns: {
+      payload: { aps: { "content-available": 1 } },
+      headers: { "apns-priority": "5" },
+    },
+  };
+  await admin.messaging().send(message);
+  console.log(`[FCM] Cancel message sent for callId=${callId}`);
+}
+
+// ── Cloud Functions ───────────────────────────────────────────────────────────
+
+/**
+ * Trigger: new call document created in Firestore.
+ * Notifies the receiver on both Android (FCM) and iOS (VoIP push).
+ */
+exports.sendCallNotification = onDocumentCreated(
+  {
+    document: "calls/{callId}",
+    secrets:  [APNS_KEY_ID, APNS_TEAM_ID, APNS_KEY_P8],
+  },
+  async (event) => {
+    const callId = event.params.callId;           // ← correct way to get the doc ID
+    const call   = event.data.data();
+
+    // Only notify for ringing calls
+    if (call.status && call.status !== "ringing") {
+      console.log(`[sendCallNotification] Skipping — status=${call.status}`);
+      return;
+    }
+
+    const receiverId = call.receiverId;
+    if (!receiverId) {
+      console.error("[sendCallNotification] Missing receiverId");
+      return;
+    }
+
+    // Fetch receiver's tokens
+    const userDoc  = await admin.firestore().collection("users").doc(receiverId).get();
+    const userData = userDoc.data();
+    if (!userData) {
+      console.error(`[sendCallNotification] Receiver ${receiverId} not found`);
+      return;
+    }
+
+    const fcmToken  = userData.fcmToken;
+    const voipToken = userData.voipToken;
+
+    const callData = {
+      callId,
+      callerId:    call.callerId    || "",
+      callerName:  call.callerName  || "Unknown",
+      callerPhoto: call.callerPhoto || "",
+      callType:    call.type        || "audio",
+      roomName:    call.roomName    || "",
+      receiverId,
     };
 
-    try {
-      const response = await admin.messaging().send(payload);
-      functions.logger.log("Notification sent:", response);
-    } catch (error) {
-      functions.logger.error("Failed to send notification:", error);
+    console.log(`[sendCallNotification] callId=${callId}, caller=${callData.callerName}, ` +
+      `hasFcm=${!!fcmToken}, hasVoip=${!!voipToken}`);
+
+    const tasks = [];
+
+    // ── 1. FCM data message (Android background/killed + iOS foreground) ──
+    // Single high-priority data-only message — no "notification" block so the
+    // Android native SwiftCallFirebaseMessagingService gets it exclusively.
+    if (fcmToken) {
+      tasks.push(
+        sendFcmDataMessage(fcmToken, callData).catch((err) =>
+          console.error("[FCM] send error:", err.message)
+        )
+      );
     }
-  });
+
+    // ── 2. APNs VoIP push (iOS background/killed via PushKit) ──────────────
+    // Required to wake a killed iOS app and show the native CallKit screen.
+    // Secrets must be configured; silently skipped if not set.
+    if (voipToken) {
+      const provider = buildApnProvider(
+        APNS_KEY_ID.value(),
+        APNS_TEAM_ID.value(),
+        APNS_KEY_P8.value(),
+      );
+      if (provider) {
+        tasks.push(
+          sendVoipPush(provider, voipToken, callData)
+            .catch((err) => console.error("[APNs] VoIP push error:", err.message))
+            .finally(() => provider.shutdown())
+        );
+      }
+    }
+
+    await Promise.allSettled(tasks);
+  }
+);
+
+/**
+ * Trigger: call document updated.
+ * When the caller cancels or the call ends, tell the receiver to dismiss
+ * the incoming call screen immediately.
+ */
+exports.cancelCallNotification = onDocumentUpdated(
+  "calls/{callId}",
+  async (event) => {
+    const callId  = event.params.callId;
+    const before  = event.data.before.data();
+    const after   = event.data.after.data();
+
+    const dismissStatuses = new Set(["cancelled", "rejected", "ended", "missed", "busy"]);
+
+    // Only act when the status just became a terminal state from ringing
+    if (before.status !== "ringing") return;
+    if (!dismissStatuses.has(after.status)) return;
+
+    console.log(`[cancelCallNotification] callId=${callId}, new status=${after.status}`);
+
+    // Notify BOTH parties to clear call state
+    const uids = [after.receiverId, after.callerId].filter(Boolean);
+    await Promise.allSettled(
+      uids.map(async (uid) => {
+        const doc  = await admin.firestore().collection("users").doc(uid).get();
+        const token = doc.data()?.fcmToken;
+        if (token) {
+          await sendCancelMessage(token, callId).catch((e) =>
+            console.warn(`[FCM] cancel to ${uid} failed:`, e.message)
+          );
+        }
+      })
+    );
+  }
+);

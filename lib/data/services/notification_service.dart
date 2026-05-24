@@ -29,6 +29,9 @@ class NotificationService {
   // Called when the user declines from native UI
   static void Function(Map<String, dynamic>)? onCallDeclinedFromNative;
 
+  // Called when the caller cancels (FCM call_cancelled message)
+  static void Function(String callId)? onCallCancelled;
+
   // Called when VoIP token is received (iOS PushKit) — save to Firestore
   static void Function(String token)? onVoipTokenReceived;
 
@@ -163,9 +166,11 @@ class NotificationService {
 
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
     final data = message.data;
+
+    // ── Incoming call ──────────────────────────────────────────────────────
     if (data['type'] == 'call') {
-      // On Android, native CallForegroundService handles background calls.
-      // When the app IS in foreground, show a local call notification.
+      // On Android when app is foreground, show a local high-priority notification.
+      // (The Firestore listener in app.dart also shows the in-app incoming call screen.)
       if (Platform.isAndroid) {
         await showCallNotification(
           callerName:  data['callerName']  ?? '',
@@ -173,10 +178,21 @@ class NotificationService {
           isVideoCall: data['callType'] == 'video',
         );
       }
-      // On iOS, PushKit handles kill/background; CallKit shows native UI.
-      // If app is foreground on iOS, the Firestore listener in app.dart handles it.
+      // On iOS, PushKit/CallKit handles kill/background; Firestore listener handles foreground.
       return;
     }
+
+    // ── Call cancelled by caller ───────────────────────────────────────────
+    if (data['type'] == 'call_cancelled') {
+      await cancelCallNotification();
+      final callId = data['callId'] as String?;
+      if (callId != null && onCallCancelled != null) {
+        onCallCancelled!(callId);
+      }
+      return;
+    }
+
+    // ── Regular notification ───────────────────────────────────────────────
     final notification = message.notification;
     if (notification == null) return;
     await _local.show(

@@ -24,9 +24,19 @@ class SwiftCallFirebaseMessagingService : FirebaseMessagingService() {
         val data = message.data
         Log.d(TAG, "FCM received: type=${data["type"]}, app foreground=${isAppForeground()}")
 
-        if (data["type"] == "call") {
-            handleIncomingCall(data)
+        when (data["type"]) {
+            "call"            -> handleIncomingCall(data)
+            "call_cancelled"  -> handleCallCancelled(data)
         }
+    }
+
+    private fun handleCallCancelled(data: Map<String, String>) {
+        Log.d(TAG, "Call cancelled — stopping foreground service (callId=${data["callId"]})")
+        // Stop the incoming call foreground service so the notification is dismissed
+        val stopIntent = Intent(this, CallForegroundService::class.java).apply {
+            putExtra("action", "stop")
+        }
+        stopService(stopIntent)
     }
 
     private fun handleIncomingCall(data: Map<String, String>) {

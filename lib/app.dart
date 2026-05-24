@@ -85,6 +85,9 @@ class _SwiftCallAppState extends State<SwiftCallApp>
     // User declined from native CallKit (iOS) or tapped Decline button (Android)
     NotificationService.onCallDeclinedFromNative = _handleNativeDecline;
 
+    // Caller cancelled before the receiver answered → dismiss incoming call UI
+    NotificationService.onCallCancelled = _dismissIncomingCall;
+
     // iOS PushKit VoIP token → save to Firestore for backend to use
     NotificationService.onVoipTokenReceived = (token) {
       AuthService.instance.updateVoipToken(token);
@@ -111,8 +114,10 @@ class _SwiftCallAppState extends State<SwiftCallApp>
         .snapshots()
         .listen((snap) {
       for (final change in snap.docChanges) {
+        // Call left the 'ringing' query → caller cancelled or it ended
         if (change.type == DocumentChangeType.removed) {
-          NotificationService.instance.cancelCallNotification();
+          final callId = change.doc.id;
+          _dismissIncomingCall(callId);
           continue;
         }
         if (change.type != DocumentChangeType.added) continue;
@@ -205,6 +210,20 @@ class _SwiftCallAppState extends State<SwiftCallApp>
         .doc(callId)
         .update({'status': 'rejected'}).catchError((_) {});
     NotificationService.instance.cancelCallNotification();
+    _dismissIncomingCall(callId);
+  }
+
+  /// Dismisses the incoming call screen and notification.
+  /// Called when: Firestore call doc leaves 'ringing', or FCM call_cancelled arrives.
+  void _dismissIncomingCall(String callId) {
+    NotificationService.instance.cancelCallNotification();
+    if (_lastShownCallId == callId || _lastShownCallId == null) {
+      _lastShownCallId = null;
+      final path = _router.routeInformationProvider.value.uri.path;
+      if (path == AppRouter.incomingCall) {
+        _router.pop();
+      }
+    }
   }
 
   // ── Settings ─────────────────────────────────────────────────────────────
