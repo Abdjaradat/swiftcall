@@ -14,6 +14,8 @@ import '../../../data/models/message_model.dart';
 import '../../../data/models/phone_contact_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/services/auth_service.dart';
+import '../../call_history/bloc/call_history_bloc.dart';
+import '../../call_history/screens/call_history_screen.dart';
 import '../bloc/home_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -31,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: 2, vsync: this);
+    _tabCtrl = TabController(length: 3, vsync: this);
     context.read<HomeBloc>().add(HomeLoadChats());
     context.read<HomeBloc>().add(HomeLoadContacts());
   }
@@ -45,24 +47,32 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: NestedScrollView(
-        headerSliverBuilder: (_, __) => [_buildAppBar()],
-        body: TabBarView(
-          controller: _tabCtrl,
-          children: [_ChatsTab(), _ContactsTab()],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        onPressed: _showNewChatSheet,
-        child: const Icon(Icons.edit_rounded, color: Colors.white),
-      ),
+    return AnimatedBuilder(
+      animation: _tabCtrl,
+      builder: (ctx, _) {
+        final onCalls = _tabCtrl.index == 2;
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: NestedScrollView(
+            headerSliverBuilder: (_, __) => [_buildAppBar(onCalls: onCalls)],
+            body: TabBarView(
+              controller: _tabCtrl,
+              children: [_ChatsTab(), _ContactsTab(), const CallHistoryTab()],
+            ),
+          ),
+          floatingActionButton: onCalls
+              ? null
+              : FloatingActionButton(
+                  backgroundColor: AppColors.primary,
+                  onPressed: _showNewChatSheet,
+                  child: const Icon(Icons.edit_rounded, color: Colors.white),
+                ),
+        );
+      },
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar({bool onCalls = false}) {
     return SliverAppBar(
       expandedHeight: 120,
       floating: true,
@@ -83,10 +93,18 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.search_rounded),
-          onPressed: () => showSearch(context: context, delegate: _ChatSearch()),
-        ),
+        if (onCalls)
+          IconButton(
+            icon: const Icon(Icons.delete_sweep_rounded),
+            tooltip: 'مسح السجل',
+            onPressed: () => _confirmClearHistory(context),
+          )
+        else
+          IconButton(
+            icon: const Icon(Icons.search_rounded),
+            onPressed: () =>
+                showSearch(context: context, delegate: _ChatSearch()),
+          ),
         FutureBuilder<UserModel?>(
           future: AuthService.instance.getCurrentUserModel(),
           builder: (_, snap) {
@@ -128,6 +146,100 @@ class _HomeScreenState extends State<HomeScreen>
         tabs: const [
           Tab(text: 'المحادثات'),
           Tab(text: 'جهات الاتصال'),
+          Tab(text: 'المكالمات'),
+        ],
+      ),
+    );
+  }
+
+  void _confirmClearHistory(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40, height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.divider,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'مسح سجل المكالمات بالكامل؟',
+              style: GoogleFonts.cairo(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'سيتم حذف جميع المكالمات نهائياً ولا يمكن استعادتها',
+              style: GoogleFonts.cairo(
+                fontSize: 13,
+                color: AppColors.textHint,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                      side: const BorderSide(color: AppColors.divider),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text('إلغاء', style: GoogleFonts.cairo(fontSize: 14)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      context.read<CallHistoryBloc>().add(CallHistoryClearAll());
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.callRed,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'مسح الكل',
+                      style: GoogleFonts.cairo(
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
         ],
       ),
     );

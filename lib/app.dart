@@ -15,6 +15,7 @@ import 'data/services/auth_service.dart';
 import 'data/services/notification_service.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/call/bloc/call_bloc.dart';
+import 'features/call_history/bloc/call_history_bloc.dart';
 import 'features/chat/bloc/chat_bloc.dart';
 import 'features/home/bloc/home_bloc.dart';
 
@@ -173,6 +174,7 @@ class _SwiftCallAppState extends State<SwiftCallApp>
         BlocProvider(create: (_) => HomeBloc()),
         BlocProvider(create: (_) => ChatBloc()),
         BlocProvider(create: (_) => CallBloc()),
+        BlocProvider(create: (_) => CallHistoryBloc()..add(CallHistoryLoad())),
       ],
       child: _ThemeLocaleWrapper(
         isDark: _isDark,
