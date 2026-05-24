@@ -1,0 +1,86 @@
+
+C:\SwiftCall>git pull origin main
+remote: Enumerating objects: 284, done.
+remote: Counting objects: 100% (284/284), done.
+remote: Compressing objects: 100% (108/108), done.
+remote: Total 222 (delta 111), reused 207 (delta 96), pack-reused 0 (from 0)
+Receiving objects: 100% (222/222), 76.72 KiB | 448.00 KiB/s, done.
+Resolving deltas: 100% (111/111), completed with 30 local objects.
+From https://github.com/Abdjaradat/swiftcall
+ * branch            main       -> FETCH_HEAD
+   ab3bb09..92afd68  main       -> origin/main
+Updating ab3bb09..92afd68
+Fast-forward
+ .github/workflows/build.yml                        | 104 +++-
+ .github/workflows/ios-build.yml                    |  35 +-
+ .replit                                            |   7 +
+ BACKGROUND_CALLS_SETUP.md                          | 165 ++++++
+ DEBUG_BUILDS.md                                    | 121 +++++
+ android/app/build.gradle                           |   9 +-
+ android/app/proguard-rules.pro                     |  56 ++
+ android/app/src/main/AndroidManifest.xml           |  59 ++-
+ .../kotlin/com/swiftcall/app/CallActionReceiver.kt |  58 +-
+ .../com/swiftcall/app/CallConnectionService.kt     |  63 ++-
+ .../com/swiftcall/app/CallForegroundService.kt     | 218 ++++----
+ .../main/kotlin/com/swiftcall/app/MainActivity.kt  | 160 +++---
+ .../app/SwiftCallFirebaseMessagingService.kt       |  81 +++
+ ...ORS-KOTLIN-GRADLE-ERRORS-e-fi_1779648197217.txt |  93 ++++
+ attached_assets/image_1779636154538.png            | Bin 0 -> 4243 bytes
+ firebase.json                                      |  20 +-
+ firestore.indexes.json                             |  38 ++
+ firestore.rules                                    |  12 +
+ functions/index.js                                 | 481 ++++++++++++++---
+ functions/package.json                             |   9 +-
+ ios/ExportOptions.plist                            |  26 +
+ ios/Podfile                                        |  31 +-
+ ios/Runner/AppDelegate.swift                       | 284 ++++++----
+ ios/Runner/Info.plist                              |  32 +-
+ lib/app.dart                                       | 210 ++++++--
+ lib/core/constants/app_constants.dart              |   8 +-
+ lib/core/router/app_router.dart                    |  43 +-
+ lib/data/models/group_call_model.dart              | 124 +++++
+ lib/data/services/auth_service.dart                |   9 +-
+ lib/data/services/network_bypass_service.dart      |  19 +-
+ lib/data/services/notification_service.dart        | 175 ++++--
+ lib/features/call/bloc/call_bloc.dart              | 154 ++++--
+ lib/features/call/bloc/call_event.dart             |   6 +
+ lib/features/call/bloc/call_state.dart             |  15 +-
+ lib/features/call/screens/video_call_screen.dart   |  42 +-
+ lib/features/call/screens/voice_call_screen.dart   |  34 +-
+ .../call_history/bloc/call_history_bloc.dart       | 124 +++++
+ .../call_history/bloc/call_history_event.dart      |  17 +
+ .../call_history/bloc/call_history_state.dart      |  17 +
+ .../call_history/screens/call_history_screen.dart  | 324 ++++++++++++
+ lib/features/chat/bloc/chat_bloc.dart              |  17 +-
+ lib/features/chat/bloc/chat_event.dart             |   5 +
+ lib/features/group_call/bloc/group_call_bloc.dart  | 285 ++++++++++
+ lib/features/group_call/bloc/group_call_event.dart |  26 +
+ lib/features/group_call/bloc/group_call_state.dart |  55 ++
+ .../screens/create_group_call_screen.dart          | 429 +++++++++++++++
+ .../group_call/screens/group_call_screen.dart      | 587 +++++++++++++++++++++
+ .../screens/incoming_group_call_screen.dart        | 304 +++++++++++
+ lib/features/home/bloc/home_bloc.dart              |   4 -
+ lib/features/home/screens/home_screen.dart         | 224 +++++++-
+ lib/main.dart                                      |  83 +--
+ lib/services/call_manager.dart                     |  79 +--
+ 52 files changed, 4802 insertions(+), 779 deletions(-)
+ create mode 100644 .replit
+ create mode 100644 BACKGROUND_CALLS_SETUP.md
+ create mode 100644 DEBUG_BUILDS.md
+ create mode 100644 android/app/proguard-rules.pro
+ create mode 100644 android/app/src/main/kotlin/com/swiftcall/app/SwiftCallFirebaseMessagingService.kt
+ create mode 100644 attached_assets/Pasted-Run-echo-KOTLIN-GRADLE-ERRORS-KOTLIN-GRADLE-ERRORS-e-fi_1779648197217.txt
+ create mode 100644 attached_assets/image_1779636154538.png
+ create mode 100644 firestore.indexes.json
+ create mode 100644 ios/ExportOptions.plist
+ create mode 100644 lib/data/models/group_call_model.dart
+ create mode 100644 lib/features/call_history/bloc/call_history_bloc.dart
+ create mode 100644 lib/features/call_history/bloc/call_history_event.dart
+ create mode 100644 lib/features/call_history/bloc/call_history_state.dart
+ create mode 100644 lib/features/call_history/screens/call_history_screen.dart
+ create mode 100644 lib/features/group_call/bloc/group_call_bloc.dart
+ create mode 100644 lib/features/group_call/bloc/group_call_event.dart
+ create mode 100644 lib/features/group_call/bloc/group_call_state.dart
+ create mode 100644 lib/features/group_call/screens/create_group_call_screen.dart
+ create mode 100644 lib/features/group_call/screens/group_call_screen.dart
+ create mode 100644 lib/features/group_call/screens/incoming_group_call_screen.dart
