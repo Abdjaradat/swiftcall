@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../data/services/ad_service.dart';
 import '../../../data/models/token_model.dart';
 import '../bloc/token_bloc.dart';
 import '../bloc/token_event.dart';
@@ -345,7 +346,7 @@ class _WalletScreenState extends State<WalletScreen>
     return 'منذ ${diff.inDays} يوم';
   }
 
-  void _watchAd() {
+  Future<void> _watchAd() async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -362,12 +363,21 @@ class _WalletScreenState extends State<WalletScreen>
         ),
       ),
     );
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        Navigator.of(context).pop();
-        context.read<TokenBloc>().add(TokenWatchAd());
-      }
-    });
+
+    final completed = await AdService.instance.showRewardedAd();
+
+    if (!mounted) return;
+    Navigator.of(context).pop();
+
+    if (completed) {
+      context.read<TokenBloc>().add(TokenWatchAd());
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('يجب إكمال الإعلان للحصول على التوكنز'),
+        backgroundColor: Colors.orange,
+        behavior: SnackBarBehavior.floating,
+      ));
+    }
   }
 
   void _shareApp() {

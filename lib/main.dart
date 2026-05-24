@@ -7,6 +7,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import 'app.dart';
 import 'core/constants/app_constants.dart';
+import 'data/services/ad_service.dart';
 import 'data/services/auth_service.dart';
 import 'data/services/network_bypass_service.dart';
 import 'data/services/notification_service.dart';
@@ -34,6 +35,9 @@ void main() async {
 
   // Network bypass (proxy) initialization
   await NetworkBypassService.instance.initialize();
+
+  // Unity Ads — تهيئة مسبقة لتحميل الإعلانات
+  AdService.instance.init();
 
   // Timeago Arabic locale
   timeago.setLocaleMessages('ar', timeago.ArMessages());
