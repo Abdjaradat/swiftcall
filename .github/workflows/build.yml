@@ -46,19 +46,19 @@ jobs:
           retention-days: 30
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # iOS Build
+  # iOS Unsigned IPA
   #
-  # Without secrets  → builds for the iOS Simulator (can test in Xcode Simulator).
-  # With secrets     → builds a signed Ad-Hoc IPA you can install on your iPhone.
+  # Builds an unsigned IPA that can be installed on a real iPhone WITHOUT an
+  # Apple Developer account using one of these free tools:
   #
-  # To enable real-device IPA, add these to GitHub → Settings → Secrets → Actions:
-  #   APPLE_CERTIFICATE_BASE64     (base64 of your .p12 distribution certificate)
-  #   APPLE_CERTIFICATE_PASSWORD   (password for the .p12)
-  #   APPLE_PROVISIONING_BASE64    (base64 of your Ad-Hoc .mobileprovision)
-  #   APPLE_TEAM_ID                (10-char Apple Team ID, e.g. ABCDE12345)
+  #   • AltStore   → https://altstore.io  (Windows & Mac)
+  #   • Sideloadly → https://sideloadly.io (Windows & Mac)
+  #
+  # Both tools sign the IPA with your free Apple ID automatically.
+  # Free Apple ID = app works for 7 days, then re-sign via the same tool.
   # ─────────────────────────────────────────────────────────────────────────────
   ios:
-    name: iOS Build
+    name: iOS Unsigned IPA
     runs-on: macos-latest
 
     steps:
@@ -76,66 +76,19 @@ jobs:
       - name: Install CocoaPods dependencies
         run: cd ios && pod install --repo-update
 
-      # ── Simulator build (no secrets needed) ────────────────────────────────
-      - name: Build for iOS Simulator
-        if: ${{ secrets.APPLE_TEAM_ID == '' }}
-        run: flutter build ios --simulator --no-codesign
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
 
-      - name: Zip Simulator .app
-        if: ${{ secrets.APPLE_TEAM_ID == '' }}
+      - name: Package into unsigned IPA
         run: |
-          cd build/ios/iphonesimulator
-          zip -r SwiftCall-simulator.zip Runner.app
+          mkdir -p build/ios/ipa/Payload
+          cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
+          cd build/ios/ipa
+          zip -r SwiftCall-unsigned.ipa Payload/
 
-      - name: Upload Simulator artifact
-        if: ${{ secrets.APPLE_TEAM_ID == '' }}
+      - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
         with:
-          name: SwiftCall-iOS-Simulator-${{ github.run_number }}
-          path: build/ios/iphonesimulator/SwiftCall-simulator.zip
-          retention-days: 30
-
-      # ── Real-device signed IPA (requires secrets) ──────────────────────────
-      - name: Import signing certificate
-        if: ${{ secrets.APPLE_TEAM_ID != '' }}
-        env:
-          CERT_B64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
-          CERT_PASS: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-        run: |
-          KEYCHAIN=$RUNNER_TEMP/build.keychain
-          security create-keychain -p "" $KEYCHAIN
-          security set-keychain-settings -lut 21600 $KEYCHAIN
-          security unlock-keychain -p "" $KEYCHAIN
-          echo "$CERT_B64" | base64 --decode > $RUNNER_TEMP/cert.p12
-          security import $RUNNER_TEMP/cert.p12 -P "$CERT_PASS" \
-            -A -t cert -f pkcs12 -k $KEYCHAIN
-          security list-keychain -d user -s $KEYCHAIN
-
-      - name: Install provisioning profile
-        if: ${{ secrets.APPLE_TEAM_ID != '' }}
-        env:
-          PROV_B64: ${{ secrets.APPLE_PROVISIONING_BASE64 }}
-        run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$PROV_B64" | base64 --decode \
-            > ~/Library/MobileDevice/Provisioning\ Profiles/swiftcall.mobileprovision
-
-      - name: Patch ExportOptions with Team ID
-        if: ${{ secrets.APPLE_TEAM_ID != '' }}
-        env:
-          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: sed -i '' "s/TEAM_ID_PLACEHOLDER/$TEAM_ID/g" ios/ExportOptions.plist
-
-      - name: Build signed IPA
-        if: ${{ secrets.APPLE_TEAM_ID != '' }}
-        run: |
-          flutter build ipa --release \
-            --export-options-plist=ios/ExportOptions.plist
-
-      - name: Upload IPA artifact
-        if: ${{ secrets.APPLE_TEAM_ID != '' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: SwiftCall-iOS-AdHoc-${{ github.run_number }}
-          path: build/ios/ipa/*.ipa
+          name: SwiftCall-iOS-unsigned-${{ github.run_number }}
+          path: build/ios/ipa/SwiftCall-unsigned.ipa
           retention-days: 30
