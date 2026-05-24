@@ -10,13 +10,11 @@ permissions:
 
 jobs:
   # ───────────────────────────────────────────────────────────────────────────
-  # Android Debug APK
+  # Android Release APK
   # ───────────────────────────────────────────────────────────────────────────
   android:
-    name: Android Debug APK
+    name: Android Release APK
     runs-on: ubuntu-latest
-    outputs:
-      apk_path: build/app/outputs/flutter-apk/app-debug.apk
 
     steps:
       - uses: actions/checkout@v4
@@ -35,11 +33,11 @@ jobs:
       - name: Install Android SDK platform 35
         run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35"
 
-      - name: Restore fixed debug keystore (stable SHA-1 for Firebase)
+      - name: Restore release keystore (stable SHA-1)
         run: |
           mkdir -p ~/.android
           echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 -d > ~/.android/debug.keystore
-          echo "✅ SHA-1 for this keystore:"
+          echo "✅ SHA-1:"
           keytool -list -v \
             -keystore ~/.android/debug.keystore \
             -alias androiddebugkey \
@@ -49,58 +47,96 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
 
-      - name: Build debug APK
+      - name: Build release APK
         id: build_apk
-        run: flutter build apk --debug 2>&1 | tee /tmp/build_log.txt; exit ${PIPESTATUS[0]}
+        env:
+          RELEASE_KEYSTORE_PATH: /root/.android/debug.keystore
+          RELEASE_STORE_PASSWORD: android
+          RELEASE_KEY_ALIAS: androiddebugkey
+          RELEASE_KEY_PASSWORD: android
+        run: flutter build apk --release 2>&1 | tee /tmp/build_log.txt; exit ${PIPESTATUS[0]}
         continue-on-error: true
 
       - name: Show errors on failure
         if: steps.build_apk.outcome == 'failure'
         run: |
           echo "=== KOTLIN / GRADLE ERRORS ==="
-          grep -E "^e:|error:|overrides nothing|Unresolved reference|compileDebug" /tmp/build_log.txt || true
+          grep -E "^e:|error:|overrides nothing|Unresolved reference|compileRelease" /tmp/build_log.txt || true
           echo "=== LAST 80 LINES ==="
           tail -80 /tmp/build_log.txt
           exit 1
 
+      - name: Get version from pubspec
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Rename APK with version
         run: |
           BUILD_NUM=${{ github.run_number }}
-          cp build/app/outputs/flutter-apk/app-debug.apk \
-             build/app/outputs/flutter-apk/SwiftCall-v1.0.$BUILD_NUM.apk
+          VERSION=${{ steps.version.outputs.version }}
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             build/app/outputs/flutter-apk/SwiftCall-v${VERSION}-b${BUILD_NUM}.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SwiftCall-Android-debug-${{ github.run_number }}
-          path: build/app/outputs/flutter-apk/SwiftCall-v1.0.${{ github.run_number }}.apk
+          name: SwiftCall-Android-release-${{ github.run_number }}
+          path: build/app/outputs/flutter-apk/SwiftCall-v${{ steps.version.outputs.version }}-b${{ github.run_number }}.apk
           retention-days: 90
 
-      - name: Create GitHub Release with APK
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: "SwiftCall v1.0.${{ github.run_number }}"
+          tag_name: v${{ steps.version.outputs.version }}-b${{ github.run_number }}
+          name: "SwiftCall v${{ steps.version.outputs.version }} (Build ${{ github.run_number }})"
           body: |
-            ## تحميل SwiftCall 📲
+            ## 📲 تحميل SwiftCall
 
-            **رابط التحميل المباشر للأندرويد** 👇
-            اضغط على الملف أدناه لتحميل APK
+            اضغط على ملف `SwiftCall-v*.apk` أدناه للتحميل المباشر
 
-            ### ما الجديد؟
-            - نظام التوكنز والمكافآت
-            - تسجيل الدخول بالإيميل + Google
-            - تذكرني + نسيت كلمة المرور
-            - إعلانات Unity Ads (مكافأة 50 توكن)
+            ---
 
-            ### كيفية التثبيت
-            1. حمّل ملف APK من الأسفل
-            2. فعّل "مصادر غير معروفة" في إعدادات الهاتف
+            ### ✅ ما الجديد في هذا الإصدار؟
+
+            **🔐 تسجيل الدخول**
+            - إصلاح تسجيل الدخول بالإيميل وكلمة المرور
+            - دعم Google Sign-In كامل
+            - تذكرني + نسيت كلمة المرور (بالعربي)
+            - إنشاء ملف المستخدم تلقائياً عند أول دخول
+
+            **💬 المحادثات**
+            - إرسال نصوص، صور، فيديو، ملفات، تسجيلات صوتية
+            - الرد على الرسائل + مؤشر الكتابة
+            - حذف الرسائل
+
+            **📞 المكالمات**
+            - مكالمات صوتية وفيديو عبر LiveKit WebRTC
+            - مكالمات جماعية
+            - إشعارات المكالمات الواردة
+
+            **💎 نظام التوكنز**
+            - 100 توكن هدية ترحيب للمستخدمين الجدد
+            - كسب 50 توكن بمشاهدة إعلان
+            - كسب 30 توكن بمشاركة التطبيق
+            - سجل المعاملات
+
+            **📢 الإعلانات (Unity Ads)**
+            - إعلانات مكافأة في المحفظة
+            - إعلانات بانر في الشاشات الرئيسية
+            - إعلانات تخللية بعد المكالمات
+
+            ---
+
+            ### 📥 كيفية التثبيت
+            1. حمّل ملف `SwiftCall-v*.apk`
+            2. افتح الإعدادات ← الأمان ← فعّل **مصادر غير معروفة**
             3. افتح الملف وثبّت التطبيق
 
-            > ⚠️ هذا إصدار تجريبي (Debug) للاختبار قبل النشر الرسمي
+            > ✅ هذا إصدار **Release** موقّع جاهز للتوزيع
           files: |
-            build/app/outputs/flutter-apk/SwiftCall-v1.0.${{ github.run_number }}.apk
+            build/app/outputs/flutter-apk/SwiftCall-v${{ steps.version.outputs.version }}-b${{ github.run_number }}.apk
           draft: false
           prerelease: false
 
@@ -135,16 +171,22 @@ jobs:
       - name: Build iOS (no codesign)
         run: flutter build ios --release --no-codesign
 
+      - name: Get version from pubspec
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Package into unsigned IPA
         run: |
           mkdir -p build/ios/ipa/Payload
           cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
           cd build/ios/ipa
-          zip -r SwiftCall-iOS-unsigned.ipa Payload/
+          zip -r SwiftCall-iOS-v${{ steps.version.outputs.version }}-unsigned.ipa Payload/
 
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
         with:
           name: SwiftCall-iOS-unsigned-${{ github.run_number }}
-          path: build/ios/ipa/SwiftCall-iOS-unsigned.ipa
+          path: build/ios/ipa/SwiftCall-iOS-v${{ steps.version.outputs.version }}-unsigned.ipa
           retention-days: 90

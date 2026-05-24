@@ -20,6 +20,15 @@ android {
         jvmTarget = "11"
     }
 
+    signingConfigs {
+        release {
+            storeFile     file(System.getenv("RELEASE_KEYSTORE_PATH") ?: "${System.getProperty('user.home')}/.android/debug.keystore")
+            storePassword System.getenv("RELEASE_STORE_PASSWORD") ?: "android"
+            keyAlias      System.getenv("RELEASE_KEY_ALIAS")      ?: "androiddebugkey"
+            keyPassword   System.getenv("RELEASE_KEY_PASSWORD")   ?: "android"
+        }
+    }
+
     defaultConfig {
         applicationId "com.swiftcall.app"
         minSdk 24
@@ -30,14 +39,16 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
-            // Set minifyEnabled = true and shrinkResources = true before
-            // publishing to Google Play.  proguard-rules.pro already covers
-            // all Firebase, LiveKit, and custom-service keep rules.
-            minifyEnabled false
-            shrinkResources false
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                           'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
         }
     }
 }

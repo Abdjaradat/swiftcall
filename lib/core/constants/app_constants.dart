@@ -1,7 +1,7 @@
 class AppConstants {
   // App Info
   static const String appName    = 'SwiftCall';
-  static const String appVersion = '1.0.0';
+  static const String appVersion = '1.0.1';
 
   // LiveKit
   static const String livekitUrl         = 'wss://swiftcall-criz4m8x.livekit.cloud';
