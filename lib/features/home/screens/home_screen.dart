@@ -18,6 +18,8 @@ import '../../../data/services/auth_service.dart';
 import '../../call_history/bloc/call_history_bloc.dart';
 import '../../call_history/screens/call_history_screen.dart';
 import '../bloc/home_bloc.dart';
+import '../../tokens/bloc/token_bloc.dart';
+import '../../tokens/bloc/token_state.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -116,10 +118,38 @@ class _HomeScreenState extends State<HomeScreen>
             onPressed: () =>
                 showSearch(context: context, delegate: _ChatSearch()),
           ),
-        IconButton(
-          icon: const Icon(Icons.account_balance_wallet_rounded, color: Color(0xFF6C63FF)),
-          tooltip: 'محفظة التوكنز',
-          onPressed: () => context.push(AppRouter.wallet),
+        BlocBuilder<TokenBloc, TokenState>(
+          builder: (context, state) {
+            final balance = state is TokenLoaded ? state.wallet.balance : null;
+            return GestureDetector(
+              onTap: () => context.push(AppRouter.wallet),
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF6C63FF), Color(0xFF3F3D8F)],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('💎', style: TextStyle(fontSize: 14)),
+                    const SizedBox(width: 4),
+                    Text(
+                      balance != null ? '$balance' : '...',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
         FutureBuilder<UserModel?>(
           future: AuthService.instance.getCurrentUserModel(),
