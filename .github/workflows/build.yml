@@ -36,7 +36,18 @@ jobs:
         run: flutter pub get
 
       - name: Build debug APK
-        run: flutter build apk --debug --verbose
+        id: build_apk
+        run: flutter build apk --debug 2>&1 | tee /tmp/build_log.txt; exit ${PIPESTATUS[0]}
+        continue-on-error: true
+
+      - name: Show Kotlin errors
+        if: steps.build_apk.outcome == 'failure'
+        run: |
+          echo "=== KOTLIN / GRADLE ERRORS ==="
+          grep -E "^e:|error:|overrides nothing|Unresolved reference|compileDebug" /tmp/build_log.txt || true
+          echo "=== LAST 80 LINES ==="
+          tail -80 /tmp/build_log.txt
+          exit 1
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
