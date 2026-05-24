@@ -448,13 +448,70 @@ class _AuthFormState extends State<_AuthForm> {
                         await AuthService.instance.sendPasswordReset(email);
                         if (dialogCtx.mounted) Navigator.pop(dialogCtx);
                         if (ctx.mounted) {
-                          ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-                            content: Text(
-                                'تم إرسال رابط إعادة التعيين إلى $email ✅',
-                                style: GoogleFonts.cairo()),
-                            backgroundColor: Colors.green,
-                            behavior: SnackBarBehavior.floating,
-                          ));
+                          showDialog(
+                            context: ctx,
+                            builder: (_) => AlertDialog(
+                              backgroundColor: const Color(0xFF1E1E2E),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)),
+                              title: Text('📧 تم الإرسال!',
+                                  style: GoogleFonts.cairo(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('أُرسل إيميل إلى:',
+                                      style: GoogleFonts.cairo(
+                                          color: Colors.white70, fontSize: 13)),
+                                  const SizedBox(height: 4),
+                                  Text(email,
+                                      style: GoogleFonts.cairo(
+                                          color: AppColors.primary,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    '1️⃣ افتح إيميلك\n'
+                                    '2️⃣ ابحث عن رسالة من SwiftCall أو noreply@firebase\n'
+                                    '3️⃣ اضغط على الرابط داخل الإيميل\n'
+                                    '4️⃣ ستفتح صفحة تحدد فيها باسورد جديد\n'
+                                    '5️⃣ ارجع للتطبيق وادخل بالباسورد الجديد',
+                                    style: GoogleFonts.cairo(
+                                        color: Colors.white70, fontSize: 13, height: 1.8),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                                    ),
+                                    child: Text(
+                                      '⚠️ إذا ما وصل الإيميل تحقق من مجلد Spam/جunk',
+                                      style: GoogleFonts.cairo(
+                                          color: Colors.orange, fontSize: 12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12)),
+                                  ),
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: Text('فهمت ✅',
+                                      style: GoogleFonts.cairo(
+                                          color: Colors.white)),
+                                ),
+                              ],
+                            ),
+                          );
                         }
                       } catch (_) {
                         setDialogState(() => sending = false);
