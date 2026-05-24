@@ -75,7 +75,7 @@ class SwiftCallFirebaseMessagingService : FirebaseMessagingService() {
             val am = getSystemService(ACTIVITY_SERVICE) as android.app.ActivityManager
             val tasks = am.getRunningTasks(1)
             tasks.isNotEmpty() && tasks[0].topActivity?.packageName == packageName
-        } catch (_: Exception) { false }
+        } catch (e: Exception) { false }
     }
 
     override fun onNewToken(token: String) {
