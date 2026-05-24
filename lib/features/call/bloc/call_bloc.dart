@@ -14,10 +14,27 @@ part 'call_state.dart';
 
 class CallBloc extends Bloc<CallEvent, CallState> {
   Timer? _durationTimer;
+
+  /// Fires after [AppConstants.callTimeout] when the callee never answers.
+  /// Writes `status: "missed"` to Firestore so the receiver sees a missed-call
+  /// entry in their history.  cancelCallNotification Cloud Function then sends
+  /// call_cancelled FCM to both parties, dismissing their UIs.
+  Timer? _ringTimer;
+
   StreamSubscription? _callStatusSub;
   EventsListener<RoomEvent>? _roomListener;
   Duration _elapsed = Duration.zero;
-  String? _activeCallId;
+  String?  _activeCallId;
+
+  /// True once the remote participant joins LiveKit and the call goes active.
+  bool _wasActive = false;
+
+  /// True when the remote side already wrote a terminal status (rejected /
+  /// missed).  Prevents _onEnd from overwriting it with "cancelled"/"ended".
+  bool _skipFirestoreWrite = false;
+
+  /// Reason to pass to [CallEnded] so the UI can show a dismissal message.
+  CallEndReason _endReason = CallEndReason.normal;
 
   CallBloc() : super(CallIdle()) {
     on<CallStart>(_onStart);
@@ -90,9 +107,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       return;
     }
 
-    _watchForRemoteParticipant(room, event.isVideo, roomName);
-
-    // Watch for receiver rejecting / missing the call
+    // ── Firestore listener: remote rejected / missed → dismiss caller UI ──
     _callStatusSub?.cancel();
     _callStatusSub = FirebaseFirestore.instance
         .collection('calls')
@@ -101,17 +116,44 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         .listen((doc) {
       if (!doc.exists || _activeCallId == null) return;
       final status = doc.data()?['status'] as String?;
-      if (status == 'rejected' || status == 'missed') {
+      if (status == 'rejected') {
+        _skipFirestoreWrite = true;
+        _endReason = CallEndReason.rejected;
+        add(CallEnd());
+      } else if (status == 'missed') {
+        _skipFirestoreWrite = true;
+        _endReason = CallEndReason.noAnswer;
         add(CallEnd());
       }
     });
+
+    // ── Local ring timer: write "missed" after 45 s if unanswered ─────────
+    // Complements the Cloud Function timeout (every ~1 min) so the caller's
+    // UI closes after exactly 45 s with a "لا يرد" message.
+    _ringTimer?.cancel();
+    _ringTimer = Timer(AppConstants.callTimeout, () async {
+      if (_activeCallId == null || _wasActive) return;
+      _skipFirestoreWrite = true;
+      _endReason = CallEndReason.noAnswer;
+      try {
+        await FirebaseFirestore.instance
+            .collection('calls')
+            .doc(_activeCallId)
+            .update({'status': 'missed'});
+      } catch (_) {}
+      // The Firestore listener above will see 'missed' and fire add(CallEnd()).
+      // Belt-and-suspenders: fire directly too in case the stream is slow.
+      if (!isClosed) add(CallEnd());
+    });
+
+    _watchForRemoteParticipant(room, event.isVideo, roomName);
   }
 
   void _watchForRemoteParticipant(Room room, bool isVideo, String roomName) {
     _roomListener?.dispose();
     _roomListener = room.createListener();
 
-    // Already connected (race condition)
+    // Race: receiver might have joined before we set up the listener
     if (room.remoteParticipants.isNotEmpty) {
       _roomListener!.dispose();
       _roomListener = null;
@@ -124,21 +166,13 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       _roomListener = null;
       add(_CallSessionStarted(isVideo: isVideo, roomName: roomName));
     });
-
-    // Timeout after 45 seconds
-    Future.delayed(AppConstants.callTimeout, () {
-      if (_roomListener != null) {
-        _roomListener?.dispose();
-        _roomListener = null;
-        if (state is CallConnecting) {
-          add(CallEnd());
-        }
-      }
-    });
   }
 
   Future<void> _onAccept(CallAccept event, Emitter<CallState> emit) async {
     emit(CallConnecting());
+    _ringTimer?.cancel();
+    _ringTimer = null;
+
     await _requestCallPermissions(event.call.type == CallType.video);
 
     final me = await AuthService.instance.getCurrentUserModel();
@@ -191,23 +225,36 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     _callStatusSub = null;
     _roomListener?.dispose();
     _roomListener = null;
+    _ringTimer?.cancel();
+    _ringTimer = null;
 
     final elapsed = _elapsed;
     _elapsed = Duration.zero;
 
     await LiveKitService.instance.disconnect();
 
-    if (_activeCallId != null) {
+    if (_activeCallId != null && !_skipFirestoreWrite) {
+      // Determine the correct terminal status:
+      //  • Call was active (remote joined)    → "ended" with elapsed duration
+      //  • Call was still ringing (caller gave up) → "cancelled"
+      final status = _wasActive ? 'ended' : 'cancelled';
+      final extra  = _wasActive ? {'duration': elapsed.inSeconds} : <String, dynamic>{};
+      if (!_wasActive) _endReason = CallEndReason.cancelled;
       try {
         await FirebaseFirestore.instance
             .collection('calls')
             .doc(_activeCallId)
-            .update({'status': 'ended', 'duration': elapsed.inSeconds});
+            .update({'status': status, ...extra});
       } catch (_) {}
-      _activeCallId = null;
     }
 
-    emit(CallEnded(elapsed));
+    final reason    = _endReason;
+    _activeCallId   = null;
+    _wasActive      = false;
+    _skipFirestoreWrite = false;
+    _endReason      = CallEndReason.normal;
+
+    emit(CallEnded(elapsed, reason: reason));
   }
 
   Future<void> _onToggleMic(CallToggleMic event, Emitter<CallState> emit) async {
@@ -242,6 +289,11 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   }
 
   void _startSession(Emitter<CallState> emit, bool isVideo, String roomName) {
+    // Call has been answered — cancel ring timer and mark as active
+    _ringTimer?.cancel();
+    _ringTimer = null;
+    _wasActive = true;
+
     LiveKitService.instance.enableSpeaker(isVideo);
     _elapsed = Duration.zero;
 
@@ -266,6 +318,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     _durationTimer?.cancel();
     _callStatusSub?.cancel();
     _roomListener?.dispose();
+    _ringTimer?.cancel();
     return super.close();
   }
 }

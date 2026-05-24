@@ -59,9 +59,20 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<CallBloc, CallState>(
-      listener: (_, state) {
-        if (state is CallEnded || state is CallFailed) {
-          context.pop();
+      listener: (ctx, state) {
+        if (state is CallFailed) {
+          ctx.pop();
+          return;
+        }
+        if (state is CallEnded) {
+          final reason = state.reason;
+          if (reason == CallEndReason.normal || reason == CallEndReason.cancelled) {
+            ctx.pop();
+            return;
+          }
+          Future.delayed(const Duration(seconds: 2), () {
+            if (ctx.mounted) ctx.pop();
+          });
         }
         if (state is CallActive) {
           _attachRoomListener();
@@ -128,6 +139,15 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                             style: GoogleFonts.cairo(
                                 color: Colors.white70, fontSize: 14),
                           ),
+                        if (state is CallEnded)
+                          Text(
+                            _endedLabel((state as CallEnded).reason),
+                            style: GoogleFonts.cairo(
+                              color: _endedColor((state as CallEnded).reason),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -152,6 +172,22 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     final m = d.inMinutes.toString().padLeft(2, '0');
     final s = (d.inSeconds % 60).toString().padLeft(2, '0');
     return '$m:$s';
+  }
+
+  String _endedLabel(CallEndReason reason) {
+    switch (reason) {
+      case CallEndReason.noAnswer:  return 'لا يرد';
+      case CallEndReason.rejected:  return 'رفض المكالمة';
+      default:                      return '';
+    }
+  }
+
+  Color _endedColor(CallEndReason reason) {
+    switch (reason) {
+      case CallEndReason.noAnswer:  return Colors.orangeAccent;
+      case CallEndReason.rejected:  return Colors.redAccent;
+      default:                      return Colors.white70;
+    }
   }
 }
 

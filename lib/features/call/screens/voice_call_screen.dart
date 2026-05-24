@@ -50,9 +50,22 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
   @override
   Widget build(BuildContext context) {
     return BlocListener<CallBloc, CallState>(
-      listener: (_, state) {
-        if (state is CallEnded || state is CallFailed) {
-          context.pop();
+      listener: (ctx, state) {
+        if (state is CallFailed) {
+          ctx.pop();
+          return;
+        }
+        if (state is CallEnded) {
+          final reason = state.reason;
+          // Normal / cancelled → dismiss immediately with no extra message.
+          if (reason == CallEndReason.normal || reason == CallEndReason.cancelled) {
+            ctx.pop();
+            return;
+          }
+          // No answer / rejected → let the UI render the message for 2 s, then pop.
+          Future.delayed(const Duration(seconds: 2), () {
+            if (ctx.mounted) ctx.pop();
+          });
         }
       },
       child: Scaffold(
@@ -154,6 +167,8 @@ class _StatusText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String text;
+    Color color = Colors.white60;
+
     if (state is CallConnecting) {
       text = 'جارٍ الاتصال...';
     } else if (state is CallActive) {
@@ -161,13 +176,24 @@ class _StatusText extends StatelessWidget {
       final m = d.inMinutes.toString().padLeft(2, '0');
       final s = (d.inSeconds % 60).toString().padLeft(2, '0');
       text = '$m:$s';
+    } else if (state is CallEnded) {
+      switch ((state as CallEnded).reason) {
+        case CallEndReason.noAnswer:
+          text  = 'لا يرد';
+          color = Colors.orangeAccent;
+        case CallEndReason.rejected:
+          text  = 'رفض المكالمة';
+          color = Colors.redAccent;
+        default:
+          text = '';
+      }
     } else {
       text = '';
     }
 
     return Text(
       text,
-      style: GoogleFonts.poppins(color: Colors.white60, fontSize: 16),
+      style: GoogleFonts.poppins(color: color, fontSize: 16),
     );
   }
 }

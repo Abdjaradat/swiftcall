@@ -31,8 +31,13 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.debug
+            // Set minifyEnabled = true and shrinkResources = true before
+            // publishing to Google Play.  proguard-rules.pro already covers
+            // all Firebase, LiveKit, and custom-service keep rules.
             minifyEnabled false
             shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                          'proguard-rules.pro'
         }
     }
 }
