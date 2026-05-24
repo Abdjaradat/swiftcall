@@ -22,7 +22,7 @@ class AdService {
     if (_initialized) return;
     UnityAds.init(
       gameId: _gameId,
-      testMode: true,
+      testMode: false,
       onComplete: () {
         _initialized = true;
         _loadAd();
