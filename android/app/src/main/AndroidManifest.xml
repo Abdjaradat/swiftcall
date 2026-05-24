@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
 
-    <!-- Calls -->
+    <!-- Calls & Media -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
@@ -19,6 +19,9 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
+    <!-- Show over lock screen / other apps -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+
     <!-- Contacts -->
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
@@ -29,14 +32,22 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
 
-    <!-- Foreground service for calls -->
+    <!-- Foreground services -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL"/>
 
-    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <!-- TelecomManager — required for addNewIncomingCall with SELF_MANAGED account -->
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS"/>
+
+    <!-- Wake device -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+
+    <uses-feature android:name="android.hardware.camera"       android:required="false"/>
     <uses-feature android:name="android.hardware.camera.front" android:required="false"/>
-    <uses-feature android:name="android.hardware.microphone" android:required="false"/>
+    <uses-feature android:name="android.hardware.microphone"   android:required="false"/>
 
     <application
         android:label="SwiftCall"
@@ -46,6 +57,7 @@
         android:allowBackup="false"
         android:requestLegacyExternalStorage="true">
 
+        <!-- ── Main Activity ──────────────────────────────────────────── -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -66,16 +78,51 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <!-- Called from CallActionReceiver and CallForegroundService -->
+            <intent-filter>
+                <action android:name="com.swiftcall.app.INCOMING_CALL"/>
+                <action android:name="com.swiftcall.app.ANSWER_CALL"/>
+                <action android:name="com.swiftcall.app.DECLINE_CALL"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
         </activity>
 
-        <!-- FCM Service -->
+        <!-- ── FCM Service (custom — handles background/killed FCM messages) ── -->
         <service
-            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+            android:name=".SwiftCallFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
+
+        <!-- ── Call Foreground Service ────────────────────────────────── -->
+        <service
+            android:name=".CallForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="phoneCall|microphone|camera"
+            android:stopWithTask="false"/>
+
+        <!-- ── Telecom ConnectionService ─────────────────────────────── -->
+        <service
+            android:name=".CallConnectionService"
+            android:exported="true"
+            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+            <intent-filter>
+                <action android:name="android.telecom.ConnectionService"/>
+            </intent-filter>
+        </service>
+
+        <!-- ── Notification action receiver ──────────────────────────── -->
+        <receiver
+            android:name=".CallActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.swiftcall.app.ANSWER_CALL"/>
+                <action android:name="com.swiftcall.app.DECLINE_CALL"/>
+            </intent-filter>
+        </receiver>
 
         <meta-data
             android:name="flutterEmbedding"

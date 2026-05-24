@@ -93,8 +93,15 @@ class AuthService {
   Future<void> updateFcmToken(String token) async {
     final uid = currentUserId;
     if (uid == null) return;
-
     await _db.collection('users').doc(uid).update({'fcmToken': token});
+  }
+
+  /// Saves the iOS PushKit VoIP token to Firestore so the backend can
+  /// send VoIP push notifications to wake the app from a killed state.
+  Future<void> updateVoipToken(String token) async {
+    final uid = currentUserId;
+    if (uid == null) return;
+    await _db.collection('users').doc(uid).update({'voipToken': token});
   }
 
   Future<void> updatePhoneNumber(String phone) async {

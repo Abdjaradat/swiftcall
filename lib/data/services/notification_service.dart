@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
@@ -7,12 +9,28 @@ class NotificationService {
 
   static const int _callNotificationId = 999;
 
+  // ── iOS CallKit/PushKit channel ─────────────────────────────────────────
+  static const _iosChannel = MethodChannel('com.swiftcall.swiftcall/callkit');
+  // ── Android call manager channel ────────────────────────────────────────
+  static const _androidChannel = MethodChannel('com.swiftcall.app/call_manager');
+
   static NotificationService get instance => _instance;
   static final NotificationService _instance = NotificationService._();
   NotificationService._();
 
+  // Called when a push arrives and the user should see the incoming call screen
   static Map<String, dynamic>? pendingCallData;
-  static void Function(Map<String, dynamic> callData)? onCallOpened;
+  static void Function(Map<String, dynamic>)? onCallOpened;
+
+  // Called when the user answers from the native UI (CallKit / notification button)
+  // → Flutter should navigate directly to the active call screen
+  static void Function(Map<String, dynamic>)? onCallAnsweredFromNative;
+
+  // Called when the user declines from native UI
+  static void Function(Map<String, dynamic>)? onCallDeclinedFromNative;
+
+  // Called when VoIP token is received (iOS PushKit) — save to Firestore
+  static void Function(String token)? onVoipTokenReceived;
 
   Future<void> initialize() async {
     await _fcm.requestPermission(
@@ -30,12 +48,8 @@ class NotificationService {
       requestSoundPermission: true,
       requestCriticalPermission: true,
     );
-    const initSettings = InitializationSettings(
-      android: androidInit,
-      iOS: iosInit,
-    );
     await _local.initialize(
-      initSettings,
+      const InitializationSettings(android: androidInit, iOS: iosInit),
       onDidReceiveNotificationResponse: _onNotificationResponse,
     );
 
@@ -45,28 +59,96 @@ class NotificationService {
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
 
     final initialMessage = await _fcm.getInitialMessage();
-    if (initialMessage != null) {
-      final data = initialMessage.data;
-      if (data['type'] == 'call') {
-        pendingCallData = data;
-      }
+    if (initialMessage != null && initialMessage.data['type'] == 'call') {
+      pendingCallData = initialMessage.data;
+    }
+
+    // ── Native → Flutter channel handlers ──────────────────────────────
+    _setupNativeChannelHandlers();
+  }
+
+  // ── Native channel setup ────────────────────────────────────────────────
+
+  void _setupNativeChannelHandlers() {
+    if (Platform.isIOS) {
+      _iosChannel.setMethodCallHandler(_handleIosNativeCall);
+    }
+    if (Platform.isAndroid) {
+      _androidChannel.setMethodCallHandler(_handleAndroidNativeCall);
     }
   }
 
+  Future<dynamic> _handleIosNativeCall(MethodCall call) async {
+    final args = call.arguments is Map
+        ? Map<String, dynamic>.from(call.arguments as Map)
+        : <String, dynamic>{};
+
+    switch (call.method) {
+      case 'voipTokenReceived':
+        final token = call.arguments as String?;
+        if (token != null && onVoipTokenReceived != null) {
+          onVoipTokenReceived!(token);
+        }
+
+      case 'answerCallFromNative':
+        // User answered via CallKit native screen
+        if (onCallAnsweredFromNative != null) {
+          onCallAnsweredFromNative!(args);
+        }
+        await cancelCallNotification();
+
+      case 'endCallFromNative':
+        // User declined via CallKit native screen
+        if (onCallDeclinedFromNative != null) {
+          onCallDeclinedFromNative!(args);
+        }
+        await cancelCallNotification();
+    }
+  }
+
+  Future<dynamic> _handleAndroidNativeCall(MethodCall call) async {
+    final args = call.arguments is Map
+        ? Map<String, dynamic>.from(call.arguments as Map)
+        : <String, dynamic>{};
+
+    switch (call.method) {
+      case 'showCallScreen':
+        // Notification tapped → show incoming call screen in Flutter
+        if (onCallOpened != null) {
+          onCallOpened!(args);
+        }
+
+      case 'answerCallFromNative':
+        // User tapped "Answer" button on Android notification
+        if (onCallAnsweredFromNative != null) {
+          onCallAnsweredFromNative!(args);
+        }
+        await cancelCallNotification();
+
+      case 'declineCallFromNative':
+        // User tapped "Decline" button on Android notification
+        if (onCallDeclinedFromNative != null) {
+          onCallDeclinedFromNative!(args);
+        }
+        await cancelCallNotification();
+    }
+  }
+
+  // ── Local notification channels ─────────────────────────────────────────
+
   Future<void> _createChannels() async {
-    const msgChannel = AndroidNotificationChannel(
+    final androidImpl = _local.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+
+    await androidImpl?.createNotificationChannel(const AndroidNotificationChannel(
       'swiftcall_channel',
       'SwiftCall إشعارات',
       description: 'إشعارات المكالمات والرسائل',
       importance: Importance.high,
       playSound: true,
-    );
-    await _local
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(msgChannel);
+    ));
 
-    const callChannel = AndroidNotificationChannel(
+    await androidImpl?.createNotificationChannel(const AndroidNotificationChannel(
       'swiftcall_calls',
       'SwiftCall مكالمات',
       description: 'إشعارات المكالمات الواردة',
@@ -74,21 +156,25 @@ class NotificationService {
       playSound: true,
       sound: RawResourceAndroidNotificationSound('ringtone'),
       enableVibration: true,
-    );
-    await _local
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(callChannel);
+    ));
   }
+
+  // ── FCM handlers ────────────────────────────────────────────────────────
 
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
     final data = message.data;
     if (data['type'] == 'call') {
-      await showCallNotification(
-        callerName: data['callerName'] ?? '',
-        callerPhoto: data['callerPhoto'],
-        isVideoCall: data['callType'] == 'video',
-      );
+      // On Android, native CallForegroundService handles background calls.
+      // When the app IS in foreground, show a local call notification.
+      if (Platform.isAndroid) {
+        await showCallNotification(
+          callerName:  data['callerName']  ?? '',
+          callerPhoto: data['callerPhoto'],
+          isVideoCall: data['callType'] == 'video',
+        );
+      }
+      // On iOS, PushKit handles kill/background; CallKit shows native UI.
+      // If app is foreground on iOS, the Firestore listener in app.dart handles it.
       return;
     }
     final notification = message.notification;
@@ -99,16 +185,13 @@ class NotificationService {
       notification.body,
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'swiftcall_channel',
-          'SwiftCall إشعارات',
+          'swiftcall_channel', 'SwiftCall إشعارات',
           importance: Importance.high,
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
         ),
         iOS: DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
+          presentAlert: true, presentBadge: true, presentSound: true,
         ),
       ),
     );
@@ -122,8 +205,10 @@ class NotificationService {
   }
 
   void _onNotificationResponse(NotificationResponse response) {
-    // Called when user taps the call notification
+    // Local notification tap — the Firestore listener will surface the call
   }
+
+  // ── Public API ───────────────────────────────────────────────────────────
 
   Future<String?> getToken() => _fcm.getToken();
 
@@ -137,8 +222,7 @@ class NotificationService {
     required bool isVideoCall,
   }) async {
     const androidDetails = AndroidNotificationDetails(
-      'swiftcall_calls',
-      'SwiftCall مكالمات',
+      'swiftcall_calls', 'SwiftCall مكالمات',
       channelDescription: 'إشعارات المكالمات الواردة',
       importance: Importance.max,
       priority: Priority.max,
@@ -153,7 +237,6 @@ class NotificationService {
       visibility: NotificationVisibility.public,
       timeoutAfter: 45000,
     );
-
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
@@ -166,7 +249,7 @@ class NotificationService {
       _callNotificationId,
       isVideoCall ? 'مكالمة فيديو واردة' : 'مكالمة صوتية واردة',
       callerName,
-      NotificationDetails(android: androidDetails, iOS: iosDetails),
+      const NotificationDetails(android: androidDetails, iOS: iosDetails),
     );
   }
 

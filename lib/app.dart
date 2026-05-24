@@ -73,15 +73,34 @@ class _SwiftCallAppState extends State<SwiftCallApp>
 
     WidgetsBinding.instance.addObserver(this);
 
-    NotificationService.onCallOpened = _navigateToCallFromData;
+    // ── Native → Flutter callbacks ────────────────────────────────────────
 
+    // FCM notification tapped (app was background/killed) → show incoming call UI
+    NotificationService.onCallOpened = _navigateToIncomingCall;
+
+    // User answered from native CallKit (iOS) or tapped Answer button (Android)
+    // → navigate directly to the active call screen
+    NotificationService.onCallAnsweredFromNative = _navigateToActiveCall;
+
+    // User declined from native CallKit (iOS) or tapped Decline button (Android)
+    NotificationService.onCallDeclinedFromNative = _handleNativeDecline;
+
+    // iOS PushKit VoIP token → save to Firestore for backend to use
+    NotificationService.onVoipTokenReceived = (token) {
+      AuthService.instance.updateVoipToken(token);
+    };
+
+    // Deliver pending call data from a cold start via notification
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (NotificationService.pendingCallData != null) {
-        _navigateToCallFromData(NotificationService.pendingCallData!);
+        _navigateToIncomingCall(NotificationService.pendingCallData!);
         NotificationService.pendingCallData = null;
       }
     });
   }
+
+  // ── Firestore incoming-call listener ─────────────────────────────────────
+  // Used when app is in foreground (both iOS + Android)
 
   void _startIncomingCallListener(String myUid) {
     _incomingCallSub?.cancel();
@@ -104,7 +123,7 @@ class _SwiftCallAppState extends State<SwiftCallApp>
         HapticFeedback.heavyImpact();
 
         NotificationService.instance.showCallNotification(
-          callerName: call.callerName,
+          callerName:  call.callerName,
           callerPhoto: call.callerPhoto,
           isVideoCall: call.type == CallType.video,
         );
@@ -116,26 +135,6 @@ class _SwiftCallAppState extends State<SwiftCallApp>
     });
   }
 
-  void _navigateToCallFromData(Map<String, dynamic> data) {
-    final call = CallModel(
-      id: data['callId'] ?? '',
-      callerId: data['callerId'] ?? '',
-      callerName: data['callerName'] ?? '',
-      callerPhoto: data['callerPhoto'] ?? '',
-      receiverId: AuthService.instance.currentUserId ?? '',
-      receiverName: '',
-      type: data['callType'] == 'video' ? CallType.video : CallType.audio,
-      status: CallStatus.ringing,
-      roomName: data['roomName'] ?? '',
-      timestamp: DateTime.now(),
-    );
-    if (_lastShownCallId == call.id) return;
-    _lastShownCallId = call.id;
-    final currentPath = _router.routeInformationProvider.value.uri.path;
-    if (currentPath == AppRouter.incomingCall) return;
-    _router.push(AppRouter.incomingCall, extra: call);
-  }
-
   void _stopIncomingCallListener() {
     _incomingCallSub?.cancel();
     _incomingCallSub = null;
@@ -143,10 +142,77 @@ class _SwiftCallAppState extends State<SwiftCallApp>
     NotificationService.instance.cancelCallNotification();
   }
 
+  // ── Navigation helpers ───────────────────────────────────────────────────
+
+  /// Shows the full incoming call screen (ring + accept/reject buttons).
+  /// Used when the app is woken from background/killed via FCM notification tap.
+  void _navigateToIncomingCall(Map<String, dynamic> data) {
+    final callId = data['callId'] ?? data['call_id'] ?? '';
+    if (_lastShownCallId == callId) return;
+    _lastShownCallId = callId;
+
+    final call = CallModel(
+      id:           callId,
+      callerId:     data['callerId']    ?? '',
+      callerName:   data['callerName']  ?? '',
+      callerPhoto:  data['callerPhoto'] as String?,
+      receiverId:   AuthService.instance.currentUserId ?? '',
+      receiverName: '',
+      type: data['callType'] == 'video' ? CallType.video : CallType.audio,
+      status:   CallStatus.ringing,
+      roomName: data['roomName'] ?? '',
+      timestamp: DateTime.now(),
+    );
+
+    final currentPath = _router.routeInformationProvider.value.uri.path;
+    if (currentPath == AppRouter.incomingCall) return;
+    _router.push(AppRouter.incomingCall, extra: call);
+  }
+
+  /// Navigates directly to the active call screen.
+  /// Used when the user answers from the native CallKit/notification UI.
+  void _navigateToActiveCall(Map<String, dynamic> data) {
+    final callId   = data['callId']    ?? data['uuid']     ?? '';
+    final roomName = data['roomName']  ?? '';
+    final callType = data['callType']  ?? 'audio';
+    final hasVideo = data['hasVideo']  as bool? ?? callType == 'video';
+
+    // Accept the call in Firestore so the caller knows it was answered
+    if (callId.isNotEmpty) {
+      FirebaseFirestore.instance
+          .collection('calls')
+          .doc(callId)
+          .update({'status': 'accepted'}).catchError((_) {});
+    }
+
+    _lastShownCallId = callId;
+    NotificationService.instance.cancelCallNotification();
+
+    final route = hasVideo
+        ? '${AppRouter.videoCall}/$roomName'
+        : '${AppRouter.voiceCall}/$roomName';
+
+    // Build a minimal UserModel-like extra for the call screen
+    _router.push(route);
+  }
+
+  /// Marks the call as rejected in Firestore when the user declines from native UI.
+  void _handleNativeDecline(Map<String, dynamic> data) {
+    final callId = data['callId'] ?? data['uuid'] ?? '';
+    if (callId.isEmpty) return;
+    FirebaseFirestore.instance
+        .collection('calls')
+        .doc(callId)
+        .update({'status': 'rejected'}).catchError((_) {});
+    NotificationService.instance.cancelCallNotification();
+  }
+
+  // ── Settings ─────────────────────────────────────────────────────────────
+
   void _onSettingsChanged() {
     setState(() {
-      _isDark = AppSettingsNotifier.instance.isDark;
-      _locale = AppSettingsNotifier.instance.locale;
+      _isDark  = AppSettingsNotifier.instance.isDark;
+      _locale  = AppSettingsNotifier.instance.locale;
     });
   }
 
@@ -162,8 +228,7 @@ class _SwiftCallAppState extends State<SwiftCallApp>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    AuthService.instance
-        .setOnlineStatus(state == AppLifecycleState.resumed);
+    AuthService.instance.setOnlineStatus(state == AppLifecycleState.resumed);
   }
 
   @override

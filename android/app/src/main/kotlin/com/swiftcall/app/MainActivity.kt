@@ -1,29 +1,28 @@
 package com.swiftcall.app
 
-import android.telecom.ConnectionRequest
-
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.telecom.ConnectionService
 import android.telecom.PhoneAccount
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
+import android.util.Log
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import java.util.UUID
 
 class MainActivity : FlutterActivity() {
+
     private val CHANNEL = "com.swiftcall.app/call_manager"
     private lateinit var channel: MethodChannel
     private lateinit var telecomManager: TelecomManager
     private lateinit var phoneAccountHandle: PhoneAccountHandle
 
     companion object {
+        private const val TAG = "MainActivity"
         var flutterEngineReference: FlutterEngine? = null
         var isFlutterEngineReady: Boolean = false
     }
@@ -37,24 +36,20 @@ class MainActivity : FlutterActivity() {
         channel.setMethodCallHandler { call, result ->
             when (call.method) {
                 "showIncomingCallUI" -> {
-                    val uuid = call.argument<String>("uuid")
+                    val uuid       = call.argument<String>("uuid")
                     val callerName = call.argument<String>("callerName")
-                    val hasVideo = call.argument<Boolean>("hasVideo") ?: false
+                    val hasVideo   = call.argument<Boolean>("hasVideo") ?: false
                     if (uuid != null && callerName != null) {
-                        showIncomingCallUI(uuid, callerName, hasVideo)
+                        triggerCallForegroundService(uuid, callerName, "", hasVideo, "", "audio")
                         result.success(true)
-                    } else {
-                        result.error("INVALID_ARGUMENTS", "Missing UUID or callerName", null)
-                    }
+                    } else result.error("INVALID_ARGS", "Missing uuid/callerName", null)
                 }
                 "endNativeCall" -> {
                     val uuid = call.argument<String>("uuid")
                     if (uuid != null) {
                         endNativeCall(uuid)
                         result.success(true)
-                    } else {
-                        result.error("INVALID_ARGUMENTS", "Missing UUID", null)
-                    }
+                    } else result.error("INVALID_ARGS", "Missing uuid", null)
                 }
                 else -> result.notImplemented()
             }
@@ -64,85 +59,118 @@ class MainActivity : FlutterActivity() {
         registerPhoneAccount()
     }
 
-    private fun registerPhoneAccount() {
-        val componentName = ComponentName(packageName, CallConnectionService::class.java.name)
-        phoneAccountHandle = PhoneAccountHandle(componentName, "SwiftCallConnectionServiceId")
-
-        val builder = PhoneAccount.builder(phoneAccountHandle, "SwiftCall")
-            .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER or PhoneAccount.CAPABILITY_SUPPORTS_VIDEO_CALLING)
-            .setIcon(PhoneAccount.builder(phoneAccountHandle, "SwiftCall").build().icon) // Use default icon or provide a custom one
-
-        val phoneAccount = builder.build()
-        telecomManager.registerPhoneAccount(phoneAccount)
-    }
-
-    private fun showIncomingCallUI(uuid: String, callerName: String, hasVideo: Boolean) {
-        if (!telecomManager.defaultDialerPackage.equals(packageName)) {
-            // Your app is not the default dialer, show a notification to open the app
-            // This is a fallback for when ConnectionService might not trigger the full UI directly
-            val notificationIntent = Intent(this, MainActivity::class.java).apply {
-                action = "com.swiftcall.app.INCOMING_CALL"
-                putExtra("uuid", uuid)
-                putExtra("callerName", callerName)
-                putExtra("hasVideo", hasVideo)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            }
-            startActivity(notificationIntent)
-            return
-        }
-
-        val extras = Bundle().apply {
-            putString("uuid", uuid)
-            putString("callerName", callerName)
-            putBoolean("hasVideo", hasVideo)
-            putParcelable(TelecomManager.EXTRA_INCOMING_CALL_ADDRESS, phoneAccountHandle)
-        }
-
-        val connectionRequest = ConnectionRequest(
-            phoneAccountHandle,
-            null, // No incoming address if it's a generic handle
-            extras
-        )
-
-        // Start Foreground Service for higher priority processing and UI display
-        val serviceIntent = Intent(this, CallForegroundService::class.java).apply {
-            putExtra("uuid", uuid)
-            putExtra("callerName", callerName)
-            putExtra("hasVideo", hasVideo)
-            putExtra("action", "start")
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent)
-        } else {
-            startService(serviceIntent)
-        }
-
-        telecomManager.addNewIncomingCall(phoneAccountHandle, extras)
-    }
-
-    private fun endNativeCall(uuid: String) {
-        val serviceIntent = Intent(this, CallForegroundService::class.java).apply {
-            putExtra("uuid", uuid)
-            putExtra("action", "end")
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent)
-        } else {
-            startService(serviceIntent)
-        }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        handleCallIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent.action == "com.swiftcall.app.INCOMING_CALL") {
-            // Handle intent when app is already open
-            val uuid = intent.getStringExtra("uuid")
-            val callerName = intent.getStringExtra("callerName")
-            val hasVideo = intent.getBooleanExtra("hasVideo", false)
-            if (uuid != null && callerName != null) {
-                // You might want to navigate to a call screen here in Flutter
-                channel.invokeMethod("showCallScreen", mapOf("uuid" to uuid, "callerName" to callerName, "hasVideo" to hasVideo))
+        handleCallIntent(intent)
+    }
+
+    /**
+     * Handles INCOMING_CALL, ANSWER_CALL, and DECLINE_CALL intents
+     * sent from CallForegroundService or CallActionReceiver.
+     */
+    private fun handleCallIntent(intent: Intent?) {
+        val action      = intent?.action ?: return
+        val uuid        = intent.getStringExtra("uuid")        ?: return
+        val callerName  = intent.getStringExtra("callerName")  ?: ""
+        val callerPhoto = intent.getStringExtra("callerPhoto") ?: ""
+        val hasVideo    = intent.getBooleanExtra("hasVideo", false)
+        val roomName    = intent.getStringExtra("roomName")    ?: ""
+        val callType    = intent.getStringExtra("callType")    ?: "audio"
+
+        Log.d(TAG, "handleCallIntent: action=$action uuid=$uuid")
+
+        when (action) {
+            "com.swiftcall.app.INCOMING_CALL" -> {
+                // App launched from notification tap — show incoming call screen in Flutter
+                channel.invokeMethod("showCallScreen", mapOf(
+                    "callId"      to uuid,
+                    "callerName"  to callerName,
+                    "callerPhoto" to callerPhoto,
+                    "hasVideo"    to hasVideo,
+                    "roomName"    to roomName,
+                    "callType"    to callType,
+                ))
             }
+            "com.swiftcall.app.ANSWER_CALL" -> {
+                // User tapped "Answer" on the notification
+                channel.invokeMethod("answerCallFromNative", mapOf(
+                    "callId"      to uuid,
+                    "callerName"  to callerName,
+                    "callerPhoto" to callerPhoto,
+                    "hasVideo"    to hasVideo,
+                    "roomName"    to roomName,
+                    "callType"    to callType,
+                ))
+                // Stop ringing notification
+                stopService(Intent(this, CallForegroundService::class.java))
+            }
+            "com.swiftcall.app.DECLINE_CALL" -> {
+                // User tapped "Decline" on the notification
+                channel.invokeMethod("declineCallFromNative", mapOf(
+                    "callId"   to uuid,
+                    "hasVideo" to hasVideo,
+                ))
+                stopService(Intent(this, CallForegroundService::class.java))
+            }
+        }
+    }
+
+    // ── Phone account registration ───────────────────────────────────────
+
+    private fun registerPhoneAccount() {
+        try {
+            val componentName = ComponentName(packageName, CallConnectionService::class.java.name)
+            phoneAccountHandle = PhoneAccountHandle(componentName, "SwiftCallConnectionServiceId")
+
+            val phoneAccount = PhoneAccount.builder(phoneAccountHandle, "SwiftCall")
+                .setCapabilities(
+                    PhoneAccount.CAPABILITY_CALL_PROVIDER or
+                    PhoneAccount.CAPABILITY_SUPPORTS_VIDEO_CALLING or
+                    PhoneAccount.CAPABILITY_SELF_MANAGED
+                )
+                .build()
+            telecomManager.registerPhoneAccount(phoneAccount)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to register phone account: ${e.message}")
+        }
+    }
+
+    // ── Native helpers ───────────────────────────────────────────────────
+
+    private fun triggerCallForegroundService(
+        uuid: String, callerName: String, callerPhoto: String,
+        hasVideo: Boolean, roomName: String, callType: String
+    ) {
+        val serviceIntent = Intent(this, CallForegroundService::class.java).apply {
+            putExtra("action",      "start")
+            putExtra("uuid",        uuid)
+            putExtra("callerName",  callerName)
+            putExtra("callerPhoto", callerPhoto)
+            putExtra("hasVideo",    hasVideo)
+            putExtra("roomName",    roomName)
+            putExtra("callType",    callType)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+    }
+
+    private fun endNativeCall(uuid: String) {
+        val serviceIntent = Intent(this, CallForegroundService::class.java).apply {
+            putExtra("action", "end")
+            putExtra("uuid", uuid)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
         }
     }
 
