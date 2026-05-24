@@ -1,0 +1,106 @@
+{
+  "project_info": {
+    "project_number": "1082599622155",
+    "project_id": "swiftcall-eec90",
+    "storage_bucket": "swiftcall-eec90.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1082599622155:android:d5762cba3ab4883bdce90e",
+        "android_client_info": {
+          "package_name": "com.swiftcall.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1082599622155-ju4j3s6ot70ifjtfbnjo0233ik1p7b9t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.swiftcall.app",
+            "certificate_hash": "e314d8fa34fc3e41d264433bd4f403945189e7ff"
+          }
+        },
+        {
+          "client_id": "1082599622155-td8nsrab3bh6196nfpj1bsdmaqm0ts18.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.swiftcall.app",
+            "certificate_hash": "647e89395639f6925f052724684a1166ea3bb4bb"
+          }
+        },
+        {
+          "client_id": "1082599622155-4gakg5bv8q1gtibljpuh1snc00ncnf62.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdgXV1HjMLgJ6_QEnQR_H5mE-Mww_qc3I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1082599622155-4gakg5bv8q1gtibljpuh1snc00ncnf62.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1082599622155-3l6mchn55uh9jolkjbdggep67a1iro81.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.swiftcall.swiftcall"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1082599622155:android:a35a42c08587fec0dce90e",
+        "android_client_info": {
+          "package_name": "com.webrtc.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1082599622155-1buea0iachsvv2n34ub3ifk5jr6vnuv3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.webrtc.app",
+            "certificate_hash": "647e89395639f6925f052724684a1166ea3bb4bb"
+          }
+        },
+        {
+          "client_id": "1082599622155-4gakg5bv8q1gtibljpuh1snc00ncnf62.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdgXV1HjMLgJ6_QEnQR_H5mE-Mww_qc3I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1082599622155-4gakg5bv8q1gtibljpuh1snc00ncnf62.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1082599622155-3l6mchn55uh9jolkjbdggep67a1iro81.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.swiftcall.swiftcall"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
