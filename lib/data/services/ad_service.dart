@@ -13,7 +13,7 @@ class AdService {
   static const _iosGameId     = '800000852';
 
   String get _gameId     => Platform.isAndroid ? _androidGameId : _iosGameId;
-  String get _rewardedId => Platform.isAndroid ? 'Rewarded_Android' : 'Rewarded_iOS';
+  String get _rewardedId => 'rewardedVideo';
 
   bool _initialized = false;
   bool _adLoaded    = false;
