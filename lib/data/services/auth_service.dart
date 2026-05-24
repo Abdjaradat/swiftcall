@@ -60,6 +60,59 @@ class AuthService {
     return userModel;
   }
 
+  Future<UserModel?> signInWithEmail(String email, String password) async {
+    final cred = await _auth.signInWithEmailAndPassword(
+        email: email, password: password);
+    final user = cred.user;
+    if (user == null) return null;
+
+    final doc = await _db.collection('users').doc(user.uid).get();
+    if (doc.exists) {
+      await _db.collection('users').doc(user.uid).update({
+        'isOnline': true,
+        'lastSeen': Timestamp.now(),
+      });
+      return UserModel.fromMap(doc.data()!);
+    }
+    return null;
+  }
+
+  Future<UserModel?> registerWithEmail(
+      String email, String password, String displayName) async {
+    final cred = await _auth.createUserWithEmailAndPassword(
+        email: email, password: password);
+    final user = cred.user;
+    if (user == null) return null;
+
+    await user.updateDisplayName(displayName);
+
+    String? fcmToken;
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (_) {}
+
+    final userModel = UserModel(
+      uid: user.uid,
+      displayName: displayName,
+      email: email,
+      photoUrl: null,
+      isOnline: true,
+      lastSeen: DateTime.now(),
+      fcmToken: fcmToken,
+      phoneNumber: null,
+    );
+
+    try {
+      await _db
+          .collection('users')
+          .doc(user.uid)
+          .set(userModel.toMap(), SetOptions(merge: true));
+      await TokenService.instance.initWallet(user.uid);
+    } catch (_) {}
+
+    return userModel;
+  }
+
   Future<void> signOut() async {
     final uid = currentUserId;
     if (uid != null) {

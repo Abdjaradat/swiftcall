@@ -81,16 +81,7 @@ class _LoginScreenState extends State<LoginScreen>
                   const Spacer(flex: 2),
                   const _FeatureRow(),
                   const Spacer(flex: 2),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 28),
-                    child: Column(
-                      children: [
-                        const _GoogleSignInButton(),
-                        const SizedBox(height: 20),
-                        const _PrivacyNote(),
-                      ],
-                    ),
-                  ),
+                  const _AuthForm(),
                   const SizedBox(height: 40),
                 ],
               ),
@@ -315,6 +306,201 @@ class _FeatureCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Auth Form (Email + Google) ─────────────────────────────
+class _AuthForm extends StatefulWidget {
+  const _AuthForm();
+  @override
+  State<_AuthForm> createState() => _AuthFormState();
+}
+
+class _AuthFormState extends State<_AuthForm> {
+  final _formKey     = GlobalKey<FormState>();
+  final _emailCtrl   = TextEditingController();
+  final _passCtrl    = TextEditingController();
+  final _nameCtrl    = TextEditingController();
+  bool _isRegister   = false;
+  bool _obscure      = true;
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
+    _nameCtrl.dispose();
+    super.dispose();
+  }
+
+  void _submit(BuildContext ctx) {
+    if (!_formKey.currentState!.validate()) return;
+    if (_isRegister) {
+      ctx.read<AuthBloc>().add(AuthEmailRegisterRequested(
+        email: _emailCtrl.text.trim(),
+        password: _passCtrl.text.trim(),
+        displayName: _nameCtrl.text.trim(),
+      ));
+    } else {
+      ctx.read<AuthBloc>().add(AuthEmailSignInRequested(
+        email: _emailCtrl.text.trim(),
+        password: _passCtrl.text.trim(),
+      ));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (ctx, state) {
+        final isLoading = state is AuthLoading;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                // ── Name field (register only) ──
+                if (_isRegister) ...[
+                  _field(
+                    controller: _nameCtrl,
+                    hint: 'اسمك',
+                    icon: Icons.person_outline_rounded,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'أدخل اسمك' : null,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                // ── Email ──
+                _field(
+                  controller: _emailCtrl,
+                  hint: 'البريد الإلكتروني',
+                  icon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (v) =>
+                      (v == null || !v.contains('@')) ? 'بريد غير صحيح' : null,
+                ),
+                const SizedBox(height: 12),
+                // ── Password ──
+                _field(
+                  controller: _passCtrl,
+                  hint: 'كلمة المرور',
+                  icon: Icons.lock_outline_rounded,
+                  obscure: _obscure,
+                  suffix: IconButton(
+                    icon: Icon(
+                      _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
+                    onPressed: () => setState(() => _obscure = !_obscure),
+                  ),
+                  validator: (v) =>
+                      (v == null || v.length < 6) ? 'على الأقل 6 أحرف' : null,
+                ),
+                const SizedBox(height: 16),
+                // ── Submit button ──
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : () => _submit(ctx),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.5, color: Colors.white))
+                        : Text(
+                            _isRegister ? 'إنشاء حساب' : 'تسجيل الدخول',
+                            style: GoogleFonts.cairo(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // ── Toggle login / register ──
+                TextButton(
+                  onPressed: () => setState(() => _isRegister = !_isRegister),
+                  child: Text(
+                    _isRegister
+                        ? 'عندك حساب؟ سجّل الدخول'
+                        : 'ما عندك حساب؟ أنشئ واحداً',
+                    style: GoogleFonts.cairo(
+                        color: AppColors.primary, fontSize: 13),
+                  ),
+                ),
+                // ── OR divider ──
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(children: [
+                    const Expanded(child: Divider(color: Colors.white24)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('أو',
+                          style: GoogleFonts.cairo(
+                              color: Colors.white38, fontSize: 13)),
+                    ),
+                    const Expanded(child: Divider(color: Colors.white24)),
+                  ]),
+                ),
+                // ── Google button ──
+                const _GoogleSignInButton(),
+                const SizedBox(height: 12),
+                const _PrivacyNote(),
+              ],
+            ),
+          ),
+        ).animate().fadeIn(delay: 500.ms, duration: 500.ms);
+      },
+    );
+  }
+
+  Widget _field({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool obscure = false,
+    Widget? suffix,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscure,
+      keyboardType: keyboardType,
+      style: GoogleFonts.cairo(color: Colors.white, fontSize: 15),
+      validator: validator,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.cairo(color: Colors.white38, fontSize: 14),
+        prefixIcon: Icon(icon, color: Colors.white38, size: 20),
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: AppColors.surface,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.white12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+        errorStyle: GoogleFonts.cairo(color: Colors.redAccent, fontSize: 11),
       ),
     );
   }

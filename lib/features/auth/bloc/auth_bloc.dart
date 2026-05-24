@@ -9,6 +9,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc() : super(AuthInitial()) {
     on<AuthCheckRequested>(_onCheckRequested);
     on<AuthGoogleSignInRequested>(_onGoogleSignIn);
+    on<AuthEmailSignInRequested>(_onEmailSignIn);
+    on<AuthEmailRegisterRequested>(_onEmailRegister);
     on<AuthSignOutRequested>(_onSignOut);
   }
 
@@ -40,6 +42,58 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } catch (e) {
       emit(AuthError(e.toString()));
+    }
+  }
+
+  Future<void> _onEmailSignIn(
+    AuthEmailSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      final user = await AuthService.instance.signInWithEmail(
+          event.email, event.password);
+      if (user != null) {
+        emit(AuthAuthenticated(user));
+      } else {
+        emit(AuthError('البريد أو الباسورد غير صحيح'));
+      }
+    } on Exception catch (e) {
+      final msg = e.toString();
+      if (msg.contains('user-not-found') || msg.contains('wrong-password') || msg.contains('invalid-credential')) {
+        emit(AuthError('البريد أو الباسورد غير صحيح'));
+      } else if (msg.contains('too-many-requests')) {
+        emit(AuthError('حاولت كثيراً، انتظر قليلاً'));
+      } else {
+        emit(AuthError('حدث خطأ، حاول مجدداً'));
+      }
+    }
+  }
+
+  Future<void> _onEmailRegister(
+    AuthEmailRegisterRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      final user = await AuthService.instance.registerWithEmail(
+          event.email, event.password, event.displayName);
+      if (user != null) {
+        emit(AuthAuthenticated(user));
+      } else {
+        emit(AuthError('فشل إنشاء الحساب'));
+      }
+    } on Exception catch (e) {
+      final msg = e.toString();
+      if (msg.contains('email-already-in-use')) {
+        emit(AuthError('هذا البريد مستخدم مسبقاً'));
+      } else if (msg.contains('weak-password')) {
+        emit(AuthError('الباسورد ضعيف — استخدم 6 أحرف على الأقل'));
+      } else if (msg.contains('invalid-email')) {
+        emit(AuthError('البريد الإلكتروني غير صحيح'));
+      } else {
+        emit(AuthError('حدث خطأ، حاول مجدداً'));
+      }
     }
   }
 
