@@ -6,10 +6,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_logo.dart';
+import '../../../data/services/auth_service.dart';
 import '../bloc/auth_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -325,6 +327,39 @@ class _AuthFormState extends State<_AuthForm> {
   final _nameCtrl    = TextEditingController();
   bool _isRegister   = false;
   bool _obscure      = true;
+  bool _rememberMe   = false;
+
+  static const _prefEmail  = 'saved_email';
+  static const _prefRemember = 'remember_me';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedEmail();
+  }
+
+  Future<void> _loadSavedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final remember = prefs.getBool(_prefRemember) ?? false;
+    if (remember) {
+      final email = prefs.getString(_prefEmail) ?? '';
+      setState(() {
+        _rememberMe = true;
+        _emailCtrl.text = email;
+      });
+    }
+  }
+
+  Future<void> _saveEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_rememberMe) {
+      await prefs.setString(_prefEmail, _emailCtrl.text.trim());
+      await prefs.setBool(_prefRemember, true);
+    } else {
+      await prefs.remove(_prefEmail);
+      await prefs.setBool(_prefRemember, false);
+    }
+  }
 
   @override
   void dispose() {
@@ -336,6 +371,7 @@ class _AuthFormState extends State<_AuthForm> {
 
   void _submit(BuildContext ctx) {
     if (!_formKey.currentState!.validate()) return;
+    _saveEmail();
     if (_isRegister) {
       ctx.read<AuthBloc>().add(AuthEmailRegisterRequested(
         email: _emailCtrl.text.trim(),
@@ -348,6 +384,103 @@ class _AuthFormState extends State<_AuthForm> {
         password: _passCtrl.text.trim(),
       ));
     }
+  }
+
+  Future<void> _showForgotPassword(BuildContext ctx) async {
+    final emailCtrl = TextEditingController(text: _emailCtrl.text.trim());
+    bool sending = false;
+
+    await showDialog(
+      context: ctx,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (dialogCtx, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF1E1E2E),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text('نسيت كلمة المرور؟',
+              style: GoogleFonts.cairo(
+                  color: Colors.white, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('أدخل بريدك وسنرسل لك رابط إعادة التعيين',
+                  style:
+                      GoogleFonts.cairo(color: Colors.white70, fontSize: 13)),
+              const SizedBox(height: 16),
+              TextField(
+                controller: emailCtrl,
+                keyboardType: TextInputType.emailAddress,
+                style: GoogleFonts.cairo(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'البريد الإلكتروني',
+                  hintStyle: GoogleFonts.cairo(color: Colors.white38),
+                  prefixIcon: const Icon(Icons.email_outlined,
+                      color: Colors.white38, size: 20),
+                  filled: true,
+                  fillColor: const Color(0xFF2A2A3E),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: Text('إلغاء',
+                  style: GoogleFonts.cairo(color: Colors.white54)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: sending
+                  ? null
+                  : () async {
+                      final email = emailCtrl.text.trim();
+                      if (!email.contains('@')) return;
+                      setDialogState(() => sending = true);
+                      try {
+                        await AuthService.instance.sendPasswordReset(email);
+                        if (dialogCtx.mounted) Navigator.pop(dialogCtx);
+                        if (ctx.mounted) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+                            content: Text(
+                                'تم إرسال رابط إعادة التعيين إلى $email ✅',
+                                style: GoogleFonts.cairo()),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                          ));
+                        }
+                      } catch (_) {
+                        setDialogState(() => sending = false);
+                        if (ctx.mounted) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+                            content: Text('البريد غير مسجّل',
+                                style: GoogleFonts.cairo()),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                          ));
+                        }
+                      }
+                    },
+              child: sending
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white))
+                  : Text('إرسال', style: GoogleFonts.cairo(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+    emailCtrl.dispose();
   }
 
   @override
@@ -399,7 +532,44 @@ class _AuthFormState extends State<_AuthForm> {
                   validator: (v) =>
                       (v == null || v.length < 6) ? 'على الأقل 6 أحرف' : null,
                 ),
-                const SizedBox(height: 16),
+                // ── Remember me + Forgot password (login only) ──
+                if (!_isRegister) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Transform.scale(
+                        scale: 0.9,
+                        child: Checkbox(
+                          value: _rememberMe,
+                          onChanged: (v) =>
+                              setState(() => _rememberMe = v ?? false),
+                          activeColor: AppColors.primary,
+                          checkColor: Colors.white,
+                          side: const BorderSide(color: Colors.white38),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4)),
+                        ),
+                      ),
+                      Text('تذكرني',
+                          style: GoogleFonts.cairo(
+                              color: Colors.white70, fontSize: 13)),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: () => _showForgotPassword(ctx),
+                        style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                        child: Text('نسيت كلمة المرور؟',
+                            style: GoogleFonts.cairo(
+                                color: AppColors.primary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600)),
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 12),
                 // ── Submit button ──
                 SizedBox(
                   width: double.infinity,

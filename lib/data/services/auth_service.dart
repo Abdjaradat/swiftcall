@@ -113,6 +113,10 @@ class AuthService {
     return userModel;
   }
 
+  Future<void> sendPasswordReset(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
   Future<void> signOut() async {
     final uid = currentUserId;
     if (uid != null) {
