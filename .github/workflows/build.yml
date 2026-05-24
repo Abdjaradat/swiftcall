@@ -32,6 +32,15 @@ jobs:
       - name: Install Android SDK platform 35
         run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35"
 
+      - name: Print debug keystore SHA-1 (add this to Firebase Console)
+        run: |
+          keytool -list -v \
+            -keystore ~/.android/debug.keystore \
+            -alias androiddebugkey \
+            -storepass android \
+            -keypass android \
+            2>/dev/null | grep -A1 "SHA1:"
+
       - name: Install Flutter dependencies
         run: flutter pub get
 
