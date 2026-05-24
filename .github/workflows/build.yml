@@ -33,16 +33,13 @@ jobs:
       - name: Install Android SDK platform 35
         run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35"
 
-      - name: Restore release keystore (stable SHA-1)
+      - name: Generate debug keystore
         run: |
           mkdir -p ~/.android
-          echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 -d > ~/.android/debug.keystore
-          echo "✅ SHA-1:"
-          keytool -list -v \
-            -keystore ~/.android/debug.keystore \
-            -alias androiddebugkey \
-            -storepass android \
-            -keypass android 2>/dev/null | grep "SHA1:"
+          keytool -genkey -v -keystore ~/.android/debug.keystore \
+            -storepass android -alias androiddebugkey -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
 
       - name: Install Flutter dependencies
         run: flutter pub get
