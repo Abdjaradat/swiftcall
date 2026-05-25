@@ -46,18 +46,6 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
 
-      - name: Patch LiveKit Android compile SDK
-        run: |
-          PUB_CACHE_DIR="${PUB_CACHE:-$HOME/.pub-cache}"
-          LIVEKIT_GRADLE=$(find "$PUB_CACHE_DIR" -path "*/livekit_client-*/android/build.gradle" -print -quit)
-          if [ -z "$LIVEKIT_GRADLE" ]; then
-            echo "livekit_client Android build.gradle not found"
-            exit 1
-          fi
-          perl -0pi -e 's/compileSdkVersion\s+[^\r\n]+/compileSdkVersion 35/g; s/compileSdk\s*=\s*[^\r\n]+/compileSdk = 35/g' "$LIVEKIT_GRADLE"
-          grep -n "compileSdk" "$LIVEKIT_GRADLE"
-          grep -q "compileSdkVersion 35\|compileSdk = 35" "$LIVEKIT_GRADLE"
-
       - name: Build release APK
         id: build_apk
         run: |
