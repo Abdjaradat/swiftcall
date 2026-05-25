@@ -46,6 +46,41 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
 
+      - name: Force LiveKit Android compile SDK 35
+        run: |
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import re
+          import sys
+          from urllib.parse import unquote, urlparse
+
+          config = json.loads(pathlib.Path(".dart_tool/package_config.json").read_text())
+          package = next((p for p in config["packages"] if p["name"] == "livekit_client"), None)
+          if package is None:
+              sys.exit("livekit_client not found in package_config.json")
+
+          root_uri = package["rootUri"]
+          if root_uri.startswith("file://"):
+              root = pathlib.Path(unquote(urlparse(root_uri).path))
+          else:
+              root = pathlib.Path(root_uri)
+          gradle_file = root / "android" / "build.gradle"
+          if not gradle_file.exists():
+              sys.exit(f"{gradle_file} does not exist")
+
+          text = gradle_file.read_text()
+          updated = re.sub(r"compileSdkVersion\s+[^\r\n]+", "compileSdkVersion 35", text)
+          updated = re.sub(r"compileSdk\s*=\s*[^\r\n]+", "compileSdk = 35", updated)
+          if updated == text:
+              updated = re.sub(r"android\s*\{", "android {\n    compileSdkVersion 35", text, count=1)
+          gradle_file.write_text(updated)
+
+          for number, line in enumerate(updated.splitlines(), 1):
+              if "compileSdk" in line:
+                  print(f"{gradle_file}:{number}: {line}")
+          PY
+
       - name: Build release APK
         id: build_apk
         run: |
