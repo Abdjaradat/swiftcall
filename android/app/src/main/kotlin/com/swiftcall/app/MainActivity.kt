@@ -1,8 +1,12 @@
 package com.swiftcall.app
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.telecom.PhoneAccount
@@ -51,6 +55,7 @@ class MainActivity : FlutterActivity() {
                         result.success(true)
                     } else result.error("INVALID_ARGS", "Missing uuid", null)
                 }
+                "getLastKnownLocation" -> result.success(getLastKnownLocation())
                 else -> result.notImplemented()
             }
         }
@@ -171,6 +176,34 @@ class MainActivity : FlutterActivity() {
             startForegroundService(serviceIntent)
         } else {
             startService(serviceIntent)
+        }
+    }
+
+    private fun getLastKnownLocation(): Map<String, Double>? {
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return null
+        }
+
+        val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val providers = listOf(
+            LocationManager.GPS_PROVIDER,
+            LocationManager.NETWORK_PROVIDER,
+            LocationManager.PASSIVE_PROVIDER
+        )
+        var best: Location? = null
+        for (provider in providers) {
+            val location = try {
+                manager.getLastKnownLocation(provider)
+            } catch (_: Exception) {
+                null
+            }
+            if (location != null && (best == null || location.time > best!!.time)) {
+                best = location
+            }
+        }
+        return best?.let {
+            mapOf("latitude" to it.latitude, "longitude" to it.longitude)
         }
     }
 

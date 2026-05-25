@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/message_model.dart';
+import '../../../data/models/token_model.dart';
+import '../../../data/services/auth_service.dart';
 import '../../../data/services/chat_service.dart';
 import '../../../data/services/storage_service.dart';
+import '../../../data/services/token_service.dart';
 
 part 'chat_event.dart';
 part 'chat_state.dart';
@@ -20,6 +23,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<ChatSendFile>(_onSendFile);
     on<ChatSendAudio>(_onSendAudio);
     on<ChatSendVideo>(_onSendVideo);
+    on<ChatSendLocation>(_onSendLocation);
     on<ChatDeleteMessage>(_onDeleteMessage);
     on<ChatTypingChanged>(_onTypingChanged);
     on<ChatMarkAsRead>(_onMarkAsRead);
@@ -37,9 +41,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     Emitter<ChatState> emit,
   ) async {
     emit(ChatLoading());
-
-    // Cancel old typing subscription and start a new one for this chat.
-    // Use add() so we never call emit() from outside the event handler.
     _typingSub?.cancel();
     _typingSub = ChatService.instance
         .watchTyping(event.chatId)
@@ -63,6 +64,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     ChatSendText event,
     Emitter<ChatState> emit,
   ) async {
+    if (!await _spendForChat(TokenCosts.messagePerMessage, 'رسالة نصية')) {
+      _setUploading(emit, false, error: 'رصيد التوكنز غير كاف لإرسال الرسالة');
+      return;
+    }
     await ChatService.instance.sendMessage(
       chatId: event.chatId,
       content: event.content,
@@ -84,7 +89,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       event.chatId,
     );
     if (url == null) {
-      _setUploading(emit, false, error: 'فشل رفع الصورة، تحقق من إعدادات Firebase Storage');
+      _setUploading(emit, false, error: 'فشل رفع الصورة');
+      return;
+    }
+    if (!await _spendForChat(TokenCosts.imageUpload, 'رفع صورة')) {
+      _setUploading(emit, false, error: 'رصيد التوكنز غير كاف لرفع الصورة');
       return;
     }
     await ChatService.instance.sendMessage(
@@ -104,7 +113,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     final file = File(event.filePath);
     final url = await StorageService.instance.uploadChatFile(file, event.chatId);
     if (url == null) {
-      _setUploading(emit, false, error: 'فشل رفع الملف، تحقق من إعدادات Firebase Storage');
+      _setUploading(emit, false, error: 'فشل رفع الملف');
+      return;
+    }
+    if (!await _spendForChat(TokenCosts.fileUpload, 'رفع ملف')) {
+      _setUploading(emit, false, error: 'رصيد التوكنز غير كاف لرفع الملف');
       return;
     }
     final size = await file.length();
@@ -132,6 +145,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _setUploading(emit, false, error: 'فشل رفع الصوت');
       return;
     }
+    if (!await _spendForChat(TokenCosts.audioUpload, 'رسالة صوتية')) {
+      _setUploading(emit, false, error: 'رصيد التوكنز غير كاف لإرسال الصوت');
+      return;
+    }
     await ChatService.instance.sendMessage(
       chatId: event.chatId,
       content: 'رسالة صوتية',
@@ -155,6 +172,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _setUploading(emit, false, error: 'فشل رفع الفيديو');
       return;
     }
+    if (!await _spendForChat(TokenCosts.videoUpload, 'رفع فيديو')) {
+      _setUploading(emit, false, error: 'رصيد التوكنز غير كاف لرفع الفيديو');
+      return;
+    }
     final file = File(event.filePath);
     final size = await file.length();
     await ChatService.instance.sendMessage(
@@ -166,6 +187,29 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       fileSize: size,
     );
     _setUploading(emit, false);
+  }
+
+  Future<void> _onSendLocation(
+    ChatSendLocation event,
+    Emitter<ChatState> emit,
+  ) async {
+    if (!await _spendForChat(TokenCosts.locationMessage, 'مشاركة موقع')) {
+      _setUploading(emit, false, error: 'رصيد التوكنز غير كاف لمشاركة الموقع');
+      return;
+    }
+    final mapsUrl =
+        'https://maps.google.com/?q=${event.latitude},${event.longitude}';
+    await ChatService.instance.sendMessage(
+      chatId: event.chatId,
+      content: mapsUrl,
+      type: MessageType.location,
+    );
+  }
+
+  Future<bool> _spendForChat(int amount, String description) async {
+    final uid = AuthService.instance.currentUserId;
+    if (uid == null) return false;
+    return TokenService.instance.spendTokens(uid, amount, description);
   }
 
   void _setUploading(Emitter<ChatState> emit, bool uploading, {String? error}) {

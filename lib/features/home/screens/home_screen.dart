@@ -839,8 +839,14 @@ class _PhoneContactTile extends StatelessWidget {
   Future<void> _invite(PhoneContactModel c) async {
     const msg = 'جرّب معي SwiftCall — تطبيق المكالمات والمحادثات الخاص!';
     if (c.phone != null) {
-      final uri = Uri.parse('sms:${c.phone}?body=${Uri.encodeComponent(msg)}');
-      if (await canLaunchUrl(uri)) await launchUrl(uri);
+      final uri = Uri(
+        scheme: 'sms',
+        path: c.phone,
+        queryParameters: const {'body': msg},
+      );
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
     }
   }
 }

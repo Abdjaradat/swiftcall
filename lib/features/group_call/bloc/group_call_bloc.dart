@@ -4,9 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 import '../../../data/models/group_call_model.dart';
+import '../../../data/models/token_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/livekit_service.dart';
+import '../../../data/services/token_service.dart';
 
 part 'group_call_event.dart';
 part 'group_call_state.dart';
@@ -191,6 +193,7 @@ class GroupCallBloc extends Bloc<GroupCallEvent, GroupCallState> {
     _isCreator      = false;
 
     await LiveKitService.instance.disconnect();
+    await _chargeGroupCallTokens(elapsed);
 
     if (callId != null) {
       try {
@@ -274,6 +277,18 @@ class GroupCallBloc extends Bloc<GroupCallEvent, GroupCallState> {
   Future<void> _requestPermissions(bool withVideo) async {
     await Permission.microphone.request();
     if (withVideo) await Permission.camera.request();
+  }
+
+  Future<void> _chargeGroupCallTokens(Duration elapsed) async {
+    if (elapsed.inSeconds <= 0) return;
+    final uid = AuthService.instance.currentUserId;
+    if (uid == null) return;
+    final minutes = ((elapsed.inSeconds + 59) ~/ 60).clamp(1, 999).toInt();
+    await TokenService.instance.spendTokens(
+      uid,
+      minutes * TokenCosts.groupCallPerMinute,
+      'مكالمة جماعية $minutes دقيقة',
+    );
   }
 
   @override

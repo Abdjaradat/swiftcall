@@ -125,11 +125,16 @@ class TokenWallet {
 
 class TokenCosts {
   static const int messagePerMessage = 1;
+  static const int locationMessage = 2;
+  static const int imageUpload = 3;
+  static const int audioUpload = 3;
+  static const int fileUpload = 5;
+  static const int videoUpload = 8;
   static const int voiceCallPerMinute = 5;
   static const int videoCallPerMinute = 10;
   static const int groupCallPerMinute = 15;
 
-  static const int welcomeBonus = 100;
+  static const int welcomeBonus = 300;
   static const int watchAdReward = 50;
   static const int shareReward = 30;
 }

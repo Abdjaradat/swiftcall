@@ -46,10 +46,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  String _normalizePhone(String phone) {
-    return phone.replaceAll(RegExp(r'[\s\-\(\)\+]'), '');
-  }
-
   Future<void> _onLoadContacts(
     HomeLoadContacts event,
     Emitter<HomeState> emit,
@@ -74,7 +70,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         final email =
             c.emails.isNotEmpty ? c.emails.first.address.toLowerCase() : null;
         final phone = c.phones.isNotEmpty ? c.phones.first.number : null;
-        final normalized = phone != null ? _normalizePhone(phone) : null;
+        final normalized = phone != null
+            ? AuthService.instance.normalizePhone(phone)
+            : null;
         if (normalized != null) devicePhones.add(normalized);
 
         phoneContacts.add(PhoneContactModel(
@@ -89,7 +87,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     // ── 2. App users matching device phones ────────────────────
     List<UserModel> matchedUsers = [];
     if (!permDenied && devicePhones.isNotEmpty) {
-      matchedUsers = await AuthService.instance.getUsersByPhones(devicePhones);
+      try {
+        matchedUsers = await AuthService.instance.getUsersByPhones(devicePhones);
+      } catch (_) {
+        matchedUsers = [];
+      }
     }
 
     // Exclude self and hidden contacts

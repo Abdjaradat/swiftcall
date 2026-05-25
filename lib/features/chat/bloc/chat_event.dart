@@ -49,6 +49,17 @@ class ChatSendVideo extends ChatEvent {
   ChatSendVideo({required this.chatId, required this.filePath, required this.fileName});
 }
 
+class ChatSendLocation extends ChatEvent {
+  final String chatId;
+  final double latitude;
+  final double longitude;
+  ChatSendLocation({
+    required this.chatId,
+    required this.latitude,
+    required this.longitude,
+  });
+}
+
 class ChatDeleteMessage extends ChatEvent {
   final String chatId;
   final String messageId;

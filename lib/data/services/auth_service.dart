@@ -22,6 +22,14 @@ class AuthService {
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
+  String normalizePhone(String phone) {
+    var value = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    while (value.startsWith('00')) {
+      value = value.substring(2);
+    }
+    return value;
+  }
+
   Future<UserModel?> signInWithGoogle() async {
     final googleUser = await _googleSignIn.signIn();
     if (googleUser == null) return null;
@@ -36,7 +44,10 @@ class AuthService {
     final user = userCredential.user;
     if (user == null) return null;
 
-    final fcmToken = await FirebaseMessaging.instance.getToken();
+    String? fcmToken;
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (_) {}
 
     final userModel = UserModel(
       uid: user.uid,
@@ -214,7 +225,10 @@ class AuthService {
   Future<void> updatePhoneNumber(String phone) async {
     final uid = currentUserId;
     if (uid == null) return;
-    await _db.collection('users').doc(uid).update({'phoneNumber': phone});
+    await _db.collection('users').doc(uid).set({
+      'phoneNumber': phone,
+      'normalizedPhoneNumber': normalizePhone(phone),
+    }, SetOptions(merge: true));
   }
 
   Future<void> hideContact(String otherUid) async {
@@ -243,11 +257,11 @@ class AuthService {
 
   Future<List<UserModel>> getAllUsers() async {
     final uid = currentUserId;
-    final snap = await _db
-        .collection('users')
-        .where('uid', isNotEqualTo: uid)
-        .get();
-    return snap.docs.map((d) => UserModel.fromMap(d.data())).toList();
+    final snap = await _db.collection('users').get();
+    return snap.docs
+        .map((d) => UserModel.fromMap(d.data()))
+        .where((user) => user.uid != uid)
+        .toList();
   }
 
   Future<UserModel?> getUserById(String uid) async {
@@ -258,10 +272,20 @@ class AuthService {
 
   Future<List<UserModel>> getUsersByPhones(List<String> normalizedPhones) async {
     if (normalizedPhones.isEmpty) return [];
-    final snap = await _db
-        .collection('users')
-        .where('phoneNumber', whereIn: normalizedPhones)
-        .get();
-    return snap.docs.map((d) => UserModel.fromMap(d.data())).toList();
+
+    final wanted = normalizedPhones
+        .map(normalizePhone)
+        .where((phone) => phone.length >= 7)
+        .toSet();
+    if (wanted.isEmpty) return [];
+
+    final users = await getAllUsers();
+    return users.where((user) {
+      final saved = user.normalizedPhoneNumber ??
+          (user.phoneNumber == null ? null : normalizePhone(user.phoneNumber!));
+      if (saved == null || saved.length < 7) return false;
+      return wanted.any((phone) =>
+          phone == saved || phone.endsWith(saved) || saved.endsWith(phone));
+    }).toList();
   }
 }

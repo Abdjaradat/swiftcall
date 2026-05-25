@@ -6,8 +6,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/call_model.dart';
+import '../../../data/models/token_model.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/livekit_service.dart';
+import '../../../data/services/token_service.dart';
 
 part 'call_event.dart';
 part 'call_state.dart';
@@ -233,6 +235,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
     await LiveKitService.instance.disconnect();
 
+    await _chargeCallTokens(elapsed);
+
     if (_activeCallId != null && !_skipFirestoreWrite) {
       // Determine the correct terminal status:
       //  • Call was active (remote joined)    → "ended" with elapsed duration
@@ -286,6 +290,21 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   Future<void> _requestCallPermissions(bool withVideo) async {
     await Permission.microphone.request();
     if (withVideo) await Permission.camera.request();
+  }
+
+  Future<void> _chargeCallTokens(Duration elapsed) async {
+    if (!_wasActive || elapsed.inSeconds <= 0) return;
+    final uid = AuthService.instance.currentUserId;
+    if (uid == null) return;
+    final minutes = ((elapsed.inSeconds + 59) ~/ 60).clamp(1, 999).toInt();
+    final perMinute = state is CallActive && (state as CallActive).isVideo
+        ? TokenCosts.videoCallPerMinute
+        : TokenCosts.voiceCallPerMinute;
+    await TokenService.instance.spendTokens(
+      uid,
+      minutes * perMinute,
+      'مكالمة ${perMinute == TokenCosts.videoCallPerMinute ? 'فيديو' : 'صوت'} $minutes دقيقة',
+    );
   }
 
   void _startSession(Emitter<CallState> emit, bool isVideo, String roomName) {

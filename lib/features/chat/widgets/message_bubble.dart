@@ -65,6 +65,8 @@ class MessageBubble extends StatelessWidget {
         return _AudioBubble(message: message, isMine: isMine);
       case MessageType.file:
         return _FileBubble(message: message, isMine: isMine);
+      case MessageType.location:
+        return _LocationBubble(message: message, isMine: isMine);
       default:
         return _TextBubble(message: message, isMine: isMine);
     }
@@ -390,6 +392,68 @@ class _FileBubble extends StatelessWidget {
     if (bytes < 1024) return '${bytes}B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)}KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)}MB';
+  }
+}
+
+class _LocationBubble extends StatelessWidget {
+  final MessageModel message;
+  final bool isMine;
+  const _LocationBubble({required this.message, required this.isMine});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        final uri = Uri.parse(message.content);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        width: 230,
+        decoration: BoxDecoration(
+          color: isMine ? AppColors.sentBubble : AppColors.receivedBubble,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.16),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.location_on_rounded, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'موقع جغرافي',
+                    style: GoogleFonts.cairo(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    'اضغط للفتح على الخريطة',
+                    style: GoogleFonts.cairo(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

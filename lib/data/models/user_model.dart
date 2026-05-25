@@ -10,6 +10,7 @@ class UserModel {
   final String? fcmToken;
   final String? status;
   final String? phoneNumber;
+  final String? normalizedPhoneNumber;
   final List<String> hiddenContacts;
 
   const UserModel({
@@ -22,6 +23,7 @@ class UserModel {
     this.fcmToken,
     this.status,
     this.phoneNumber,
+    this.normalizedPhoneNumber,
     this.hiddenContacts = const [],
   });
 
@@ -36,6 +38,7 @@ class UserModel {
       fcmToken: map['fcmToken'] as String?,
       status: map['status'] as String?,
       phoneNumber: map['phoneNumber'] as String?,
+      normalizedPhoneNumber: map['normalizedPhoneNumber'] as String?,
       hiddenContacts: map['hiddenContacts'] != null
           ? List<String>.from(map['hiddenContacts'] as List)
           : const [],
@@ -53,6 +56,7 @@ class UserModel {
       'fcmToken': fcmToken,
       'status': status,
       'phoneNumber': phoneNumber,
+      'normalizedPhoneNumber': normalizedPhoneNumber,
       'hiddenContacts': hiddenContacts,
     };
   }
@@ -67,6 +71,7 @@ class UserModel {
     String? fcmToken,
     String? status,
     String? phoneNumber,
+    String? normalizedPhoneNumber,
     List<String>? hiddenContacts,
   }) {
     return UserModel(
@@ -79,6 +84,8 @@ class UserModel {
       fcmToken: fcmToken ?? this.fcmToken,
       status: status ?? this.status,
       phoneNumber: phoneNumber ?? this.phoneNumber,
+      normalizedPhoneNumber:
+          normalizedPhoneNumber ?? this.normalizedPhoneNumber,
       hiddenContacts: hiddenContacts ?? this.hiddenContacts,
     );
   }

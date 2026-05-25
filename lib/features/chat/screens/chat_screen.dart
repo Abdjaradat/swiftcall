@@ -5,10 +5,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart' hide Config;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/router/app_router.dart';
@@ -34,6 +36,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final _scrollCtrl = ScrollController();
   final _recorder = AudioRecorder();
   final _imagePicker = ImagePicker();
+  static const _nativeChannel = MethodChannel('com.swiftcall.app/call_manager');
 
   bool _showEmoji = false;
   bool _isRecording = false;
@@ -264,7 +267,7 @@ class _ChatScreenState extends State<ChatScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _AttachOption(icon: '📁', label: 'ملف', onTap: () { Navigator.pop(ctx); _pickFile(); }),
-                _AttachOption(icon: '👤', label: 'جهة اتصال', onTap: () { Navigator.pop(ctx); _pickContact(); }),
+                _AttachOption(icon: '📍', label: 'موقع', onTap: () { Navigator.pop(ctx); _shareLocation(); }),
                 _AttachOption(icon: '🎤', label: 'تسجيل', onTap: () { Navigator.pop(ctx); _toggleRecording(); }),
               ],
             ),
@@ -321,6 +324,58 @@ class _ChatScreenState extends State<ChatScreen> {
       filePath: file.path!,
       fileName: file.name,
     ));
+  }
+
+  Future<void> _shareLocation() async {
+    if (_resolvedChatId == null) return;
+    final status = await Permission.locationWhenInUse.request();
+    if (!status.isGranted) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'يلزم السماح بالموقع لمشاركته',
+            style: GoogleFonts.cairo(),
+          ),
+          backgroundColor: Colors.orange.shade700,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    Map<dynamic, dynamic>? result;
+    try {
+      result = await _nativeChannel.invokeMethod<Map<dynamic, dynamic>?>(
+        'getLastKnownLocation',
+      );
+    } catch (_) {
+      result = null;
+    }
+    final lat = (result?['latitude'] as num?)?.toDouble();
+    final lng = (result?['longitude'] as num?)?.toDouble();
+    if (lat == null || lng == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'لم نتمكن من تحديد الموقع حالياً',
+            style: GoogleFonts.cairo(),
+          ),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    context.read<ChatBloc>().add(
+          ChatSendLocation(
+            chatId: _resolvedChatId!,
+            latitude: lat,
+            longitude: lng,
+          ),
+        );
   }
 
   DateTime? _recordingStartedAt;

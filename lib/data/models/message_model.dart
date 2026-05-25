@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum MessageType { text, image, video, audio, file, call }
+enum MessageType { text, image, video, audio, file, call, location }
 
 String _typeToStr(MessageType t) {
   switch (t) {
@@ -10,6 +10,7 @@ String _typeToStr(MessageType t) {
     case MessageType.audio: return 'audio';
     case MessageType.file:  return 'file';
     case MessageType.call:  return 'call';
+    case MessageType.location: return 'location';
   }
 }
 
@@ -20,6 +21,7 @@ MessageType _typeFromStr(String? s) {
     case 'audio': return MessageType.audio;
     case 'file':  return MessageType.file;
     case 'call':  return MessageType.call;
+    case 'location': return MessageType.location;
     default:      return MessageType.text;
   }
 }

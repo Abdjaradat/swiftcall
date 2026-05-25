@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/services/ad_service.dart';
@@ -130,6 +131,8 @@ class _WalletScreenState extends State<WalletScreen>
         children: [
           _buildBalanceCard(state.wallet),
           const SizedBox(height: 20),
+          _buildBannerAd(),
+          const SizedBox(height: 20),
           _buildEarnSection(state.wallet),
           const SizedBox(height: 20),
           _buildCostsSection(),
@@ -216,6 +219,22 @@ class _WalletScreenState extends State<WalletScreen>
     );
   }
 
+  Widget _buildBannerAd() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        height: 50,
+        color: AppColors.surface,
+        alignment: Alignment.center,
+        child: UnityBannerAd(
+          placementId: AdService.bannerPlacementId,
+          onLoad: (_) {},
+          onFailed: (_, __, ___) {},
+        ),
+      ),
+    );
+  }
+
   Widget _earnCard({
     required String icon,
     required String title,
@@ -277,6 +296,10 @@ class _WalletScreenState extends State<WalletScreen>
           child: Column(
             children: [
               _costRow('💬', 'رسالة نصية', '${TokenCosts.messagePerMessage} توكن', isFirst: true),
+              _costRow('📍', 'مشاركة موقع', '${TokenCosts.locationMessage} توكن'),
+              _costRow('🖼️', 'رفع صورة', '${TokenCosts.imageUpload} توكن'),
+              _costRow('📎', 'رفع ملف', '${TokenCosts.fileUpload} توكن'),
+              _costRow('🎥', 'رفع فيديو', '${TokenCosts.videoUpload} توكن'),
               _costRow('📞', 'مكالمة صوتية', '${TokenCosts.voiceCallPerMinute} توكن/دقيقة'),
               _costRow('📹', 'مكالمة فيديو', '${TokenCosts.videoCallPerMinute} توكن/دقيقة'),
               _costRow('👥', 'مكالمة جماعية', '${TokenCosts.groupCallPerMinute} توكن/دقيقة', isLast: true),
@@ -571,8 +594,7 @@ class _WalletScreenState extends State<WalletScreen>
                   onTap: () async {
                     Navigator.pop(ctx);
                     final result = await Share.share(shareText, subject: appName);
-                    if (result.status == ShareResultStatus.success ||
-                        result.status == ShareResultStatus.dismissed) {
+                    if (result.status == ShareResultStatus.success) {
                       _awardShareToken();
                     }
                   },
