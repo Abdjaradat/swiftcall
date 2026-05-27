@@ -34,7 +34,7 @@ jobs:
         run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35"
 
       - name: Verify keystore exists
-        run: ls -la android/app/ci-debug.keystore
+        run: ls -la android/app/ci-debug-key
 
       - name: Install Flutter dependencies
         run: flutter pub get

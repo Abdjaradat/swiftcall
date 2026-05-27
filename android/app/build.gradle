@@ -22,7 +22,7 @@ android {
 
     signingConfigs {
         release {
-            def ciKeystore = rootProject.file('app/ci-debug.keystore')
+            def ciKeystore = rootProject.file('app/ci-debug-key')
             if (ciKeystore.exists()) {
                 storeFile     ciKeystore
             } else {
