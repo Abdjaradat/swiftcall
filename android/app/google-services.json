@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1082599622155-dqh5hhslt8bm0mf65bqgug099j5mn4ra.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.swiftcall.app",
+            "certificate_hash": "507dd74e0794708369d84dd986ee51bec52f6328"
+          }
+        },
+        {
           "client_id": "1082599622155-ju4j3s6ot70ifjtfbnjo0233ik1p7b9t.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -71,6 +79,14 @@
           "android_info": {
             "package_name": "com.webrtc.app",
             "certificate_hash": "647e89395639f6925f052724684a1166ea3bb4bb"
+          }
+        },
+        {
+          "client_id": "1082599622155-1jnjvsk131mc44jl72g8u3scfrvjro8r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.webrtc.app",
+            "certificate_hash": "507dd74e0794708369d84dd986ee51bec52f6328"
           }
         },
         {
