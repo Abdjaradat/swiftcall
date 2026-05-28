@@ -120,9 +120,8 @@ class _TermsContent extends StatelessWidget {
 class _PrivacyContent extends StatelessWidget {
   const _PrivacyContent();
 
-  // Replace with your hosted URL once the HTML is deployed
   static const _fullPolicyUrl =
-      'https://jaradatabdullah122.github.io/swiftcall/privacy_policy.html';
+      'https://abdjaradat.github.io/swiftcall/privacy_policy.html';
 
   Future<void> _openFullPolicy() async {
     final uri = Uri.parse(_fullPolicyUrl);
