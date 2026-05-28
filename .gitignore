@@ -57,3 +57,9 @@ functions/.runtimeconfig.json
 /ios/Flutter/Generated.xcconfig
 /ios/Flutter/flutter_export_environment.sh
 .aider*
+
+# Release signing — never commit these
+swiftcall.jks
+*.jks
+*.keystore
+android/key.properties
