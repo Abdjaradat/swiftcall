@@ -31,6 +31,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   /// True once the remote participant joins LiveKit and the call goes active.
   bool _wasActive = false;
 
+  /// Stored at session start so token charging works correctly after the
+  /// BLoC emits CallEnded (at which point state.isVideo is unavailable).
+  bool _isVideo = false;
+
   /// True when the remote side already wrote a terminal status (rejected /
   /// missed).  Prevents _onEnd from overwriting it with "cancelled"/"ended".
   bool _skipFirestoreWrite = false;
@@ -255,6 +259,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     final reason    = _endReason;
     _activeCallId   = null;
     _wasActive      = false;
+    _isVideo        = false;
     _skipFirestoreWrite = false;
     _endReason      = CallEndReason.normal;
 
@@ -297,13 +302,14 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     final uid = AuthService.instance.currentUserId;
     if (uid == null) return;
     final minutes = ((elapsed.inSeconds + 59) ~/ 60).clamp(1, 999).toInt();
-    final perMinute = state is CallActive && (state as CallActive).isVideo
+    // Use the stored _isVideo flag — state may already be CallEnded by this point.
+    final perMinute = _isVideo
         ? TokenCosts.videoCallPerMinute
         : TokenCosts.voiceCallPerMinute;
     await TokenService.instance.spendTokens(
       uid,
       minutes * perMinute,
-      'مكالمة ${perMinute == TokenCosts.videoCallPerMinute ? 'فيديو' : 'صوت'} $minutes دقيقة',
+      'مكالمة ${_isVideo ? 'فيديو' : 'صوت'} $minutes دقيقة',
     );
   }
 
@@ -312,6 +318,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     _ringTimer?.cancel();
     _ringTimer = null;
     _wasActive = true;
+    _isVideo = isVideo;
 
     LiveKitService.instance.enableSpeaker(isVideo);
     _elapsed = Duration.zero;

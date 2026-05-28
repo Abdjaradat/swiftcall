@@ -83,23 +83,24 @@ class NetworkBypassService {
   ProxyConfig? get activeProxy => _activeProxy;
   bool get isEnabled => _activeProxy != null;
 
+  // TURN credentials should be fetched from a server-side endpoint in production
+  // rather than being hardcoded here.  Use --dart-define to override at build time.
+  static const _turnUser = String.fromEnvironment(
+    'TURN_USER', defaultValue: 'openrelayproject');
+  static const _turnCred = String.fromEnvironment(
+    'TURN_CREDENTIAL', defaultValue: 'openrelayproject');
+
   List<Map<String, dynamic>> get iceServers => [
     {'urls': 'stun:stun.l.google.com:19302'},
     {'urls': 'stun:stun1.l.google.com:19302'},
-    {'urls': 'stun:stun2.l.google.com:19302'},
     {
       'urls': [
         'turn:openrelay.metered.ca:80',
         'turn:openrelay.metered.ca:443',
         'turn:openrelay.metered.ca:443?transport=tcp',
       ],
-      'username': 'openrelayproject',
-      'credential': 'openrelayproject',
-    },
-    {
-      'urls': 'turn:relay.metered.ca:80',
-      'username': 'e9b4b7e4b1a61f0b',
-      'credential': 'SwiftCall',
+      'username': _turnUser,
+      'credential': _turnCred,
     },
   ];
 

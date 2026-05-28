@@ -12,7 +12,11 @@ class StorageService {
   static final StorageService _instance = StorageService._();
   StorageService._();
 
-  String get _uid => FirebaseAuth.instance.currentUser!.uid;
+  String get _uid {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    assert(uid != null, 'StorageService used while unauthenticated');
+    return uid ?? '';
+  }
 
   Future<String?> uploadProfileImage(File file) async {
     return _upload(

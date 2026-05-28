@@ -24,7 +24,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeLoadChats event,
     Emitter<HomeState> emit,
   ) async {
-    emit(HomeLoading());
+    // Only show loading spinner on first load (no existing chats yet).
+    if (state is! HomeLoaded) emit(HomeLoading());
     await emit.forEach<List<ChatModel>>(
       ChatService.instance.watchChats(),
       onData: (chats) {
@@ -33,6 +34,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           chats: chats,
           contacts: current?.contacts ?? [],
           myUid: current?.myUid ?? '',
+          searchQuery: current?.searchQuery ?? '',
         );
       },
       onError: (_, __) => HomeError('فشل تحميل المحادثات'),
@@ -40,6 +42,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   void _onSearchChanged(HomeSearchChanged event, Emitter<HomeState> emit) {
+    if (state is HomeLoaded) {
+      emit((state as HomeLoaded).copyWith(searchQuery: event.query));
+    }
   }
 
   Future<void> _onLoadUsers(

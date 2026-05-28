@@ -35,7 +35,14 @@ class AppConstants {
   static const int maxImageSizeMB        = 10;
   static const int maxFileSizeMB         = 50;
 
-  // Encryption key (replace with secure key management in production)
-  static const String encryptionKey      = 'SwiftCall@2025!#SecureKey32Bytes';
-  static const String encryptionIV       = 'SwiftCallIV16B!!';
+  // Override in production via:
+  //   flutter build apk --dart-define=ENCRYPTION_KEY=... --dart-define=ENCRYPTION_IV=...
+  static const String encryptionKey = String.fromEnvironment(
+    'ENCRYPTION_KEY',
+    defaultValue: 'SwiftCall@2025!#SecureKey32Bytes',
+  );
+  static const String encryptionIV = String.fromEnvironment(
+    'ENCRYPTION_IV',
+    defaultValue: 'SwiftCallIV16B!!',
+  );
 }

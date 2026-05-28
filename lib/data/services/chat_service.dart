@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
+import '../models/user_model.dart';
 import 'auth_service.dart';
 
 class ChatService {
@@ -11,7 +12,14 @@ class ChatService {
   static final ChatService _instance = ChatService._();
   ChatService._();
 
-  String get _myUid => FirebaseAuth.instance.currentUser!.uid;
+  // In-memory cache: uid → UserModel to avoid N+1 Firestore reads per snapshot.
+  final Map<String, UserModel> _userCache = {};
+
+  String get _myUid {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    assert(uid != null, 'ChatService used while unauthenticated');
+    return uid ?? '';
+  }
 
   // ── Chats ──────────────────────────────────────────────
 
@@ -22,6 +30,27 @@ class ChatService {
         .where('participantIds', arrayContains: _myUid)
         .snapshots()
         .asyncMap((snap) async {
+      // Collect UIDs not yet cached so we can batch-fetch them.
+      final missingUids = <String>{};
+      for (final doc in snap.docs) {
+        final ids = List<String>.from(
+            doc.data()['participantIds'] as List? ?? []);
+        final otherUid = ids.firstWhere((id) => id != _myUid, orElse: () => '');
+        if (otherUid.isNotEmpty && !_userCache.containsKey(otherUid)) {
+          missingUids.add(otherUid);
+        }
+      }
+
+      // Fetch missing users in parallel.
+      if (missingUids.isNotEmpty) {
+        final fetched = await Future.wait(
+          missingUids.map((uid) => AuthService.instance.getUserById(uid)),
+        );
+        for (final user in fetched) {
+          if (user != null) _userCache[user.uid] = user;
+        }
+      }
+
       final chats = <ChatModel>[];
       for (final doc in snap.docs) {
         var chat = ChatModel.fromMap(doc.data(), doc.id);
@@ -30,8 +59,7 @@ class ChatService {
           orElse: () => '',
         );
         if (otherUid.isNotEmpty) {
-          final user = await AuthService.instance.getUserById(otherUid);
-          chat = chat.copyWith(otherUser: user);
+          chat = chat.copyWith(otherUser: _userCache[otherUid]);
         }
         chats.add(chat);
       }

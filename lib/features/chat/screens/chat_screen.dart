@@ -55,12 +55,11 @@ class _ChatScreenState extends State<ChatScreen> {
       final otherUid = chatId.replaceFirst('new_', '');
       chatId = await ChatService.instance.getOrCreateChat(otherUid);
     }
+    if (!mounted) return;
     setState(() => _resolvedChatId = chatId);
-    if (mounted) {
-      context.read<ChatBloc>()
-        ..add(ChatLoadMessages(chatId))
-        ..add(ChatMarkAsRead(chatId));
-    }
+    context.read<ChatBloc>()
+      ..add(ChatLoadMessages(chatId))
+      ..add(ChatMarkAsRead(chatId));
   }
 
   @override
@@ -279,19 +278,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _pickImage() async {
     final xFile = await _imagePicker.pickImage(source: ImageSource.gallery);
-    if (xFile == null || _resolvedChatId == null) return;
+    if (!mounted || xFile == null || _resolvedChatId == null) return;
     context.read<ChatBloc>().add(ChatSendImage(chatId: _resolvedChatId!, filePath: xFile.path));
   }
 
   Future<void> _takePhoto() async {
     final xFile = await _imagePicker.pickImage(source: ImageSource.camera);
-    if (xFile == null || _resolvedChatId == null) return;
+    if (!mounted || xFile == null || _resolvedChatId == null) return;
     context.read<ChatBloc>().add(ChatSendImage(chatId: _resolvedChatId!, filePath: xFile.path));
   }
 
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles();
-    if (result == null || _resolvedChatId == null) return;
+    if (!mounted || result == null || _resolvedChatId == null) return;
     final file = result.files.first;
     if (file.path == null) return;
     context.read<ChatBloc>().add(ChatSendFile(
@@ -303,7 +302,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _pickVideo() async {
     final xFile = await _imagePicker.pickVideo(source: ImageSource.gallery);
-    if (xFile == null || _resolvedChatId == null) return;
+    if (!mounted || xFile == null || _resolvedChatId == null) return;
     context.read<ChatBloc>().add(ChatSendVideo(
       chatId: _resolvedChatId!,
       filePath: xFile.path,
@@ -354,6 +353,7 @@ class _ChatScreenState extends State<ChatScreen> {
       return;
     }
 
+    if (!mounted) return;
     context.read<ChatBloc>().add(
           ChatSendLocation(
             chatId: _resolvedChatId!,
@@ -373,7 +373,7 @@ class _ChatScreenState extends State<ChatScreen> {
           : 0;
       _recordingStartedAt = null;
       setState(() => _isRecording = false);
-      if (path != null && _resolvedChatId != null) {
+      if (mounted && path != null && _resolvedChatId != null) {
         context.read<ChatBloc>().add(ChatSendAudio(
           chatId: _resolvedChatId!,
           filePath: path,

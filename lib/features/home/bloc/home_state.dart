@@ -9,32 +9,41 @@ class HomeLoaded extends HomeState {
   final List<ChatModel> chats;
   final List<UserModel> contacts;
   final String myUid;
+  final String searchQuery;
 
   HomeLoaded({
     required this.chats,
     this.contacts = const [],
     this.myUid = '',
+    this.searchQuery = '',
   });
 
   List<ChatModel> get filteredChats {
     if (searchQuery.isEmpty) return chats;
+    final q = searchQuery.toLowerCase();
     return chats.where((c) {
       final name = c.otherUser?.name.toLowerCase() ?? '';
-      return name.contains(searchQuery.toLowerCase());
+      return name.contains(q);
     }).toList();
   }
 
-  String get searchQuery => '';
+  List<UserModel> get filteredContacts {
+    if (searchQuery.isEmpty) return contacts;
+    final q = searchQuery.toLowerCase();
+    return contacts.where((u) => u.name.toLowerCase().contains(q)).toList();
+  }
 
   HomeLoaded copyWith({
     List<ChatModel>? chats,
     List<UserModel>? contacts,
     String? myUid,
+    String? searchQuery,
   }) {
     return HomeLoaded(
       chats: chats ?? this.chats,
       contacts: contacts ?? this.contacts,
       myUid: myUid ?? this.myUid,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 }

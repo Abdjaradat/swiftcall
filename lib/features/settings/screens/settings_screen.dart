@@ -441,11 +441,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       type: type,
                     );
                     await NetworkBypassService.instance.saveConfig(config);
-                    if (mounted) {
-                      Navigator.pop(ctx);
-                      setState(() => _proxyEnabled = true);
-                      _testConnection();
-                    }
+                    if (!ctx.mounted) return;
+                    Navigator.pop(ctx);
+                    if (!mounted) return;
+                    setState(() => _proxyEnabled = true);
+                    _testConnection();
                   },
                   child: Text('حفظ وتفعيل',
                       style: GoogleFonts.cairo(

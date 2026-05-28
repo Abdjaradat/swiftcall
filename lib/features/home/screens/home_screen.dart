@@ -563,7 +563,7 @@ class _ContactsTab extends StatelessWidget {
         }
         if (state is! HomeLoaded) return const SizedBox();
 
-        final users = state.contacts;
+        final users = state.filteredContacts;
         if (users.isEmpty) return _EmptyContacts();
 
         return ListView.builder(
@@ -584,9 +584,13 @@ class _UserTile extends StatelessWidget {
   final String myUid;
   const _UserTile({required this.user, required this.myUid});
 
-  bool get isContact => user.contacts.contains(myUid);
-  bool get hasIncoming => user.incomingRequests.contains(myUid);
-  bool get hasOutgoing => user.outgoingRequests.contains(myUid);
+  // `user` is the OTHER person's Firestore document, so:
+  // • user.contacts contains myUid       → bidirectional friendship confirmed
+  // • user.outgoingRequests contains myUid → they sent ME a request (my incoming)
+  // • user.incomingRequests contains myUid → I sent THEM a request (my outgoing)
+  bool get isContact   => user.contacts.contains(myUid);
+  bool get hasIncoming => user.outgoingRequests.contains(myUid);
+  bool get hasOutgoing => user.incomingRequests.contains(myUid);
 
   @override
   Widget build(BuildContext context) {
@@ -782,11 +786,25 @@ class _NewChatSheet extends StatelessWidget {
             child: BlocBuilder<HomeBloc, HomeState>(
               builder: (_, state) {
                 if (state is! HomeLoaded) return const Center(child: CircularProgressIndicator());
+                // Show only accepted friends in the new-chat sheet.
+                final myUid = state.myUid;
+                final friends = state.contacts
+                    .where((u) => u.contacts.contains(myUid))
+                    .toList();
+                if (friends.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'أضف أصدقاء أولاً من تبويب "جهات الاتصال"',
+                      style: GoogleFonts.cairo(color: AppColors.textHint, fontSize: 13),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
                 return ListView.builder(
                   controller: ctrl,
-                  itemCount: state.contacts.length,
+                  itemCount: friends.length,
                   itemBuilder: (ctx, i) {
-                    final user = state.contacts[i];
+                    final user = friends[i];
                     return ListTile(
                       leading: CircleAvatar(
                         backgroundColor: AppColors.card,

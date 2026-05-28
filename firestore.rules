@@ -26,15 +26,18 @@ service cloud.firestore {
       }
     }
 
-    // Calls: caller or receiver can read/write
+    // Calls: caller or receiver can read/update; only caller can create; nobody can delete
     match /calls/{callId} {
-      allow read, write: if request.auth != null
+      allow read: if request.auth != null
         && (request.auth.uid == resource.data.callerId
             || request.auth.uid == resource.data.receiverId);
 
       allow create: if request.auth != null
-        && (request.auth.uid == request.resource.data.callerId
-            || request.auth.uid == request.resource.data.receiverId);
+        && request.auth.uid == request.resource.data.callerId;
+
+      allow update: if request.auth != null
+        && (request.auth.uid == resource.data.callerId
+            || request.auth.uid == resource.data.receiverId);
     }
 
     // Group calls: any participant can read/write

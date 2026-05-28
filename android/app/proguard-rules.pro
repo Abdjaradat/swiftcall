@@ -52,5 +52,24 @@
 -keepattributes SourceFile,LineNumberTable
 -keepattributes Exceptions,InnerClasses
 
+# ─── Unity Ads ────────────────────────────────────────────────────────────────
+-keep class com.unity3d.ads.** { *; }
+-keep class com.unity3d.services.** { *; }
+-dontwarn com.unity3d.**
+
+# ─── Gson (used by Firebase & LiveKit internals) ──────────────────────────────
+-keepattributes *Annotation*
+-keep class com.google.gson.** { *; }
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# ─── Dio / OkHttp (used for LiveKit token requests) ──────────────────────────
+-keep class com.squareup.okhttp3.** { *; }
+-dontwarn com.squareup.okhttp3.**
+
 # ─── R8 full-mode compatibility ───────────────────────────────────────────────
 -allowaccessmodification

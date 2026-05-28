@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 
@@ -67,35 +68,31 @@ class AdService {
 
     if (!_rewardedLoaded) {
       _loadRewarded();
-      for (var i = 0; i < 15; i++) {
+      // Wait up to 3 s for the ad to load before giving up.
+      for (var i = 0; i < 15 && !_rewardedLoaded; i++) {
         await Future.delayed(const Duration(milliseconds: 200));
-        if (_rewardedLoaded) break;
       }
       if (!_rewardedLoaded) return false;
     }
 
-    bool? result;
+    final completer = Completer<bool>();
     UnityAds.showVideoAd(
       placementId: _placementRewarded,
       onComplete: (String _) {
-        result = true;
         _rewardedLoaded = false;
         _loadRewarded();
+        if (!completer.isCompleted) completer.complete(true);
       },
       onFailed: (String _, UnityAdsShowError __, String ___) {
-        result = false;
         _loadRewarded();
+        if (!completer.isCompleted) completer.complete(false);
       },
       onSkipped: (String _) {
-        result = false;
         _loadRewarded();
+        if (!completer.isCompleted) completer.complete(false);
       },
     );
-
-    while (result == null) {
-      await Future.delayed(const Duration(milliseconds: 200));
-    }
-    return result!;
+    return completer.future;
   }
 
   // ── Interstitial — يظهر بعد المكالمات تلقائياً ────────────────────────────
@@ -104,33 +101,29 @@ class AdService {
 
     if (!_interstitialLoaded) {
       _loadInterstitial();
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < 10 && !_interstitialLoaded; i++) {
         await Future.delayed(const Duration(milliseconds: 200));
-        if (_interstitialLoaded) break;
       }
       if (!_interstitialLoaded) return;
     }
 
-    bool done = false;
+    final completer = Completer<void>();
     UnityAds.showVideoAd(
       placementId: _placementInterstitial,
       onComplete: (String _) {
-        done = true;
         _interstitialLoaded = false;
         _loadInterstitial();
+        if (!completer.isCompleted) completer.complete();
       },
       onFailed: (String _, UnityAdsShowError __, String ___) {
-        done = true;
         _loadInterstitial();
+        if (!completer.isCompleted) completer.complete();
       },
       onSkipped: (String _) {
-        done = true;
         _loadInterstitial();
+        if (!completer.isCompleted) completer.complete();
       },
     );
-
-    while (!done) {
-      await Future.delayed(const Duration(milliseconds: 200));
-    }
+    return completer.future;
   }
 }
