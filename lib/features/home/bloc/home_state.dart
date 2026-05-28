@@ -8,16 +8,12 @@ class HomeLoading extends HomeState {}
 class HomeLoaded extends HomeState {
   final List<ChatModel> chats;
   final List<UserModel> contacts;
-  final List<PhoneContactModel> phoneContacts;
-  final bool contactsPermissionDenied;
-  final String searchQuery;
+  final String myUid;
 
   HomeLoaded({
     required this.chats,
     this.contacts = const [],
-    this.phoneContacts = const [],
-    this.contactsPermissionDenied = false,
-    this.searchQuery = '',
+    this.myUid = '',
   });
 
   List<ChatModel> get filteredChats {
@@ -28,20 +24,17 @@ class HomeLoaded extends HomeState {
     }).toList();
   }
 
+  String get searchQuery => '';
+
   HomeLoaded copyWith({
     List<ChatModel>? chats,
     List<UserModel>? contacts,
-    List<PhoneContactModel>? phoneContacts,
-    bool? contactsPermissionDenied,
-    String? searchQuery,
+    String? myUid,
   }) {
     return HomeLoaded(
       chats: chats ?? this.chats,
       contacts: contacts ?? this.contacts,
-      phoneContacts: phoneContacts ?? this.phoneContacts,
-      contactsPermissionDenied:
-          contactsPermissionDenied ?? this.contactsPermissionDenied,
-      searchQuery: searchQuery ?? this.searchQuery,
+      myUid: myUid ?? this.myUid,
     );
   }
 }

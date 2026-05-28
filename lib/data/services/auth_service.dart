@@ -22,14 +22,6 @@ class AuthService {
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  String normalizePhone(String phone) {
-    var value = phone.replaceAll(RegExp(r'[^0-9]'), '');
-    while (value.startsWith('00')) {
-      value = value.substring(2);
-    }
-    return value;
-  }
-
   Future<UserModel?> signInWithGoogle() async {
     final googleUser = await _googleSignIn.signIn();
     if (googleUser == null) return null;
@@ -227,24 +219,74 @@ class AuthService {
     if (uid == null) return;
     await _db.collection('users').doc(uid).set({
       'phoneNumber': phone,
-      'normalizedPhoneNumber': normalizePhone(phone),
     }, SetOptions(merge: true));
   }
 
-  Future<void> hideContact(String otherUid) async {
+  Future<void> sendFriendRequest(String targetUid) async {
     final uid = currentUserId;
     if (uid == null) return;
-    await _db.collection('users').doc(uid).update({
-      'hiddenContacts': FieldValue.arrayUnion([otherUid]),
+    final batch = _db.batch();
+    batch.update(_db.collection('users').doc(uid), {
+      'outgoingRequests': FieldValue.arrayUnion([targetUid]),
     });
+    batch.update(_db.collection('users').doc(targetUid), {
+      'incomingRequests': FieldValue.arrayUnion([uid]),
+    });
+    await batch.commit();
   }
 
-  Future<void> unhideContact(String otherUid) async {
+  Future<void> acceptFriendRequest(String requesterUid) async {
     final uid = currentUserId;
     if (uid == null) return;
-    await _db.collection('users').doc(uid).update({
-      'hiddenContacts': FieldValue.arrayRemove([otherUid]),
+    final batch = _db.batch();
+    batch.update(_db.collection('users').doc(uid), {
+      'contacts': FieldValue.arrayUnion([requesterUid]),
+      'incomingRequests': FieldValue.arrayRemove([requesterUid]),
     });
+    batch.update(_db.collection('users').doc(requesterUid), {
+      'contacts': FieldValue.arrayUnion([uid]),
+      'outgoingRequests': FieldValue.arrayRemove([uid]),
+    });
+    await batch.commit();
+  }
+
+  Future<void> rejectFriendRequest(String requesterUid) async {
+    final uid = currentUserId;
+    if (uid == null) return;
+    final batch = _db.batch();
+    batch.update(_db.collection('users').doc(uid), {
+      'incomingRequests': FieldValue.arrayRemove([requesterUid]),
+    });
+    batch.update(_db.collection('users').doc(requesterUid), {
+      'outgoingRequests': FieldValue.arrayRemove([uid]),
+    });
+    await batch.commit();
+  }
+
+  Future<void> cancelFriendRequest(String targetUid) async {
+    final uid = currentUserId;
+    if (uid == null) return;
+    final batch = _db.batch();
+    batch.update(_db.collection('users').doc(uid), {
+      'outgoingRequests': FieldValue.arrayRemove([targetUid]),
+    });
+    batch.update(_db.collection('users').doc(targetUid), {
+      'incomingRequests': FieldValue.arrayRemove([uid]),
+    });
+    await batch.commit();
+  }
+
+  Future<void> removeFriend(String targetUid) async {
+    final uid = currentUserId;
+    if (uid == null) return;
+    final batch = _db.batch();
+    batch.update(_db.collection('users').doc(uid), {
+      'contacts': FieldValue.arrayRemove([targetUid]),
+    });
+    batch.update(_db.collection('users').doc(targetUid), {
+      'contacts': FieldValue.arrayRemove([uid]),
+    });
+    await batch.commit();
   }
 
   Stream<UserModel?> watchUser(String uid) {
@@ -253,6 +295,14 @@ class AuthService {
         .doc(uid)
         .snapshots()
         .map((doc) => doc.exists ? UserModel.fromMap(doc.data()!) : null);
+  }
+
+  Future<List<UserModel>> getUsersExcluding(List<String> excludeUids) async {
+    final snap = await _db.collection('users').get();
+    return snap.docs
+        .map((d) => UserModel.fromMap(d.data()))
+        .where((user) => !excludeUids.contains(user.uid))
+        .toList();
   }
 
   Future<List<UserModel>> getAllUsers() async {
@@ -268,24 +318,5 @@ class AuthService {
     final doc = await _db.collection('users').doc(uid).get();
     if (!doc.exists) return null;
     return UserModel.fromMap(doc.data()!);
-  }
-
-  Future<List<UserModel>> getUsersByPhones(List<String> normalizedPhones) async {
-    if (normalizedPhones.isEmpty) return [];
-
-    final wanted = normalizedPhones
-        .map(normalizePhone)
-        .where((phone) => phone.length >= 7)
-        .toSet();
-    if (wanted.isEmpty) return [];
-
-    final users = await getAllUsers();
-    return users.where((user) {
-      final saved = user.normalizedPhoneNumber ??
-          (user.phoneNumber == null ? null : normalizePhone(user.phoneNumber!));
-      if (saved == null || saved.length < 7) return false;
-      return wanted.any((phone) =>
-          phone == saved || phone.endsWith(saved) || saved.endsWith(phone));
-    }).toList();
   }
 }

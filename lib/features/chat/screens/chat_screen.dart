@@ -311,21 +311,6 @@ class _ChatScreenState extends State<ChatScreen> {
     ));
   }
 
-  Future<void> _pickContact() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['vcf'],
-    );
-    if (result == null || _resolvedChatId == null) return;
-    final file = result.files.first;
-    if (file.path == null) return;
-    context.read<ChatBloc>().add(ChatSendFile(
-      chatId: _resolvedChatId!,
-      filePath: file.path!,
-      fileName: file.name,
-    ));
-  }
-
   Future<void> _shareLocation() async {
     if (_resolvedChatId == null) return;
     final status = await Permission.locationWhenInUse.request();

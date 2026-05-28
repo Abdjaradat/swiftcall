@@ -5,6 +5,7 @@ import 'auth_notifier.dart';
 import '../../data/models/call_model.dart';
 import '../../data/models/group_call_model.dart';
 import '../../data/models/user_model.dart';
+import '../../features/admin/screens/admin_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/call/screens/incoming_call_screen.dart';
 import '../../features/call/screens/video_call_screen.dart';
@@ -32,6 +33,7 @@ class AppRouter {
   static const String createGroupCall   = '/create-group-call';
   static const String settings          = '/settings';
   static const String wallet            = '/wallet';
+  static const String admin             = '/admin';
   static const String terms             = '/terms';
   static const String privacy           = '/privacy';
 
@@ -114,6 +116,7 @@ class AppRouter {
 
         GoRoute(path: settings, builder: (_, __) => const SettingsScreen()),
         GoRoute(path: wallet,   builder: (_, __) => const WalletScreen()),
+        GoRoute(path: admin,    builder: (_, __) => const AdminScreen()),
         GoRoute(
           path: terms,
           builder: (_, __) => const LegalScreen(type: LegalType.terms),

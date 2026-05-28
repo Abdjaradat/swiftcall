@@ -26,7 +26,7 @@ class _CreateGroupCallScreenState extends State<CreateGroupCallScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<HomeBloc>().add(HomeLoadContacts());
+    context.read<HomeBloc>().add(HomeLoadUsers());
     _searchCtrl.addListener(() => setState(() => _query = _searchCtrl.text.trim().toLowerCase()));
   }
 
@@ -120,7 +120,10 @@ class _CreateGroupCallScreenState extends State<CreateGroupCallScreen> {
                   }
                   if (state is! HomeLoaded) return const SizedBox();
 
+                  // Show all registered users (not just friends)
+                  final myUid = state.myUid;
                   final contacts = state.contacts
+                      .where((u) => u.uid != myUid)
                       .where((u) => _query.isEmpty ||
                           u.name.toLowerCase().contains(_query))
                       .toList();

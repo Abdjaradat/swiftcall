@@ -8,7 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.media.AudioAttributes
-import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.telecom.DisconnectCause
@@ -61,13 +61,13 @@ class CallForegroundService : Service() {
     private fun ensureChannel() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (nm.getNotificationChannel(CHANNEL_ID) != null) return
+        nm.deleteNotificationChannel(CHANNEL_ID)
 
         val channel = NotificationChannel(CHANNEL_ID, "Incoming Call", NotificationManager.IMPORTANCE_HIGH).apply {
             description          = "SwiftCall incoming call notifications"
             lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
             setSound(
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE),
+                Uri.parse("android.resource://${packageName}/raw/ringtone"),
                 AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -142,7 +142,7 @@ class CallForegroundService : Service() {
             .setAutoCancel(false)
             .setOngoing(true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE))
+            .setSound(Uri.parse("android.resource://${packageName}/raw/ringtone"))
             .setTimeoutAfter(45_000L)
             .addAction(android.R.drawable.ic_menu_call,     "قبول",  answerPI)
             .addAction(android.R.drawable.ic_delete,        "رفض",   declinePI)

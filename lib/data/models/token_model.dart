@@ -134,7 +134,40 @@ class TokenCosts {
   static const int videoCallPerMinute = 10;
   static const int groupCallPerMinute = 15;
 
-  static const int welcomeBonus = 300;
+  static const int welcomeBonus = 500;
   static const int watchAdReward = 50;
   static const int shareReward = 30;
+}
+
+class TokenPackage {
+  final String id;
+  final String name;
+  final double price;
+  final int tokens;
+  final bool isActive;
+
+  const TokenPackage({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.tokens,
+    this.isActive = true,
+  });
+
+  factory TokenPackage.fromMap(Map<String, dynamic> map, String id) {
+    return TokenPackage(
+      id: id,
+      name: map['name'] as String? ?? '',
+      price: (map['price'] as num?)?.toDouble() ?? 0,
+      tokens: (map['tokens'] as num?)?.toInt() ?? 0,
+      isActive: map['isActive'] as bool? ?? true,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+    'name': name,
+    'price': price,
+    'tokens': tokens,
+    'isActive': isActive,
+  };
 }

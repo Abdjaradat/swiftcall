@@ -10,8 +10,9 @@ class UserModel {
   final String? fcmToken;
   final String? status;
   final String? phoneNumber;
-  final String? normalizedPhoneNumber;
-  final List<String> hiddenContacts;
+  final List<String> contacts;
+  final List<String> incomingRequests;
+  final List<String> outgoingRequests;
 
   const UserModel({
     required this.uid,
@@ -23,8 +24,9 @@ class UserModel {
     this.fcmToken,
     this.status,
     this.phoneNumber,
-    this.normalizedPhoneNumber,
-    this.hiddenContacts = const [],
+    this.contacts = const [],
+    this.incomingRequests = const [],
+    this.outgoingRequests = const [],
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
@@ -38,9 +40,14 @@ class UserModel {
       fcmToken: map['fcmToken'] as String?,
       status: map['status'] as String?,
       phoneNumber: map['phoneNumber'] as String?,
-      normalizedPhoneNumber: map['normalizedPhoneNumber'] as String?,
-      hiddenContacts: map['hiddenContacts'] != null
-          ? List<String>.from(map['hiddenContacts'] as List)
+      contacts: map['contacts'] != null
+          ? List<String>.from(map['contacts'] as List)
+          : const [],
+      incomingRequests: map['incomingRequests'] != null
+          ? List<String>.from(map['incomingRequests'] as List)
+          : const [],
+      outgoingRequests: map['outgoingRequests'] != null
+          ? List<String>.from(map['outgoingRequests'] as List)
           : const [],
     );
   }
@@ -56,8 +63,9 @@ class UserModel {
       'fcmToken': fcmToken,
       'status': status,
       'phoneNumber': phoneNumber,
-      'normalizedPhoneNumber': normalizedPhoneNumber,
-      'hiddenContacts': hiddenContacts,
+      'contacts': contacts,
+      'incomingRequests': incomingRequests,
+      'outgoingRequests': outgoingRequests,
     };
   }
 
@@ -71,8 +79,9 @@ class UserModel {
     String? fcmToken,
     String? status,
     String? phoneNumber,
-    String? normalizedPhoneNumber,
-    List<String>? hiddenContacts,
+    List<String>? contacts,
+    List<String>? incomingRequests,
+    List<String>? outgoingRequests,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -84,9 +93,9 @@ class UserModel {
       fcmToken: fcmToken ?? this.fcmToken,
       status: status ?? this.status,
       phoneNumber: phoneNumber ?? this.phoneNumber,
-      normalizedPhoneNumber:
-          normalizedPhoneNumber ?? this.normalizedPhoneNumber,
-      hiddenContacts: hiddenContacts ?? this.hiddenContacts,
+      contacts: contacts ?? this.contacts,
+      incomingRequests: incomingRequests ?? this.incomingRequests,
+      outgoingRequests: outgoingRequests ?? this.outgoingRequests,
     );
   }
 

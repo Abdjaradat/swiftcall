@@ -7,12 +7,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:unity_ads_plugin/unity_ads_plugin.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/router/app_router.dart';
 import '../../../data/models/chat_model.dart';
 import '../../../data/models/message_model.dart';
-import '../../../data/models/phone_contact_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/services/auth_service.dart';
 import '../../call_history/bloc/call_history_bloc.dart';
@@ -38,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen>
     super.initState();
     _tabCtrl = TabController(length: 3, vsync: this);
     context.read<HomeBloc>().add(HomeLoadChats());
-    context.read<HomeBloc>().add(HomeLoadContacts());
+    context.read<HomeBloc>().add(HomeLoadUsers());
   }
 
   @override
@@ -565,147 +563,35 @@ class _ContactsTab extends StatelessWidget {
         }
         if (state is! HomeLoaded) return const SizedBox();
 
-        final appUsers = state.contacts;
-        final phoneContacts = state.phoneContacts;
-        final permDenied = state.contactsPermissionDenied;
+        final users = state.contacts;
+        if (users.isEmpty) return _EmptyContacts();
 
-        if (appUsers.isEmpty && phoneContacts.isEmpty) {
-          return _EmptyContacts(permDenied: permDenied);
-        }
-
-        final items = <Widget>[];
-
-        // ── App users section ──
-        if (appUsers.isNotEmpty) {
-          items.add(_SectionHeader(title: 'على التطبيق', count: appUsers.length));
-          for (var i = 0; i < appUsers.length; i++) {
-            items.add(_AppContactTile(user: appUsers[i])
-                .animate(delay: (i * 40).ms)
-                .fadeIn()
-                .slideX(begin: 0.1, end: 0));
-          }
-        }
-
-        // ── Phone contacts section ──
-        if (phoneContacts.isNotEmpty) {
-          items.add(_SectionHeader(
-              title: 'جهات الاتصال',
-              subtitle: 'دعوتهم للانضمام',
-              count: phoneContacts.length));
-          for (var i = 0; i < phoneContacts.length; i++) {
-            items.add(_PhoneContactTile(contact: phoneContacts[i])
-                .animate(delay: (i * 30).ms)
-                .fadeIn()
-                .slideX(begin: 0.1, end: 0));
-          }
-        }
-
-        if (permDenied) {
-          items.add(_PermissionBanner());
-        }
-
-        return ListView(
+        return ListView.builder(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          children: items,
+          itemCount: users.length,
+          itemBuilder: (ctx, i) => _UserTile(
+            user: users[i],
+            myUid: state.myUid,
+          ).animate(delay: (i * 40).ms).fadeIn().slideX(begin: 0.1, end: 0),
         );
       },
     );
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final int count;
-
-  const _SectionHeader({
-    required this.title,
-    this.subtitle,
-    required this.count,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.cairo(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              '$count',
-              style: GoogleFonts.poppins(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(width: 6),
-            Text(
-              '· $subtitle',
-              style: GoogleFonts.cairo(
-                fontSize: 12,
-                color: AppColors.textHint,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _AppContactTile extends StatelessWidget {
+class _UserTile extends StatelessWidget {
   final UserModel user;
-  const _AppContactTile({required this.user});
+  final String myUid;
+  const _UserTile({required this.user, required this.myUid});
+
+  bool get isContact => user.contacts.contains(myUid);
+  bool get hasIncoming => user.incomingRequests.contains(myUid);
+  bool get hasOutgoing => user.outgoingRequests.contains(myUid);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      onTap: () => context.push('${AppRouter.chat}/new_${user.uid}', extra: user),
-      onLongPress: () {
-        showModalBottomSheet(
-          context: context,
-          backgroundColor: AppColors.surface,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          builder: (_) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.divider, borderRadius: BorderRadius.circular(2))),
-              const SizedBox(height: 8),
-              ListTile(
-                leading: const Icon(Icons.person_remove_rounded, color: AppColors.callRed),
-                title: Text('إخفاء جهة الاتصال', style: GoogleFonts.cairo(color: AppColors.callRed)),
-                subtitle: Text('لن يظهر هذا الشخص في قائمة جهات الاتصال', style: GoogleFonts.cairo(color: AppColors.textHint, fontSize: 12)),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.read<HomeBloc>().add(HomeRemoveContact(user.uid));
-                },
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
       leading: Stack(
         children: [
           CircleAvatar(
@@ -724,11 +610,9 @@ class _AppContactTile extends StatelessWidget {
           ),
           if (user.isOnline)
             Positioned(
-              bottom: 1,
-              right: 1,
+              bottom: 1, right: 1,
               child: Container(
-                width: 11,
-                height: 11,
+                width: 11, height: 11,
                 decoration: BoxDecoration(
                   color: AppColors.online,
                   shape: BoxShape.circle,
@@ -750,18 +634,66 @@ class _AppContactTile extends StatelessWidget {
           fontSize: 12,
         ),
       ),
-      trailing: Row(
+      trailing: _buildAction(context),
+    );
+  }
+
+  Widget _buildAction(BuildContext context) {
+    if (isContact) {
+      return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          _iconBtn(Icons.chat_rounded, AppColors.primary, () {
+            context.push('${AppRouter.chat}/new_${user.uid}', extra: user);
+          }),
+          const SizedBox(width: 4),
           _iconBtn(Icons.call_rounded, AppColors.callGreen, () {
             context.push('${AppRouter.voiceCall}/call_${user.uid}', extra: user);
           }),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           _iconBtn(Icons.videocam_rounded, AppColors.primary, () {
             context.push('${AppRouter.videoCall}/call_${user.uid}', extra: user);
           }),
         ],
+      );
+    }
+    if (hasIncoming) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _txtBtn('قبول', AppColors.primary, () {
+            context.read<HomeBloc>().add(HomeAcceptRequest(user.uid));
+          }),
+          const SizedBox(width: 4),
+          _txtBtn('رفض', AppColors.callRed, () {
+            context.read<HomeBloc>().add(HomeRejectRequest(user.uid));
+          }),
+        ],
+      );
+    }
+    if (hasOutgoing) {
+      return _txtBtn('في انتظار', AppColors.textHint, () {
+        context.read<HomeBloc>().add(HomeCancelRequest(user.uid));
+      });
+    }
+    return _txtBtn('إضافة', AppColors.primary, () {
+      context.read<HomeBloc>().add(HomeSendRequest(user.uid));
+    });
+  }
+
+  Widget _txtBtn(String label, Color color, VoidCallback onTap) {
+    return TextButton(
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+        foregroundColor: color,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: color.withValues(alpha: 0.3)),
+        ),
       ),
+      child: Text(label,
+          style: GoogleFonts.cairo(fontSize: 12, fontWeight: FontWeight.w600)),
     );
   }
 
@@ -780,111 +712,7 @@ class _AppContactTile extends StatelessWidget {
   }
 }
 
-class _PhoneContactTile extends StatelessWidget {
-  final PhoneContactModel contact;
-  const _PhoneContactTile({required this.contact});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: CircleAvatar(
-        radius: 24,
-        backgroundColor: AppColors.card,
-        backgroundImage: contact.photo != null
-            ? MemoryImage(contact.photo!)
-            : null,
-        child: contact.photo == null
-            ? Text(
-                contact.name.isNotEmpty
-                    ? contact.name[0].toUpperCase()
-                    : '?',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
-                  fontSize: 16,
-                ),
-              )
-            : null,
-      ),
-      title: Text(
-        contact.name,
-        style: GoogleFonts.poppins(
-          fontWeight: FontWeight.w400,
-          color: AppColors.textPrimary,
-          fontSize: 14,
-        ),
-      ),
-      subtitle: contact.phone != null
-          ? Text(
-              contact.phone!,
-              style: GoogleFonts.poppins(
-                color: AppColors.textHint,
-                fontSize: 12,
-              ),
-            )
-          : null,
-      trailing: TextButton.icon(
-        onPressed: () => _invite(contact),
-        icon: const Icon(Icons.share_rounded, size: 16),
-        label: Text('دعوة', style: GoogleFonts.cairo(fontSize: 13)),
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _invite(PhoneContactModel c) async {
-    const msg = 'جرّب معي SwiftCall — تطبيق المكالمات والمحادثات الخاص!';
-    if (c.phone != null) {
-      final uri = Uri(
-        scheme: 'sms',
-        path: c.phone,
-        queryParameters: const {'body': msg},
-      );
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
-    }
-  }
-}
-
-class _PermissionBanner extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.contacts_rounded, color: AppColors.textHint, size: 22),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'امنح الإذن لعرض جهات الاتصال من هاتفك',
-              style: GoogleFonts.cairo(
-                color: AppColors.textSecondary,
-                fontSize: 13,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _EmptyContacts extends StatelessWidget {
-  final bool permDenied;
-  const _EmptyContacts({required this.permDenied});
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -894,7 +722,7 @@ class _EmptyContacts extends StatelessWidget {
           const Text('👥', style: TextStyle(fontSize: 56)),
           const SizedBox(height: 16),
           Text(
-            permDenied ? 'لا يوجد إذن لجهات الاتصال' : 'لا توجد جهات اتصال',
+            'لا يوجد مستخدمين بعد',
             style: GoogleFonts.cairo(
               fontSize: 17,
               color: AppColors.textSecondary,
@@ -903,9 +731,7 @@ class _EmptyContacts extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            permDenied
-                ? 'افتح الإعدادات وامنح إذن جهات الاتصال'
-                : 'ادعُ أصدقاءك لاستخدام SwiftCall',
+            'ادعُ أصدقاءك لاستخدام SwiftCall',
             style: GoogleFonts.cairo(
               fontSize: 13,
               color: AppColors.textHint,
@@ -1114,7 +940,7 @@ class _ChatSearch extends SearchDelegate<String> {
         return ListView(
           children: [
             if (chats.isNotEmpty) ...[
-              _SearchHeader(title: 'المحادثات'),
+              const _SearchHeader(title: 'المحادثات'),
               ...chats.map((c) => ListTile(
                     leading: CircleAvatar(
                       backgroundColor: AppColors.card,
@@ -1143,7 +969,7 @@ class _ChatSearch extends SearchDelegate<String> {
                   )),
             ],
             if (contacts.isNotEmpty) ...[
-              _SearchHeader(title: 'جهات الاتصال'),
+              const _SearchHeader(title: 'جهات الاتصال'),
               ...contacts.map((u) => ListTile(
                     leading: CircleAvatar(
                       backgroundColor: AppColors.card,

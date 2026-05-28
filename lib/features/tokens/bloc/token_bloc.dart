@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/token_service.dart';
@@ -7,6 +9,7 @@ import 'token_state.dart';
 class TokenBloc extends Bloc<TokenEvent, TokenState> {
   final _tokenService = TokenService.instance;
   final _authService = AuthService.instance;
+  StreamSubscription? _authSub;
 
   TokenBloc() : super(TokenInitial()) {
     on<TokenLoadWallet>(_onLoad);
@@ -14,6 +17,21 @@ class TokenBloc extends Bloc<TokenEvent, TokenState> {
     on<TokenShare>(_onShare);
     on<TokenSpend>(_onSpend);
     on<TokenLoadHistory>(_onLoadHistory);
+    _listenAuth();
+  }
+
+  void _listenAuth() {
+    _authSub = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null && state is! TokenLoaded) {
+        add(TokenLoadWallet());
+      }
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _authSub?.cancel();
+    return super.close();
   }
 
   String? get _uid => _authService.currentUserId;

@@ -208,4 +208,54 @@ class TokenService {
       }
     }
   }
+
+  // ── Admin: credit tokens manually ──────────────────────────
+
+  Future<void> creditTokensManually(
+    String uid,
+    int amount,
+    String description,
+  ) async {
+    await _db.runTransaction((tx) async {
+      final walletRef = _wallets.doc(uid);
+      tx.set(walletRef, {
+        'uid': uid,
+        'balance': FieldValue.increment(amount),
+        'totalEarned': FieldValue.increment(amount),
+      }, SetOptions(merge: true));
+
+      tx.set(
+        _transactions(uid).doc(),
+        TokenTransaction(
+          id: '',
+          amount: amount,
+          type: 'admin_credit',
+          description: description,
+          createdAt: DateTime.now(),
+        ).toMap(),
+      );
+    });
+  }
+
+  // ── Admin: token packages ──────────────────────────────────
+
+  Stream<List<TokenPackage>> tokenPackagesStream() {
+    return _db.collection('token_packages').snapshots().map((snap) =>
+        snap.docs
+            .map((d) => TokenPackage.fromMap(d.data(), d.id))
+            .toList());
+  }
+
+  Future<void> addTokenPackage(TokenPackage pkg) async {
+    final doc = _db.collection('token_packages').doc();
+    await doc.set(pkg.toMap());
+  }
+
+  Future<void> deleteTokenPackage(String id) async {
+    await _db.collection('token_packages').doc(id).delete();
+  }
+
+  Future<void> toggleTokenPackage(String id, bool isActive) async {
+    await _db.collection('token_packages').doc(id).update({'isActive': isActive});
+  }
 }

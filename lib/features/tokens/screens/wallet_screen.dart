@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:unity_ads_plugin/unity_ads_plugin.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/router/app_router.dart';
 import '../../../data/services/ad_service.dart';
+import '../../../data/services/admin_service.dart';
 import '../../../data/models/token_model.dart';
 import '../bloc/token_bloc.dart';
 import '../bloc/token_event.dart';
@@ -22,6 +25,7 @@ class _WalletScreenState extends State<WalletScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _coinController;
   late Animation<double> _coinAnim;
+  bool _isAdmin = false;
 
   @override
   void initState() {
@@ -33,6 +37,14 @@ class _WalletScreenState extends State<WalletScreen>
     _coinAnim = CurvedAnimation(parent: _coinController, curve: Curves.elasticOut);
     context.read<TokenBloc>().add(TokenLoadWallet());
     _coinController.forward();
+    _checkAdmin();
+  }
+
+  Future<void> _checkAdmin() async {
+    final uid = await AdminService.instance.currentUid();
+    if (uid == null) return;
+    final admin = await AdminService.instance.isAdmin(uid);
+    if (mounted) setState(() => _isAdmin = admin);
   }
 
   @override
@@ -51,6 +63,14 @@ class _WalletScreenState extends State<WalletScreen>
         title: const Text('محفظة التوكنز', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          if (_isAdmin)
+            IconButton(
+              icon: const Icon(Icons.admin_panel_settings_rounded),
+              tooltip: 'لوحة التحكم',
+              onPressed: () => context.push(AppRouter.admin),
+            ),
+        ],
       ),
       body: BlocConsumer<TokenBloc, TokenState>(
         listener: (context, state) {

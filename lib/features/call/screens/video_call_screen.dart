@@ -146,9 +146,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                           ),
                         if (state is CallEnded)
                           Text(
-                            _endedLabel((state as CallEnded).reason),
+                            _endedLabel(state.reason),
                             style: GoogleFonts.cairo(
-                              color: _endedColor((state as CallEnded).reason),
+                              color: _endedColor(state.reason),
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                             ),
