@@ -24,12 +24,15 @@ class _LocationScreenState extends State<LocationScreen> {
   @override
   void initState() {
     super.initState();
-    final authService = context.read<AuthService>();
-    final friendIds = authService.currentUser?.contacts ?? [];
-
     context.read<LocationBloc>().add(const LoadUserLocation());
-    if (friendIds.isNotEmpty) {
-      context.read<LocationBloc>().add(LoadFriendLocations(friendIds));
+
+    // Load friend locations from current user
+    final authBloc = context.read<AuthBloc>();
+    if (authBloc.state is AuthAuthenticated) {
+      final user = (authBloc.state as AuthAuthenticated).user;
+      if (user.contacts.isNotEmpty) {
+        context.read<LocationBloc>().add(LoadFriendLocations(user.contacts));
+      }
     }
   }
 
