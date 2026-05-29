@@ -225,42 +225,63 @@ class AuthService {
   Future<void> sendFriendRequest(String targetUid) async {
     final uid = currentUserId;
     if (uid == null) return;
-    final batch = _db.batch();
-    batch.update(_db.collection('users').doc(uid), {
-      'outgoingRequests': FieldValue.arrayUnion([targetUid]),
-    });
-    batch.update(_db.collection('users').doc(targetUid), {
-      'incomingRequests': FieldValue.arrayUnion([uid]),
-    });
-    await batch.commit();
+    try {
+      final batch = _db.batch();
+      batch.update(_db.collection('users').doc(uid), {
+        'outgoingRequests': FieldValue.arrayUnion([targetUid]),
+      });
+      batch.update(_db.collection('users').doc(targetUid), {
+        'incomingRequests': FieldValue.arrayUnion([uid]),
+      });
+      await batch.commit();
+      print('AuthService.sendFriendRequest: Success - $uid -> $targetUid');
+    } catch (e, stack) {
+      print('AuthService.sendFriendRequest ERROR: $e');
+      print('STACK: $stack');
+      rethrow;
+    }
   }
 
   Future<void> acceptFriendRequest(String requesterUid) async {
     final uid = currentUserId;
     if (uid == null) return;
-    final batch = _db.batch();
-    batch.update(_db.collection('users').doc(uid), {
-      'contacts': FieldValue.arrayUnion([requesterUid]),
-      'incomingRequests': FieldValue.arrayRemove([requesterUid]),
-    });
-    batch.update(_db.collection('users').doc(requesterUid), {
-      'contacts': FieldValue.arrayUnion([uid]),
-      'outgoingRequests': FieldValue.arrayRemove([uid]),
-    });
-    await batch.commit();
+    try {
+      final batch = _db.batch();
+      batch.update(_db.collection('users').doc(uid), {
+        'contacts': FieldValue.arrayUnion([requesterUid]),
+        'incomingRequests': FieldValue.arrayRemove([requesterUid]),
+      });
+      batch.update(_db.collection('users').doc(requesterUid), {
+        'contacts': FieldValue.arrayUnion([uid]),
+        'outgoingRequests': FieldValue.arrayRemove([uid]),
+      });
+      await batch.commit();
+      print('AuthService.acceptFriendRequest: Success - $uid accepted $requesterUid');
+    } catch (e, stack) {
+      print('AuthService.acceptFriendRequest ERROR: $e');
+      print('STACK: $stack');
+      rethrow;
+    }
   }
 
   Future<void> rejectFriendRequest(String requesterUid) async {
     final uid = currentUserId;
     if (uid == null) return;
-    final batch = _db.batch();
-    batch.update(_db.collection('users').doc(uid), {
-      'incomingRequests': FieldValue.arrayRemove([requesterUid]),
-    });
-    batch.update(_db.collection('users').doc(requesterUid), {
-      'outgoingRequests': FieldValue.arrayRemove([uid]),
-    });
-    await batch.commit();
+    try {
+      final batch = _db.batch();
+      batch.update(_db.collection('users').doc(uid), {
+        'incomingRequests': FieldValue.arrayRemove([requesterUid]),
+      });
+      batch.update(_db.collection('users').doc(requesterUid), {
+        'outgoingRequests': FieldValue.arrayRemove([uid]),
+      });
+      await batch.commit();
+      print('AuthService.rejectFriendRequest: Success - $uid rejected $requesterUid');
+    } catch (e, stack) {
+      print('AuthService.rejectFriendRequest ERROR: $e');
+      print('STACK: $stack');
+      rethrow;
+    }
   }
 
   Future<void> cancelFriendRequest(String targetUid) async {
