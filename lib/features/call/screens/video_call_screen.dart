@@ -8,6 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/services/ad_service.dart';
 import '../../../data/services/livekit_service.dart';
+import '../../../data/services/wakelock_service.dart';
 import '../bloc/call_bloc.dart';
 
 class VideoCallScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   @override
   void initState() {
     super.initState();
+    WakelockService.instance.enable();
     final other = widget.otherUser;
     if (other != null) {
       context.read<CallBloc>().add(CallStart(
@@ -54,6 +56,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   @override
   void dispose() {
     _roomListener?.dispose();
+    WakelockService.instance.disable();
     super.dispose();
   }
 

@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/services/ad_service.dart';
+import '../../../data/services/wakelock_service.dart';
 import '../bloc/call_bloc.dart';
 
 class VoiceCallScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
   @override
   void initState() {
     super.initState();
+    WakelockService.instance.enable();
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -45,6 +47,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
   @override
   void dispose() {
     _pulseCtrl.dispose();
+    WakelockService.instance.disable();
     super.dispose();
   }
 

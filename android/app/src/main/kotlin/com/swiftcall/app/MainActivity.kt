@@ -9,10 +9,12 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.telecom.PhoneAccount
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import android.util.Log
+import android.view.WindowManager
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -24,6 +26,7 @@ class MainActivity : FlutterActivity() {
     private lateinit var channel: MethodChannel
     private lateinit var telecomManager: TelecomManager
     private lateinit var phoneAccountHandle: PhoneAccountHandle
+    private var wakeLock: PowerManager.WakeLock? = null
 
     companion object {
         private const val TAG = "MainActivity"
@@ -39,6 +42,14 @@ class MainActivity : FlutterActivity() {
         channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
         channel.setMethodCallHandler { call, result ->
             when (call.method) {
+                "enableWakeLock" -> {
+                    enableWakeLock()
+                    result.success(true)
+                }
+                "disableWakeLock" -> {
+                    disableWakeLock()
+                    result.success(true)
+                }
                 "showIncomingCallUI" -> {
                     val uuid       = call.argument<String>("uuid")
                     val callerName = call.argument<String>("callerName")
@@ -207,8 +218,32 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    private fun enableWakeLock() {
+        if (wakeLock == null) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            wakeLock = powerManager.newWakeLock(
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                "SwiftCall::CallWakeLock"
+            )
+        }
+        wakeLock?.acquire(10 * 60 * 1000L) // 10 minutes max
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        Log.d(TAG, "WakeLock enabled")
+    }
+
+    private fun disableWakeLock() {
+        wakeLock?.let {
+            if (it.isHeld) {
+                it.release()
+                Log.d(TAG, "WakeLock released")
+            }
+        }
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        disableWakeLock()
         isFlutterEngineReady = false
         flutterEngineReference = null
     }

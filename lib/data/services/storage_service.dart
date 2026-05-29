@@ -65,6 +65,12 @@ class StorageService {
     void Function(double progress)? onProgress,
   }) async {
     try {
+      // Verify file exists
+      if (!await file.exists()) {
+        print('StorageService._upload: File does not exist: ${file.path}');
+        return null;
+      }
+
       final ref = _storage.ref(path);
       final mimeType = lookupMimeType(file.path);
       final metadata = mimeType != null
@@ -82,10 +88,15 @@ class StorageService {
       }
 
       final snapshot = await task;
-      return await snapshot.ref.getDownloadURL();
-    } on FirebaseException catch (_) {
+      final url = await snapshot.ref.getDownloadURL();
+      print('StorageService._upload: Success - ${file.path} -> $url');
+      return url;
+    } on FirebaseException catch (e) {
+      print('StorageService._upload: FirebaseException - ${e.code}: ${e.message}');
       return null;
-    } catch (e) {
+    } catch (e, stack) {
+      print('StorageService._upload: ERROR - $e');
+      print('STACK: $stack');
       return null;
     }
   }

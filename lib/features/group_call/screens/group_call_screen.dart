@@ -8,6 +8,7 @@ import 'package:livekit_client/livekit_client.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/services/livekit_service.dart';
+import '../../../data/services/wakelock_service.dart';
 import '../../home/bloc/home_bloc.dart';
 import '../bloc/group_call_bloc.dart';
 
@@ -24,6 +25,7 @@ class _GroupCallScreenState extends State<GroupCallScreen> {
   @override
   void initState() {
     super.initState();
+    WakelockService.instance.enable();
     _attachRoomListener();
   }
 
@@ -43,6 +45,7 @@ class _GroupCallScreenState extends State<GroupCallScreen> {
   @override
   void dispose() {
     _roomListener?.dispose();
+    WakelockService.instance.disable();
     super.dispose();
   }
 
