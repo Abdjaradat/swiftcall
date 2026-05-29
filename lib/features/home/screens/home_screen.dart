@@ -110,6 +110,12 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
       actions: [
+        if (!onCalls)
+          IconButton(
+            icon: const Icon(Icons.map_rounded),
+            tooltip: 'الخريطة',
+            onPressed: () => context.push('/location'),
+          ),
         if (onCalls)
           IconButton(
             icon: const Icon(Icons.delete_sweep_rounded),

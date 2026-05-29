@@ -21,6 +21,8 @@ import 'features/chat/bloc/chat_bloc.dart';
 import 'features/group_call/bloc/group_call_bloc.dart';
 import 'features/home/bloc/home_bloc.dart';
 import 'features/tokens/bloc/token_bloc.dart';
+import 'features/location/bloc/location_bloc.dart';
+import 'data/services/location_service.dart';
 
 class SwiftCallApp extends StatefulWidget {
   final bool isDarkMode;
@@ -319,6 +321,12 @@ class _SwiftCallAppState extends State<SwiftCallApp>
         BlocProvider(create: (_) => CallHistoryBloc()..add(CallHistoryLoad())),
         // TokenBloc auto-loads via _listenAuth() when Firebase Auth completes
         BlocProvider(create: (_) => TokenBloc()),
+        BlocProvider(
+          create: (_) => LocationBloc(
+            locationService: LocationService(),
+            authService: AuthService.instance,
+          ),
+        ),
       ],
       child: _ThemeLocaleWrapper(
         isDark: _isDark,
