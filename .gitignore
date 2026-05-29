@@ -63,3 +63,4 @@ swiftcall.jks
 *.jks
 *.keystore
 android/key.properties
+scripts/node_modules/
