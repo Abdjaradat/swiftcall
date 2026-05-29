@@ -12,7 +12,9 @@ class AdminService {
     try {
       final snap = await _db.collection('admins').doc(uid).get();
       return snap.exists;
-    } catch (_) {
+    } catch (e, stack) {
+      print('AdminService.isAdmin ERROR: $e');
+      print('STACK: $stack');
       return false;
     }
   }

@@ -71,7 +71,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           myUid: myUid,
         ));
       }
-    } catch (_) {
+    } catch (e, stack) {
+      print('HomeBloc._onLoadUsers ERROR: $e');
+      print('STACK: $stack');
       if (state is HomeLoaded) {
         emit((state as HomeLoaded).copyWith(contacts: []));
       }

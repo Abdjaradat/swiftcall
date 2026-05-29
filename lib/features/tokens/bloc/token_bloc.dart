@@ -47,8 +47,10 @@ class TokenBloc extends Bloc<TokenEvent, TokenState> {
       final wallet = await _tokenService.getWallet(uid);
       final transactions = await _tokenService.getTransactions(uid);
       emit(TokenLoaded(wallet: wallet, transactions: transactions));
-    } catch (_) {
-      emit(TokenError('فشل تحميل المحفظة، حاول مرة أخرى'));
+    } catch (e, stack) {
+      print('TokenBloc._onLoad ERROR: $e');
+      print('STACK: $stack');
+      emit(TokenError('فشل تحميل المحفظة: ${e.toString()}'));
     }
   }
 
@@ -72,7 +74,9 @@ class TokenBloc extends Bloc<TokenEvent, TokenState> {
         ));
         add(TokenLoadWallet());
       }
-    } catch (_) {
+    } catch (e, stack) {
+      print('TokenBloc ERROR: $e');
+      print('STACK: $stack');
       emit(TokenError('تعذر تحديث المحفظة، حاول مرة أخرى'));
     }
   }
@@ -97,7 +101,9 @@ class TokenBloc extends Bloc<TokenEvent, TokenState> {
         ));
         add(TokenLoadWallet());
       }
-    } catch (_) {
+    } catch (e, stack) {
+      print('TokenBloc ERROR: $e');
+      print('STACK: $stack');
       emit(TokenError('تعذر تحديث المحفظة، حاول مرة أخرى'));
     }
   }
@@ -116,7 +122,9 @@ class TokenBloc extends Bloc<TokenEvent, TokenState> {
       }
       await _tokenService.spendTokens(uid, event.amount, event.description);
       add(TokenLoadWallet());
-    } catch (_) {
+    } catch (e, stack) {
+      print('TokenBloc ERROR: $e');
+      print('STACK: $stack');
       emit(TokenError('تعذر تحديث المحفظة، حاول مرة أخرى'));
     }
   }
@@ -131,7 +139,9 @@ class TokenBloc extends Bloc<TokenEvent, TokenState> {
       final wallet = await _tokenService.getWallet(uid);
       final transactions = await _tokenService.getTransactions(uid, limit: 50);
       emit(TokenLoaded(wallet: wallet, transactions: transactions));
-    } catch (_) {
+    } catch (e, stack) {
+      print('TokenBloc ERROR: $e');
+      print('STACK: $stack');
       emit(TokenError('فشل تحميل السجل'));
     }
   }
