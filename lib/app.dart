@@ -342,6 +342,7 @@ class _ThemeLocaleWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textDir = locale == 'ar' ? TextDirection.rtl : TextDirection.ltr;
     return MaterialApp.router(
       title: 'SwiftCall',
       debugShowCheckedModeBanner: false,
@@ -355,6 +356,12 @@ class _ThemeLocaleWrapper extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      // Explicit RTL/LTR directionality at the root so every widget
+      // inherits the correct text direction regardless of platform default.
+      builder: (context, child) => Directionality(
+        textDirection: textDir,
+        child: child!,
+      ),
       routerConfig: router,
     );
   }

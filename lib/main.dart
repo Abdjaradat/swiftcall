@@ -5,8 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import 'package:google_fonts/google_fonts.dart';
-
 import 'app.dart';
 import 'core/constants/app_constants.dart';
 import 'data/services/ad_service.dart';
@@ -22,9 +20,6 @@ Future<void> _bgMessageHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Use locally bundled Cairo font — never fetch from network
-  GoogleFonts.config.allowRuntimeFetching = false;
 
   // Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
