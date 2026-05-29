@@ -70,6 +70,8 @@ dependencies:
   flutter_contacts: ^1.1.9+1
   share_plus: ^10.0.0
   unity_ads_plugin: ^0.3.30
+  video_player: ^2.10.1
+  chewie: ^1.12.1
 
 dependency_overrides:
   record_linux:

@@ -123,23 +123,17 @@ async function sendFcmDataMessage(fcmToken, callData) {
     token: fcmToken,
     data: {
       type:        "call",
-      callId:      callData.callId,
-      callerId:    callData.callerId   || "",
-      callerName:  callData.callerName,
-      callerPhoto: callData.callerPhoto || "",
-      callType:    callData.callType   || "audio",
-      roomName:    callData.roomName   || "",
+      callId:      String(callData.callId || ""),
+      callerId:    String(callData.callerId || ""),
+      callerName:  String(callData.callerName || "Unknown"),
+      callerPhoto: String(callData.callerPhoto || ""),
+      callType:    String(callData.callType || "audio"),
+      roomName:    String(callData.roomName || ""),
     },
     // Android: highest delivery priority, 30s TTL
     android: {
       priority: "high",
-      ttl:      30000,
-      notification: {
-        channel_id: "swiftcall_calls",
-        default_vibrate_timings: true,
-        default_sound: true,
-        notification_priority: "PRIORITY_MAX",
-      },
+      ttl: 30000,
     },
     // iOS: background content-available wake + high priority
     apns: {
@@ -156,8 +150,13 @@ async function sendFcmDataMessage(fcmToken, callData) {
     },
   };
 
-  const response = await admin.messaging().send(message);
-  console.log(`[FCM] Data message sent — ${response}`);
+  try {
+    const response = await admin.messaging().send(message);
+    console.log(`[FCM] Data message sent — ${response}`);
+  } catch (error) {
+    console.error(`[FCM] Failed to send notification:`, error);
+    throw error;
+  }
 }
 
 /**
@@ -167,15 +166,22 @@ async function sendCancelMessage(fcmToken, callId) {
   if (!fcmToken) return;
   const message = {
     token: fcmToken,
-    data:  { type: "call_cancelled", callId },
+    data:  {
+      type: "call_cancelled",
+      callId: String(callId || "")
+    },
     android: { priority: "high" },
     apns: {
       payload: { aps: { "content-available": 1 } },
       headers: { "apns-priority": "5" },
     },
   };
-  await admin.messaging().send(message);
-  console.log(`[FCM] Cancel message sent for callId=${callId}`);
+  try {
+    await admin.messaging().send(message);
+    console.log(`[FCM] Cancel message sent for callId=${callId}`);
+  } catch (error) {
+    console.error(`[FCM] Failed to send cancel message:`, error);
+  }
 }
 
 // ── Cloud Functions ───────────────────────────────────────────────────────────
@@ -372,12 +378,12 @@ exports.sendGroupCallNotification = onDocumentCreated(
             token: fcmToken,
             data: {
               type:        "group_call",
-              callId,
-              callerId:    createdBy,
-              callerName:  creatorName,
-              callerPhoto: creatorPhoto,
-              callType,
-              roomName,
+              callId:      String(callId || ""),
+              callerId:    String(createdBy || ""),
+              callerName:  String(creatorName || "Unknown"),
+              callerPhoto: String(creatorPhoto || ""),
+              callType:    String(callType || "audio"),
+              roomName:    String(roomName || ""),
               isGroupCall: "true",
             },
             android: { priority: "high", ttl: 45000 },
