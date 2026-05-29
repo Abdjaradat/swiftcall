@@ -39,9 +39,10 @@ admin.initializeApp();
 const BUNDLE_ID = "com.swiftcall.app";
 
 // ── APNs secrets (set via: firebase functions:secrets:set <NAME>) ─────────────
-const APNS_KEY_ID  = defineSecret("APNS_KEY_ID");
-const APNS_TEAM_ID = defineSecret("APNS_TEAM_ID");
-const APNS_KEY_P8  = defineSecret("APNS_KEY_P8");   // full .p8 file content
+// TEMPORARILY DISABLED: Enable Secret Manager API first
+// const APNS_KEY_ID  = defineSecret("APNS_KEY_ID");
+// const APNS_TEAM_ID = defineSecret("APNS_TEAM_ID");
+// const APNS_KEY_P8  = defineSecret("APNS_KEY_P8");   // full .p8 file content
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -133,12 +134,15 @@ async function sendFcmDataMessage(fcmToken, callData) {
     android: {
       priority: "high",
       ttl:      45000,
+      notification: {
+        channelId: "swiftcall_calls",
+      },
     },
     // iOS: silent background wakeup (belt-and-suspenders for foreground state;
     // killed/background state is handled by the VoIP push below).
     apns: {
       payload: { aps: { "content-available": 1 } },
-      headers: { "apns-priority": "5", "apns-push-type": "background" },
+      headers: { "apns-priority": "10", "apns-push-type": "background" },
     },
   };
 
@@ -173,7 +177,7 @@ async function sendCancelMessage(fcmToken, callId) {
 exports.sendCallNotification = onDocumentCreated(
   {
     document: "calls/{callId}",
-    secrets:  [APNS_KEY_ID, APNS_TEAM_ID, APNS_KEY_P8],
+    // secrets:  [APNS_KEY_ID, APNS_TEAM_ID, APNS_KEY_P8],  // DISABLED
   },
   async (event) => {
     const callId = event.params.callId;           // ← correct way to get the doc ID
@@ -229,22 +233,21 @@ exports.sendCallNotification = onDocumentCreated(
     }
 
     // ── 2. APNs VoIP push (iOS background/killed via PushKit) ──────────────
-    // Required to wake a killed iOS app and show the native CallKit screen.
-    // Secrets must be configured; silently skipped if not set.
-    if (voipToken) {
-      const provider = buildApnProvider(
-        APNS_KEY_ID.value(),
-        APNS_TEAM_ID.value(),
-        APNS_KEY_P8.value(),
-      );
-      if (provider) {
-        tasks.push(
-          sendVoipPush(provider, voipToken, callData)
-            .catch((err) => console.error("[APNs] VoIP push error:", err.message))
-            .finally(() => provider.shutdown())
-        );
-      }
-    }
+    // TEMPORARILY DISABLED: Enable Secret Manager API first
+    // if (voipToken) {
+    //   const provider = buildApnProvider(
+    //     APNS_KEY_ID.value(),
+    //     APNS_TEAM_ID.value(),
+    //     APNS_KEY_P8.value(),
+    //   );
+    //   if (provider) {
+    //     tasks.push(
+    //       sendVoipPush(provider, voipToken, callData)
+    //         .catch((err) => console.error("[APNs] VoIP push error:", err.message))
+    //         .finally(() => provider.shutdown())
+    //     );
+    //   }
+    // }
 
     await Promise.allSettled(tasks);
   }
@@ -305,7 +308,7 @@ const CALL_TIMEOUT_SECONDS = 45;
 exports.sendGroupCallNotification = onDocumentCreated(
   {
     document: "group_calls/{callId}",
-    secrets:  [APNS_KEY_ID, APNS_TEAM_ID, APNS_KEY_P8],
+    // secrets:  [APNS_KEY_ID, APNS_TEAM_ID, APNS_KEY_P8],  // DISABLED
   },
   async (event) => {
     const callId = event.params.callId;
