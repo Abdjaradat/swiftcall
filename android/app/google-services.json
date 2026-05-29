@@ -14,27 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "1082599622155-dqh5hhslt8bm0mf65bqgug099j5mn4ra.apps.googleusercontent.com",
+          "client_id": "1082599622155-8d3sb994ka8qhd0eobe0oh2eaf1glpna.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.swiftcall.app",
-            "certificate_hash": "507dd74e0794708369d84dd986ee51bec52f6328"
-          }
-        },
-        {
-          "client_id": "1082599622155-ju4j3s6ot70ifjtfbnjo0233ik1p7b9t.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.swiftcall.app",
-            "certificate_hash": "e314d8fa34fc3e41d264433bd4f403945189e7ff"
-          }
-        },
-        {
-          "client_id": "1082599622155-td8nsrab3bh6196nfpj1bsdmaqm0ts18.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.swiftcall.app",
-            "certificate_hash": "647e89395639f6925f052724684a1166ea3bb4bb"
+            "certificate_hash": "c560fd0e63fb4459a465869bb4ab3d3fa4e4447a"
           }
         },
         {
