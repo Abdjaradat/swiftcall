@@ -57,6 +57,7 @@ class AuthService {
           .collection('users')
           .doc(user.uid)
           .set(userModel.toMap(), SetOptions(merge: true));
+      await _ensureFriendRequestFields(user.uid);
       await TokenService.instance.initWallet(user.uid);
     } catch (_) {}
 
@@ -96,6 +97,7 @@ class AuthService {
           .collection('users')
           .doc(user.uid)
           .set(userModel.toMap(), SetOptions(merge: true));
+      await _ensureFriendRequestFields(user.uid);
       await TokenService.instance.initWallet(user.uid);
     } catch (_) {}
     return userModel;
@@ -131,6 +133,7 @@ class AuthService {
           .collection('users')
           .doc(user.uid)
           .set(userModel.toMap(), SetOptions(merge: true));
+      await _ensureFriendRequestFields(user.uid);
       await TokenService.instance.initWallet(user.uid);
     } catch (_) {}
 
@@ -175,6 +178,7 @@ class AuthService {
       );
       await _db.collection('users').doc(firebaseUser.uid)
           .set(userModel.toMap(), SetOptions(merge: true));
+      await _ensureFriendRequestFields(firebaseUser.uid);
       await TokenService.instance.initWallet(firebaseUser.uid);
       return userModel;
     } catch (_) {
@@ -226,6 +230,10 @@ class AuthService {
     final uid = currentUserId;
     if (uid == null) return;
     try {
+      // Ensure both users have the friend request fields initialized
+      await _ensureFriendRequestFields(uid);
+      await _ensureFriendRequestFields(targetUid);
+
       final batch = _db.batch();
       batch.update(_db.collection('users').doc(uid), {
         'outgoingRequests': FieldValue.arrayUnion([targetUid]),
@@ -239,6 +247,29 @@ class AuthService {
       print('AuthService.sendFriendRequest ERROR: $e');
       print('STACK: $stack');
       rethrow;
+    }
+  }
+
+  Future<void> _ensureFriendRequestFields(String uid) async {
+    try {
+      final doc = await _db.collection('users').doc(uid).get();
+      if (!doc.exists) return;
+
+      final data = doc.data()!;
+      final needsUpdate = !data.containsKey('contacts') ||
+          !data.containsKey('incomingRequests') ||
+          !data.containsKey('outgoingRequests');
+
+      if (needsUpdate) {
+        await _db.collection('users').doc(uid).set({
+          'contacts': [],
+          'incomingRequests': [],
+          'outgoingRequests': [],
+        }, SetOptions(merge: true));
+        print('AuthService._ensureFriendRequestFields: Initialized fields for $uid');
+      }
+    } catch (e) {
+      print('AuthService._ensureFriendRequestFields ERROR: $e');
     }
   }
 
