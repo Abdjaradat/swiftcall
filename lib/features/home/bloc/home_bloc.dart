@@ -51,8 +51,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeLoadUsers event,
     Emitter<HomeState> emit,
   ) async {
-    final me = await AuthService.instance.getCurrentUserModel();
-    final myUid = me?.uid ?? AuthService.instance.currentUserId ?? '';
+    // Auth guard: ensure user is logged in before querying Firestore
+    final myUid = AuthService.instance.currentUserId;
+    if (myUid == null || myUid.isEmpty) {
+      print('HomeBloc._onLoadUsers: User not authenticated, skipping');
+      return;
+    }
 
     try {
       final allUsers = await AuthService.instance.getAllUsers();

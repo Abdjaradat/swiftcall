@@ -35,8 +35,14 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     _tabCtrl = TabController(length: 3, vsync: this);
+    // Load chats immediately (rules allow read if auth != null)
     context.read<HomeBloc>().add(HomeLoadChats());
-    context.read<HomeBloc>().add(HomeLoadUsers());
+    // Delay loading users until next frame to ensure auth is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<HomeBloc>().add(HomeLoadUsers());
+      }
+    });
   }
 
   @override
