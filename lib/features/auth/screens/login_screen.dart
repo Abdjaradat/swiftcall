@@ -51,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen>
         backgroundColor: AppColors.background,
         body: Stack(
           children: [
-            // â”€â”€ Animated background blobs â”€â”€
+            // ── Animated background blobs ──
             _AnimatedBlob(
                 ctrl: _bgCtrl,
                 alignment: const Alignment(-0.9, -0.9),
@@ -71,10 +71,10 @@ class _LoginScreenState extends State<LoginScreen>
                 size: 200,
                 delay: 0.6),
 
-            // â”€â”€ Subtle dot grid â”€â”€
+            // ── Subtle dot grid ──
             Positioned.fill(child: CustomPaint(painter: _GridPainter())),
 
-            // â”€â”€ Main content â”€â”€
+            // ── Main content ──
             SafeArea(
               child: Column(
                 children: [
@@ -128,15 +128,15 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   String _localizeError(String e) {
-    if (e.contains('network')) return 'ØªØ­Ù‚Ù‚ Ù…Ù† Ø§ØªØµØ§Ù„Ùƒ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª';
-    if (e.contains('cancel')) return 'ØªÙ… Ø¥Ù„ØºØ§Ø¡ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„';
-    if (e.contains('account-exists')) return 'Ù‡Ø°Ø§ Ø§Ù„Ø¨Ø±ÙŠØ¯ Ù…Ø±ØªØ¨Ø· Ø¨Ø­Ø³Ø§Ø¨ Ø¢Ø®Ø±';
-    if (e.contains('sign_in_failed')) return 'ÙØ´Ù„ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ â€” ØªØ£ÙƒØ¯ Ù…Ù† Ø¥Ø¹Ø¯Ø§Ø¯ Google Sign-In';
-    return 'Ø­Ø¯Ø« Ø®Ø·Ø£ØŒ Ø­Ø§ÙˆÙ„ Ù…Ø¬Ø¯Ø¯Ø§Ù‹';
+    if (e.contains('network')) return 'تحقق من اتصالك بالإنترنت';
+    if (e.contains('cancel')) return 'تم إلغاء تسجيل الدخول';
+    if (e.contains('account-exists')) return 'هذا البريد مرتبط بحساب آخر';
+    if (e.contains('sign_in_failed')) return 'فشل تسجيل الدخول — تأكد من إعداد Google Sign-In';
+    return 'حدث خطأ، حاول مجدداً';
   }
 }
 
-// â”€â”€ Logo Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Logo Section ───────────────────────────────────────────
 class _LogoSection extends StatelessWidget {
   const _LogoSection();
 
@@ -210,7 +210,7 @@ class _LogoSection extends StatelessWidget {
         const SizedBox(height: 10),
 
         Text(
-          'ØªÙˆØ§ØµÙ„ Ø¨Ø³Ø±Ø¹Ø© â€¢ Ø§Ø¨Ù‚ÙŽ Ø¹Ù„Ù‰ ØªÙˆØ§ØµÙ„',
+          'تواصل بسرعة • ابقَ على تواصل',
           style: GoogleFonts.cairo(
             fontSize: 15,
             color: AppColors.textSecondary,
@@ -230,15 +230,15 @@ class _LogoSection extends StatelessWidget {
   }
 }
 
-// â”€â”€ Feature Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Feature Row ────────────────────────────────────────────
 class _FeatureRow extends StatelessWidget {
   const _FeatureRow();
 
   static const _features = [
-    _FeatureData('ðŸ“¹', 'ÙÙŠØ¯ÙŠÙˆ', AppColors.primary),
-    _FeatureData('ðŸŽ™ï¸', 'ØµÙˆØª', AppColors.secondary),
-    _FeatureData('ðŸ’¬', 'Ø´Ø§Øª', Color(0xFFFF6B6B)),
-    _FeatureData('ðŸ”’', 'Ù…Ø´ÙØ±', Color(0xFFFFB344)),
+    _FeatureData('📹', 'فيديو', AppColors.primary),
+    _FeatureData('🎙️', 'صوت', AppColors.secondary),
+    _FeatureData('💬', 'شات', Color(0xFFFF6B6B)),
+    _FeatureData('🔒', 'مشفر', Color(0xFFFFB344)),
   ];
 
   @override
@@ -313,7 +313,7 @@ class _FeatureCard extends StatelessWidget {
   }
 }
 
-// â”€â”€ Auth Form (Email + Google) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Auth Form (Email + Google) ─────────────────────────────
 class _AuthForm extends StatefulWidget {
   const _AuthForm();
   @override
@@ -397,13 +397,13 @@ class _AuthFormState extends State<_AuthForm> {
           backgroundColor: const Color(0xFF1E1E2E),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text('Ù†Ø³ÙŠØª ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±ØŸ',
+          title: Text('نسيت كلمة المرور؟',
               style: GoogleFonts.cairo(
                   color: Colors.white, fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Ø£Ø¯Ø®Ù„ Ø¨Ø±ÙŠØ¯Ùƒ ÙˆØ³Ù†Ø±Ø³Ù„ Ù„Ùƒ Ø±Ø§Ø¨Ø· Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„ØªØ¹ÙŠÙŠÙ†',
+              Text('أدخل بريدك وسنرسل لك رابط إعادة التعيين',
                   style:
                       GoogleFonts.cairo(color: Colors.white70, fontSize: 13)),
               const SizedBox(height: 16),
@@ -412,7 +412,7 @@ class _AuthFormState extends State<_AuthForm> {
                 keyboardType: TextInputType.emailAddress,
                 style: GoogleFonts.cairo(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ',
+                  hintText: 'البريد الإلكتروني',
                   hintStyle: GoogleFonts.cairo(color: Colors.white38),
                   prefixIcon: const Icon(Icons.email_outlined,
                       color: Colors.white38, size: 20),
@@ -429,7 +429,7 @@ class _AuthFormState extends State<_AuthForm> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx),
-              child: Text('Ø¥Ù„ØºØ§Ø¡',
+              child: Text('إلغاء',
                   style: GoogleFonts.cairo(color: Colors.white54)),
             ),
             ElevatedButton(
@@ -454,7 +454,7 @@ class _AuthFormState extends State<_AuthForm> {
                               backgroundColor: const Color(0xFF1E1E2E),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20)),
-                              title: Text('ðŸ“§ ØªÙ… Ø§Ù„Ø¥Ø±Ø³Ø§Ù„!',
+                              title: Text('📧 تم الإرسال!',
                                   style: GoogleFonts.cairo(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold)),
@@ -462,7 +462,7 @@ class _AuthFormState extends State<_AuthForm> {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Ø£ÙØ±Ø³Ù„ Ø¥ÙŠÙ…ÙŠÙ„ Ø¥Ù„Ù‰:',
+                                  Text('أُرسل إيميل إلى:',
                                       style: GoogleFonts.cairo(
                                           color: Colors.white70, fontSize: 13)),
                                   const SizedBox(height: 4),
@@ -473,11 +473,11 @@ class _AuthFormState extends State<_AuthForm> {
                                           fontWeight: FontWeight.bold)),
                                   const SizedBox(height: 16),
                                   Text(
-                                    '1ï¸âƒ£ Ø§ÙØªØ­ Ø¥ÙŠÙ…ÙŠÙ„Ùƒ\n'
-                                    '2ï¸âƒ£ Ø§Ø¨Ø­Ø« Ø¹Ù† Ø±Ø³Ø§Ù„Ø© Ù…Ù† SwiftCall Ø£Ùˆ noreply@firebase\n'
-                                    '3ï¸âƒ£ Ø§Ø¶ØºØ· Ø¹Ù„Ù‰ Ø§Ù„Ø±Ø§Ø¨Ø· Ø¯Ø§Ø®Ù„ Ø§Ù„Ø¥ÙŠÙ…ÙŠÙ„\n'
-                                    '4ï¸âƒ£ Ø³ØªÙØªØ­ ØµÙØ­Ø© ØªØ­Ø¯Ø¯ ÙÙŠÙ‡Ø§ Ø¨Ø§Ø³ÙˆØ±Ø¯ Ø¬Ø¯ÙŠØ¯\n'
-                                    '5ï¸âƒ£ Ø§Ø±Ø¬Ø¹ Ù„Ù„ØªØ·Ø¨ÙŠÙ‚ ÙˆØ§Ø¯Ø®Ù„ Ø¨Ø§Ù„Ø¨Ø§Ø³ÙˆØ±Ø¯ Ø§Ù„Ø¬Ø¯ÙŠØ¯',
+                                    '1️⃣ افتح إيميلك\n'
+                                    '2️⃣ ابحث عن رسالة من SwiftCall أو noreply@firebase\n'
+                                    '3️⃣ اضغط على الرابط داخل الإيميل\n'
+                                    '4️⃣ ستفتح صفحة تحدد فيها باسورد جديد\n'
+                                    '5️⃣ ارجع للتطبيق وادخل بالباسورد الجديد',
                                     style: GoogleFonts.cairo(
                                         color: Colors.white70, fontSize: 13, height: 1.8),
                                   ),
@@ -490,7 +490,7 @@ class _AuthFormState extends State<_AuthForm> {
                                       border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
                                     ),
                                     child: Text(
-                                      'âš ï¸ Ø¥Ø°Ø§ Ù…Ø§ ÙˆØµÙ„ Ø§Ù„Ø¥ÙŠÙ…ÙŠÙ„ ØªØ­Ù‚Ù‚ Ù…Ù† Ù…Ø¬Ù„Ø¯ Spam/Ø¬unk',
+                                      '⚠️ إذا ما وصل الإيميل تحقق من مجلد Spam/جunk',
                                       style: GoogleFonts.cairo(
                                           color: Colors.orange, fontSize: 12),
                                     ),
@@ -505,7 +505,7 @@ class _AuthFormState extends State<_AuthForm> {
                                         borderRadius: BorderRadius.circular(12)),
                                   ),
                                   onPressed: () => Navigator.pop(ctx),
-                                  child: Text('ÙÙ‡Ù…Øª âœ…',
+                                  child: Text('فهمت ✅',
                                       style: GoogleFonts.cairo(
                                           color: Colors.white)),
                                 ),
@@ -517,7 +517,7 @@ class _AuthFormState extends State<_AuthForm> {
                         setDialogState(() => sending = false);
                         if (ctx.mounted) {
                           ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-                            content: Text('Ø§Ù„Ø¨Ø±ÙŠØ¯ ØºÙŠØ± Ù…Ø³Ø¬Ù‘Ù„',
+                            content: Text('البريد غير مسجّل',
                                 style: GoogleFonts.cairo()),
                             backgroundColor: Colors.red,
                             behavior: SnackBarBehavior.floating,
@@ -531,7 +531,7 @@ class _AuthFormState extends State<_AuthForm> {
                       height: 18,
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white))
-                  : Text('Ø¥Ø±Ø³Ø§Ù„', style: GoogleFonts.cairo(color: Colors.white)),
+                  : Text('إرسال', style: GoogleFonts.cairo(color: Colors.white)),
             ),
           ],
         ),
@@ -551,31 +551,31 @@ class _AuthFormState extends State<_AuthForm> {
             key: _formKey,
             child: Column(
               children: [
-                // â”€â”€ Name field (register only) â”€â”€
+                // ── Name field (register only) ──
                 if (_isRegister) ...[
                   _field(
                     controller: _nameCtrl,
-                    hint: 'Ø§Ø³Ù…Ùƒ',
+                    hint: 'اسمك',
                     icon: Icons.person_outline_rounded,
                     validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Ø£Ø¯Ø®Ù„ Ø§Ø³Ù…Ùƒ' : null,
+                        (v == null || v.trim().isEmpty) ? 'أدخل اسمك' : null,
                   ),
                   const SizedBox(height: 12),
                 ],
-                // â”€â”€ Email â”€â”€
+                // ── Email ──
                 _field(
                   controller: _emailCtrl,
-                  hint: 'Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ',
+                  hint: 'البريد الإلكتروني',
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) =>
-                      (v == null || !v.contains('@')) ? 'Ø¨Ø±ÙŠØ¯ ØºÙŠØ± ØµØ­ÙŠØ­' : null,
+                      (v == null || !v.contains('@')) ? 'بريد غير صحيح' : null,
                 ),
                 const SizedBox(height: 12),
-                // â”€â”€ Password â”€â”€
+                // ── Password ──
                 _field(
                   controller: _passCtrl,
-                  hint: 'ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±',
+                  hint: 'كلمة المرور',
                   icon: Icons.lock_outline_rounded,
                   obscure: _obscure,
                   suffix: IconButton(
@@ -587,9 +587,9 @@ class _AuthFormState extends State<_AuthForm> {
                     onPressed: () => setState(() => _obscure = !_obscure),
                   ),
                   validator: (v) =>
-                      (v == null || v.length < 6) ? 'Ø¹Ù„Ù‰ Ø§Ù„Ø£Ù‚Ù„ 6 Ø£Ø­Ø±Ù' : null,
+                      (v == null || v.length < 6) ? 'على الأقل 6 أحرف' : null,
                 ),
-                // â”€â”€ Remember me + Forgot password (login only) â”€â”€
+                // ── Remember me + Forgot password (login only) ──
                 if (!_isRegister) ...[
                   const SizedBox(height: 4),
                   Row(
@@ -607,7 +607,7 @@ class _AuthFormState extends State<_AuthForm> {
                               borderRadius: BorderRadius.circular(4)),
                         ),
                       ),
-                      Text('ØªØ°ÙƒØ±Ù†ÙŠ',
+                      Text('تذكرني',
                           style: GoogleFonts.cairo(
                               color: Colors.white70, fontSize: 13)),
                       const Spacer(),
@@ -617,7 +617,7 @@ class _AuthFormState extends State<_AuthForm> {
                             padding: EdgeInsets.zero,
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                        child: Text('Ù†Ø³ÙŠØª ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±ØŸ',
+                        child: Text('نسيت كلمة المرور؟',
                             style: GoogleFonts.cairo(
                                 color: AppColors.primary,
                                 fontSize: 13,
@@ -627,7 +627,7 @@ class _AuthFormState extends State<_AuthForm> {
                   ),
                 ],
                 const SizedBox(height: 12),
-                // â”€â”€ Submit button â”€â”€
+                // ── Submit button ──
                 SizedBox(
                   width: double.infinity,
                   height: 54,
@@ -645,7 +645,7 @@ class _AuthFormState extends State<_AuthForm> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.5, color: Colors.white))
                         : Text(
-                            _isRegister ? 'Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨' : 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„',
+                            _isRegister ? 'إنشاء حساب' : 'تسجيل الدخول',
                             style: GoogleFonts.cairo(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -654,32 +654,32 @@ class _AuthFormState extends State<_AuthForm> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                // â”€â”€ Toggle login / register â”€â”€
+                // ── Toggle login / register ──
                 TextButton(
                   onPressed: () => setState(() => _isRegister = !_isRegister),
                   child: Text(
                     _isRegister
-                        ? 'Ø¹Ù†Ø¯Ùƒ Ø­Ø³Ø§Ø¨ØŸ Ø³Ø¬Ù‘Ù„ Ø§Ù„Ø¯Ø®ÙˆÙ„'
-                        : 'Ù…Ø§ Ø¹Ù†Ø¯Ùƒ Ø­Ø³Ø§Ø¨ØŸ Ø£Ù†Ø´Ø¦ ÙˆØ§Ø­Ø¯Ø§Ù‹',
+                        ? 'عندك حساب؟ سجّل الدخول'
+                        : 'ما عندك حساب؟ أنشئ واحداً',
                     style: GoogleFonts.cairo(
                         color: AppColors.primary, fontSize: 13),
                   ),
                 ),
-                // â”€â”€ OR divider â”€â”€
+                // ── OR divider ──
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(children: [
                     const Expanded(child: Divider(color: Colors.white24)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('Ø£Ùˆ',
+                      child: Text('أو',
                           style: GoogleFonts.cairo(
                               color: Colors.white38, fontSize: 13)),
                     ),
                     const Expanded(child: Divider(color: Colors.white24)),
                   ]),
                 ),
-                // â”€â”€ Google button â”€â”€
+                // ── Google button ──
                 const _GoogleSignInButton(),
                 const SizedBox(height: 12),
                 const _PrivacyNote(),
@@ -733,7 +733,7 @@ class _AuthFormState extends State<_AuthForm> {
   }
 }
 
-// â”€â”€ Google Sign-In Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Google Sign-In Button ──────────────────────────────────
 class _GoogleSignInButton extends StatelessWidget {
   const _GoogleSignInButton();
 
@@ -795,7 +795,7 @@ class _GoogleSignInButton extends StatelessWidget {
                             const _GoogleLogo(),
                             const SizedBox(width: 14),
                             Text(
-                              'Ù…ØªØ§Ø¨Ø¹Ø© Ù…Ø¹ Google',
+                              'متابعة مع Google',
                               style: GoogleFonts.cairo(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
@@ -823,7 +823,7 @@ class _GoogleSignInButton extends StatelessWidget {
   }
 }
 
-// â”€â”€ Google Logo (real G logo) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Google Logo (real G logo) ──────────────────────────────
 class _GoogleLogo extends StatelessWidget {
   const _GoogleLogo();
 
@@ -897,7 +897,7 @@ class _GoogleGPainter extends CustomPainter {
   bool shouldRepaint(_) => false;
 }
 
-// â”€â”€ Privacy Note â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Privacy Note ───────────────────────────────────────────
 class _PrivacyNote extends StatelessWidget {
   const _PrivacyNote();
 
@@ -911,18 +911,18 @@ class _PrivacyNote extends StatelessWidget {
         decoration: TextDecoration.underline);
     return Text.rich(
       TextSpan(
-        text: 'Ø¨Ø§Ù„Ù…ØªØ§Ø¨Ø¹Ø© ØªÙˆØ§ÙÙ‚ Ø¹Ù„Ù‰ ',
+        text: 'بالمتابعة توافق على ',
         style: base,
         children: [
           TextSpan(
-            text: 'Ø´Ø±ÙˆØ· Ø§Ù„Ø®Ø¯Ù…Ø©',
+            text: 'شروط الخدمة',
             style: link,
             recognizer: TapGestureRecognizer()
               ..onTap = () => context.push(AppRouter.terms),
           ),
-          TextSpan(text: ' Ùˆ', style: base),
+          TextSpan(text: ' و', style: base),
           TextSpan(
-            text: 'Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø®ØµÙˆØµÙŠØ©',
+            text: 'سياسة الخصوصية',
             style: link,
             recognizer: TapGestureRecognizer()
               ..onTap = () => context.push(AppRouter.privacy),
@@ -934,7 +934,7 @@ class _PrivacyNote extends StatelessWidget {
   }
 }
 
-// â”€â”€ Animated Background Blob â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Animated Background Blob ───────────────────────────────
 class _AnimatedBlob extends StatelessWidget {
   final AnimationController ctrl;
   final Alignment alignment;
@@ -983,7 +983,7 @@ class _AnimatedBlob extends StatelessWidget {
   }
 }
 
-// â”€â”€ Dot Grid Background â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Dot Grid Background ────────────────────────────────────
 class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
