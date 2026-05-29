@@ -11,12 +11,14 @@ service cloud.firestore {
       allow create, delete: if request.auth != null && request.auth.uid == userId;
 
       // Owner can update their own data, OR
-      // Friends can update contacts/requests fields
+      // Friends can update contacts/requests fields (check both old and new data)
       allow update: if request.auth != null && (
         request.auth.uid == userId ||
-        request.auth.uid in resource.data.contacts ||
-        request.auth.uid in resource.data.incomingRequests ||
-        request.auth.uid in resource.data.outgoingRequests
+        (resource.data.keys().hasAll(['contacts']) && request.auth.uid in resource.data.contacts) ||
+        (resource.data.keys().hasAll(['incomingRequests']) && request.auth.uid in resource.data.incomingRequests) ||
+        (resource.data.keys().hasAll(['outgoingRequests']) && request.auth.uid in resource.data.outgoingRequests) ||
+        // Allow if updating friend request fields
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['contacts', 'incomingRequests', 'outgoingRequests', 'lastSeen']))
       );
     }
 
