@@ -130,19 +130,29 @@ async function sendFcmDataMessage(fcmToken, callData) {
       callType:    callData.callType   || "audio",
       roomName:    callData.roomName   || "",
     },
-    // Android: highest delivery priority, 45 s TTL (matches call timeout)
+    // Android: highest delivery priority, 30s TTL
     android: {
       priority: "high",
-      ttl:      45000,
+      ttl:      30000,
       notification: {
-        channelId: "swiftcall_calls",
+        channel_id: "swiftcall_calls",
+        default_vibrate_timings: true,
+        default_sound: true,
+        notification_priority: "PRIORITY_MAX",
       },
     },
-    // iOS: silent background wakeup (belt-and-suspenders for foreground state;
-    // killed/background state is handled by the VoIP push below).
+    // iOS: background content-available wake + high priority
     apns: {
-      payload: { aps: { "content-available": 1 } },
-      headers: { "apns-priority": "10", "apns-push-type": "background" },
+      payload: {
+        aps: {
+          "content-available": 1,
+          sound: "ringtone.wav",
+        }
+      },
+      headers: {
+        "apns-priority": "10",
+        "apns-push-type": "background",
+      },
     },
   };
 
