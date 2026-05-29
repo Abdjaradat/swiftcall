@@ -20,6 +20,11 @@ class GroupCallToggleCamera  extends GroupCallEvent {}
 class GroupCallSwitchCamera  extends GroupCallEvent {}
 class GroupCallToggleSpeaker extends GroupCallEvent {}
 
+class GroupCallAddParticipants extends GroupCallEvent {
+  final List<UserModel> newParticipants;
+  GroupCallAddParticipants(this.newParticipants);
+}
+
 class _GroupCallTick extends GroupCallEvent {
   final Duration elapsed;
   _GroupCallTick(this.elapsed);

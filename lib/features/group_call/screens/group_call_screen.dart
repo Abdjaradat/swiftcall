@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:livekit_client/livekit_client.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../data/models/user_model.dart';
 import '../../../data/services/livekit_service.dart';
+import '../../home/bloc/home_bloc.dart';
 import '../bloc/group_call_bloc.dart';
 
 class GroupCallScreen extends StatefulWidget {
@@ -458,6 +461,14 @@ class _GroupCallControls extends StatelessWidget {
   final bool isVideo;
   const _GroupCallControls({required this.state, required this.isVideo});
 
+  void _showAddParticipantsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      builder: (_) => _AddParticipantsSheet(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isMicOn =
@@ -472,6 +483,17 @@ class _GroupCallControls extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Add Participants button (creator only)
+        if (isCreator) ...[
+          _Btn(
+            icon: Icons.person_add_rounded,
+            color: AppColors.primary.withValues(alpha: 0.25),
+            iconColor: AppColors.primary,
+            onTap: () => _showAddParticipantsSheet(context),
+          ),
+          const SizedBox(height: 16),
+        ],
+
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -581,6 +603,114 @@ class _Btn extends StatelessWidget {
         decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         child: Icon(icon, color: iconColor, size: 24),
       ),
+    );
+  }
+}
+
+// ── Add Participants Sheet ────────────────────────────────────────────────────
+
+class _AddParticipantsSheet extends StatefulWidget {
+  @override
+  State<_AddParticipantsSheet> createState() => _AddParticipantsSheetState();
+}
+
+class _AddParticipantsSheetState extends State<_AddParticipantsSheet> {
+  final Set<UserModel> _selected = {};
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        if (state is! HomeLoaded) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final contacts = state.contacts;
+
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'إضافة متصلين',
+                    style: GoogleFonts.cairo(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: contacts.isEmpty
+                    ? Center(
+                        child: Text(
+                          'لا يوجد جهات اتصال',
+                          style: GoogleFonts.cairo(color: Colors.white54),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: contacts.length,
+                        itemBuilder: (_, i) {
+                          final user = contacts[i];
+                          final isSelected = _selected.contains(user);
+                          return CheckboxListTile(
+                            value: isSelected,
+                            onChanged: (v) {
+                              setState(() {
+                                if (v == true) {
+                                  _selected.add(user);
+                                } else {
+                                  _selected.remove(user);
+                                }
+                              });
+                            },
+                            title: Text(
+                              user.name,
+                              style: GoogleFonts.cairo(color: Colors.white),
+                            ),
+                            secondary: CircleAvatar(
+                              backgroundImage: user.photoUrl != null
+                                  ? NetworkImage(user.photoUrl!)
+                                  : null,
+                              child: user.photoUrl == null
+                                  ? const Icon(Icons.person)
+                                  : null,
+                            ),
+                          );
+                        },
+                      ),
+              ),
+              if (_selected.isNotEmpty)
+                ElevatedButton.icon(
+                  onPressed: () {
+                    context
+                        .read<GroupCallBloc>()
+                        .add(GroupCallAddParticipants(_selected.toList()));
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.person_add_rounded),
+                  label: Text(
+                    'إضافة (${_selected.length})',
+                    style: GoogleFonts.cairo(fontWeight: FontWeight.w700),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

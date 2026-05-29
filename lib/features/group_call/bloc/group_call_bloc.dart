@@ -28,6 +28,7 @@ class GroupCallBloc extends Bloc<GroupCallEvent, GroupCallState> {
     on<GroupCallToggleCamera>(_onToggleCamera);
     on<GroupCallSwitchCamera>(_onSwitchCamera);
     on<GroupCallToggleSpeaker>(_onToggleSpeaker);
+    on<GroupCallAddParticipants>(_onAddParticipants);
     on<_GroupCallTick>(_onTick);
   }
 
@@ -271,6 +272,60 @@ class GroupCallBloc extends Bloc<GroupCallEvent, GroupCallState> {
       final cur = state as GroupCallActive;
       await LiveKitService.instance.enableSpeaker(!cur.isSpeakerOn);
       emit(cur.copyWith(isSpeakerOn: !cur.isSpeakerOn));
+    }
+  }
+
+  Future<void> _onAddParticipants(
+    GroupCallAddParticipants event,
+    Emitter<GroupCallState> emit,
+  ) async {
+    if (_activeCallId == null || state is! GroupCallActive) {
+      emit(GroupCallError('لا توجد مكالمة نشطة'));
+      return;
+    }
+
+    try {
+      final ref = FirebaseFirestore.instance
+          .collection('group_calls')
+          .doc(_activeCallId);
+
+      final doc = await ref.get();
+      if (!doc.exists) {
+        emit(GroupCallError('المكالمة غير موجودة'));
+        return;
+      }
+
+      // Get current participants
+      final data = doc.data()!;
+      final currentParticipants = (data['participants'] as List<dynamic>)
+          .map((p) => Map<String, dynamic>.from(p as Map))
+          .toList();
+
+      // Add new participants with 'invited' status
+      for (final user in event.newParticipants) {
+        // Check if already in call
+        if (currentParticipants.any((p) => p['uid'] == user.uid)) continue;
+
+        currentParticipants.add({
+          'uid': user.uid,
+          'name': user.name,
+          'photoUrl': user.photoUrl ?? '',
+          'status': 'invited',
+          'joinedAt': null,
+        });
+      }
+
+      // Update Firestore
+      await ref.update({'participants': currentParticipants});
+
+      // TODO: Send FCM notifications to new participants
+      // NotificationService.instance.sendGroupCallInvite(_activeCallId, newUsers);
+
+      emit(GroupCallError('تمت إضافة ${event.newParticipants.length} متصل'));
+    } catch (e, stack) {
+      print('GroupCallBloc._onAddParticipants ERROR: $e');
+      print('STACK: $stack');
+      emit(GroupCallError('فشل إضافة المتصلين'));
     }
   }
 
