@@ -28,6 +28,8 @@ class MessageListenerService : Service() {
         private const val TAG = "MessageListenerService"
         private const val CHANNEL_ID = "swiftcall_messages"
         private const val CHANNEL_NAME = "الرسائل"
+        private const val LISTENER_CHANNEL_ID = "swiftcall_message_listener"
+        private const val NOTIFICATION_ID = 1002
         private var instance: MessageListenerService? = null
         private val shownMessageIds = mutableSetOf<String>()
 
@@ -41,7 +43,8 @@ class MessageListenerService : Service() {
         super.onCreate()
         instance = this
         Log.d(TAG, "Service created")
-        createNotificationChannel()
+        createNotificationChannels()
+        startForeground(NOTIFICATION_ID, createListenerNotification())
         startListening()
     }
 
@@ -55,9 +58,12 @@ class MessageListenerService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun createNotificationChannel() {
+    private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
+            val notificationManager = getSystemService(NotificationManager::class.java)
+
+            // Channel for actual message notifications
+            val messageChannel = NotificationChannel(
                 CHANNEL_ID,
                 CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_HIGH
@@ -66,10 +72,30 @@ class MessageListenerService : Service() {
                 enableVibration(true)
                 setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), null)
             }
+            notificationManager.createNotificationChannel(messageChannel)
 
-            val notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(channel)
+            // Channel for listener service (low priority)
+            val listenerChannel = NotificationChannel(
+                LISTENER_CHANNEL_ID,
+                "خدمة الاستماع للرسائل",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "تعمل في الخلفية لاستقبال الرسائل"
+                setShowBadge(false)
+            }
+            notificationManager.createNotificationChannel(listenerChannel)
         }
+    }
+
+    private fun createListenerNotification(): android.app.Notification {
+        return NotificationCompat.Builder(this, LISTENER_CHANNEL_ID)
+            .setContentTitle("SwiftCall")
+            .setContentText("جاهز لاستقبال الرسائل")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .setShowWhen(false)
+            .build()
     }
 
     private fun startListening() {
