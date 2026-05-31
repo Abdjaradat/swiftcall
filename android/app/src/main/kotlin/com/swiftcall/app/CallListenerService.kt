@@ -5,10 +5,12 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.MetadataChanges
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 /**
  * Background service that listens to Firestore calls collection
@@ -45,7 +47,7 @@ class CallListenerService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun startListening() {
-        currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        currentUserId = Firebase.auth.currentUser?.uid
         if (currentUserId == null) {
             Log.w(TAG, "No authenticated user, stopping service")
             stopSelf()
@@ -55,7 +57,7 @@ class CallListenerService : Service() {
         Log.d(TAG, "Starting Firestore listener for user: $currentUserId")
 
         // Listen for new calls where receiverId == currentUserId and status == "ringing"
-        callsListener = FirebaseFirestore.getInstance()
+        callsListener = Firebase.firestore
             .collection("calls")
             .whereEqualTo("receiverId", currentUserId)
             .whereEqualTo("status", "ringing")
@@ -69,7 +71,7 @@ class CallListenerService : Service() {
 
                 // Process each new ringing call
                 for (doc in snapshots.documentChanges) {
-                    if (doc.type == com.google.firebase.firestore.DocumentChange.Type.ADDED) {
+                    if (doc.type == DocumentChange.Type.ADDED) {
                         val call = doc.document.data
                         handleIncomingCall(doc.document.id, call)
                     }

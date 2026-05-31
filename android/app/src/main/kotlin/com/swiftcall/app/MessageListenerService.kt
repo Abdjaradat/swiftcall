@@ -11,10 +11,12 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 /**
  * Background service that listens to new messages in all user's chats
@@ -71,7 +73,7 @@ class MessageListenerService : Service() {
     }
 
     private fun startListening() {
-        currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        currentUserId = Firebase.auth.currentUser?.uid
         if (currentUserId == null) {
             Log.w(TAG, "No authenticated user, stopping service")
             stopSelf()
@@ -81,7 +83,7 @@ class MessageListenerService : Service() {
         Log.d(TAG, "Starting Firestore listener for messages, user: $currentUserId")
 
         // Listen for all chats where user is a participant
-        val chatListener = FirebaseFirestore.getInstance()
+        val chatListener = Firebase.firestore
             .collection("chats")
             .whereArrayContains("participantIds", currentUserId!!)
             .addSnapshotListener { chatSnapshots, error ->
@@ -108,7 +110,7 @@ class MessageListenerService : Service() {
             return
         }
 
-        val messageListener = FirebaseFirestore.getInstance()
+        val messageListener = Firebase.firestore
             .collection("chats")
             .document(chatId)
             .collection("messages")
@@ -123,7 +125,7 @@ class MessageListenerService : Service() {
                 if (messageSnapshots == null || messageSnapshots.isEmpty) return@addSnapshotListener
 
                 for (doc in messageSnapshots.documentChanges) {
-                    if (doc.type == com.google.firebase.firestore.DocumentChange.Type.ADDED) {
+                    if (doc.type == DocumentChange.Type.ADDED) {
                         val message = doc.document.data
                         val messageId = doc.document.id
 

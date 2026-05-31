@@ -5,7 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 /**
  * Starts CallListenerService when device boots
@@ -25,7 +26,7 @@ class BootReceiver : BroadcastReceiver() {
                 Log.d(TAG, "Boot completed, starting listener services")
 
                 // Only start if user is logged in
-                if (FirebaseAuth.getInstance().currentUser != null) {
+                if (Firebase.auth.currentUser != null) {
                     // Start call listener
                     val callServiceIntent = Intent(context, CallListenerService::class.java)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
