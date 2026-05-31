@@ -23,7 +23,9 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
 
     private val CHANNEL = "com.swiftcall.app/call_manager"
+    private val LISTENER_CHANNEL = "com.swiftcall.app/call_listener"
     private lateinit var channel: MethodChannel
+    private lateinit var listenerChannel: MethodChannel
     private lateinit var telecomManager: TelecomManager
     private lateinit var phoneAccountHandle: PhoneAccountHandle
     private var wakeLock: PowerManager.WakeLock? = null
@@ -67,6 +69,42 @@ class MainActivity : FlutterActivity() {
                     } else result.error("INVALID_ARGS", "Missing uuid", null)
                 }
                 "getLastKnownLocation" -> result.success(getLastKnownLocation())
+                else -> result.notImplemented()
+            }
+        }
+
+        // Call Listener Service channel
+        listenerChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, LISTENER_CHANNEL)
+        listenerChannel.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "startCallListener" -> {
+                    val serviceIntent = Intent(this, CallListenerService::class.java)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(serviceIntent)
+                    } else {
+                        startService(serviceIntent)
+                    }
+                    result.success(true)
+                }
+                "stopCallListener" -> {
+                    val serviceIntent = Intent(this, CallListenerService::class.java)
+                    stopService(serviceIntent)
+                    result.success(true)
+                }
+                "startMessageListener" -> {
+                    val serviceIntent = Intent(this, MessageListenerService::class.java)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(serviceIntent)
+                    } else {
+                        startService(serviceIntent)
+                    }
+                    result.success(true)
+                }
+                "stopMessageListener" -> {
+                    val serviceIntent = Intent(this, MessageListenerService::class.java)
+                    stopService(serviceIntent)
+                    result.success(true)
+                }
                 else -> result.notImplemented()
             }
         }

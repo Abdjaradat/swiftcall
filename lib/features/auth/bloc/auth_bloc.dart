@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/services/auth_service.dart';
+import '../../../data/services/call_listener_service.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -22,6 +23,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final user = await AuthService.instance.getCurrentUserModel();
     if (user != null) {
       await AuthService.instance.setOnlineStatus(true);
+      // Start background Firestore listeners
+      await CallListenerServiceManager.start();
+      await CallListenerServiceManager.startMessageListener();
       emit(AuthAuthenticated(user));
     } else {
       emit(AuthUnauthenticated());
@@ -36,6 +40,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final user = await AuthService.instance.signInWithGoogle();
       if (user != null) {
+        // Start background Firestore listeners
+        await CallListenerServiceManager.start();
+        await CallListenerServiceManager.startMessageListener();
         emit(AuthAuthenticated(user));
       } else {
         emit(AuthUnauthenticated());
@@ -54,6 +61,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final user = await AuthService.instance.signInWithEmail(
           event.email, event.password);
       if (user != null) {
+        // Start background Firestore listeners
+        await CallListenerServiceManager.start();
+        await CallListenerServiceManager.startMessageListener();
         emit(AuthAuthenticated(user));
       } else {
         emit(AuthError('البريد أو الباسورد غير صحيح'));

@@ -130,6 +130,33 @@
             </intent-filter>
         </receiver>
 
+        <!-- ── Boot receiver (starts CallListenerService on boot) ──── -->
+        <receiver
+            android:name=".BootReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:directBootAware="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- ── Call Listener Service (Firestore background listener) ── -->
+        <service
+            android:name=".CallListenerService"
+            android:enabled="true"
+            android:exported="false"
+            android:stopWithTask="false"/>
+
+        <!-- ── Message Listener Service (Firestore messages listener) ── -->
+        <service
+            android:name=".MessageListenerService"
+            android:enabled="true"
+            android:exported="false"
+            android:stopWithTask="false"/>
+
         <meta-data
             android:name="flutterEmbedding"
             android:value="2"/>
