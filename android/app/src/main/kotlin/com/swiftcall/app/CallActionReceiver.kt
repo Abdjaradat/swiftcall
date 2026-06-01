@@ -42,6 +42,11 @@ class CallActionReceiver : BroadcastReceiver() {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 }
                 context.startActivity(launchIntent)
+                // Stop ringtone when call is answered
+                val stopIntent = Intent(context, CallForegroundService::class.java).apply {
+                    putExtra("action", "stop")
+                }
+                context.stopService(stopIntent)
             }
             "com.swiftcall.app.DECLINE_CALL" -> {
                 connection?.onReject()

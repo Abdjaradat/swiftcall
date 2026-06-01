@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
@@ -27,6 +29,8 @@ class CallForegroundService : Service() {
         private const val TAG              = "CallForegroundService"
         private const val PHONE_ACCOUNT_ID = "SwiftCallConnectionServiceId"
     }
+
+    private var mediaPlayer: MediaPlayer? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -86,6 +90,7 @@ class CallForegroundService : Service() {
         hasVideo: Boolean, roomName: String, callType: String
     ) {
         ensureChannel()
+        startRingtone()  // Start looping ringtone
 
         // Full-screen intent — launches MainActivity when screen is locked / app killed
         val fullScreenIntent = Intent(this, MainActivity::class.java).apply {
@@ -179,8 +184,47 @@ class CallForegroundService : Service() {
         }
     }
 
+    // ── MediaPlayer for looping ringtone ─────────────────────────────────
+
+    private fun startRingtone() {
+        try {
+            stopRingtone() // Stop any existing player
+
+            mediaPlayer = MediaPlayer().apply {
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+                setDataSource(this@CallForegroundService,
+                    Uri.parse("android.resource://${packageName}/raw/ringtone"))
+                isLooping = true  // Loop the ringtone!
+                prepare()
+                start()
+            }
+            Log.d(TAG, "Ringtone started (looping)")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start ringtone: ${e.message}")
+        }
+    }
+
+    private fun stopRingtone() {
+        mediaPlayer?.let {
+            try {
+                if (it.isPlaying) it.stop()
+                it.release()
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to stop ringtone: ${e.message}")
+            }
+        }
+        mediaPlayer = null
+        Log.d(TAG, "Ringtone stopped")
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        stopRingtone()
         NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
     }
 }
