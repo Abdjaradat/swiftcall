@@ -481,8 +481,8 @@ class _TokenManagementTabState extends State<_TokenManagementTab> {
       _message = null;
     });
     try {
-      final wallet = await TokenService.instance.getTokenWallet(user.uid);
-      setState(() => _currentBalance = wallet?.balance ?? 0);
+      final wallet = await TokenService.instance.getWallet(user.uid);
+      setState(() => _currentBalance = wallet.balance);
     } catch (e) {
       setState(() => _message = 'خطأ في تحميل الرصيد: $e');
     }
