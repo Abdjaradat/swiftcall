@@ -13,8 +13,8 @@ class AdService {
   static const _androidGameId = '800000852';
   static const _iosGameId     = '800000852';
 
-  static const _placementRewarded     = 'rewardedVideo';
-  static const _placementInterstitial = 'video';
+  static const _placementRewarded     = 'Rewarded_Android';
+  static const _placementInterstitial = 'Interstitial_Android';
   static const _placementBanner       = 'Banner_Android';
 
   String get _gameId => Platform.isAndroid ? _androidGameId : _iosGameId;

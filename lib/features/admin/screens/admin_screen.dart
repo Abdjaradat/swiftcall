@@ -1,9 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/token_model.dart';
+import '../../../data/models/user_model.dart';
 import '../../../data/services/admin_service.dart';
+import '../../../data/services/auth_service.dart';
 import '../../../data/services/token_service.dart';
 
 class AdminScreen extends StatefulWidget {
@@ -73,7 +76,7 @@ class _AdminPanelState extends State<_AdminPanel> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Column(
         children: [
           TabBar(
@@ -84,6 +87,7 @@ class _AdminPanelState extends State<_AdminPanel> {
             tabs: const [
               Tab(text: 'الباقات'),
               Tab(text: 'إضافة توكنز'),
+              Tab(text: 'التوكنز'),
             ],
           ),
           Expanded(
@@ -91,6 +95,7 @@ class _AdminPanelState extends State<_AdminPanel> {
               children: [
                 _PackagesTab(),
                 _CreditTab(),
+                _TokenManagementTab(),
               ],
             ),
           ),
@@ -407,5 +412,351 @@ class _CreditTabState extends State<_CreditTab> {
         _loading = false;
       });
     }
+  }
+}
+
+// ── Token Management Tab ────────────────────────────────────
+class _TokenManagementTab extends StatefulWidget {
+  const _TokenManagementTab();
+
+  @override
+  State<_TokenManagementTab> createState() => _TokenManagementTabState();
+}
+
+class _TokenManagementTabState extends State<_TokenManagementTab> {
+  final _searchCtrl = TextEditingController();
+  final _amountCtrl = TextEditingController();
+  UserModel? _selectedUser;
+  List<UserModel> _allUsers = [];
+  List<UserModel> _filteredUsers = [];
+  int? _currentBalance;
+  bool _loading = false;
+  String? _message;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsers();
+    _searchCtrl.addListener(_filterUsers);
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    _amountCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadUsers() async {
+    try {
+      final users = await AuthService.instance.getAllUsers();
+      setState(() {
+        _allUsers = users;
+        _filteredUsers = users;
+      });
+    } catch (e) {
+      print('Failed to load users: $e');
+    }
+  }
+
+  void _filterUsers() {
+    final query = _searchCtrl.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      setState(() => _filteredUsers = _allUsers);
+    } else {
+      setState(() {
+        _filteredUsers = _allUsers
+            .where((u) =>
+                u.name.toLowerCase().contains(query) ||
+                u.email.toLowerCase().contains(query))
+            .toList();
+      });
+    }
+  }
+
+  Future<void> _selectUser(UserModel user) async {
+    setState(() {
+      _selectedUser = user;
+      _currentBalance = null;
+      _message = null;
+    });
+    try {
+      final wallet = await TokenService.instance.getTokenWallet(user.uid);
+      setState(() => _currentBalance = wallet?.balance ?? 0);
+    } catch (e) {
+      setState(() => _message = 'خطأ في تحميل الرصيد: $e');
+    }
+  }
+
+  Future<void> _addTokens() async {
+    if (_selectedUser == null) return;
+    final amount = int.tryParse(_amountCtrl.text.trim());
+    if (amount == null || amount <= 0) {
+      setState(() => _message = 'أدخل عدد صحيح');
+      return;
+    }
+    setState(() { _loading = true; _message = null; });
+    try {
+      await AdminService.instance.addTokens(_selectedUser!.uid, amount);
+      final newBalance = (_currentBalance ?? 0) + amount;
+      setState(() {
+        _currentBalance = newBalance;
+        _message = 'تم إضافة $amount توكنز';
+        _loading = false;
+        _amountCtrl.clear();
+      });
+    } catch (e) {
+      setState(() { _message = 'خطأ: $e'; _loading = false; });
+    }
+  }
+
+  Future<void> _setBalance() async {
+    if (_selectedUser == null) return;
+    final amount = int.tryParse(_amountCtrl.text.trim());
+    if (amount == null || amount < 0) {
+      setState(() => _message = 'أدخل عدد صحيح (0 أو أكثر)');
+      return;
+    }
+    setState(() { _loading = true; _message = null; });
+    try {
+      await AdminService.instance.setTokenBalance(_selectedUser!.uid, amount);
+      setState(() {
+        _currentBalance = amount;
+        _message = 'تم تعيين الرصيد إلى $amount';
+        _loading = false;
+        _amountCtrl.clear();
+      });
+    } catch (e) {
+      setState(() { _message = 'خطأ: $e'; _loading = false; });
+    }
+  }
+
+  Future<void> _deductTokens() async {
+    if (_selectedUser == null) return;
+    final amount = int.tryParse(_amountCtrl.text.trim());
+    if (amount == null || amount <= 0) {
+      setState(() => _message = 'أدخل عدد صحيح');
+      return;
+    }
+    setState(() { _loading = true; _message = null; });
+    try {
+      await AdminService.instance.deductTokens(_selectedUser!.uid, amount);
+      final newBalance = (_currentBalance ?? 0) - amount;
+      setState(() {
+        _currentBalance = newBalance < 0 ? 0 : newBalance;
+        _message = 'تم خصم $amount توكنز';
+        _loading = false;
+        _amountCtrl.clear();
+      });
+    } catch (e) {
+      setState(() { _message = 'خطأ: $e'; _loading = false; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Search field
+          TextField(
+            controller: _searchCtrl,
+            decoration: InputDecoration(
+              labelText: 'بحث عن مستخدم (الاسم أو الإيميل)',
+              prefixIcon: const Icon(Icons.search_rounded),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            style: GoogleFonts.cairo(),
+          ),
+          const SizedBox(height: 16),
+
+          // User list
+          if (_selectedUser == null) ...[
+            Expanded(
+              child: _filteredUsers.isEmpty
+                  ? Center(
+                      child: Text(
+                        'لا يوجد مستخدمين',
+                        style: GoogleFonts.cairo(color: AppColors.textHint),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: _filteredUsers.length,
+                      itemBuilder: (_, i) {
+                        final u = _filteredUsers[i];
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundImage: u.photoUrl != null
+                                ? CachedNetworkImageProvider(u.photoUrl!)
+                                : null,
+                            child: u.photoUrl == null
+                                ? Text(u.initials,
+                                    style: GoogleFonts.poppins(fontSize: 12))
+                                : null,
+                          ),
+                          title: Text(u.name, style: GoogleFonts.cairo()),
+                          subtitle: Text(u.email,
+                              style: GoogleFonts.cairo(fontSize: 12)),
+                          onTap: () => _selectUser(u),
+                        );
+                      },
+                    ),
+            ),
+          ] else ...[
+            // Selected user card
+            Card(
+              color: AppColors.surface,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 28,
+                          backgroundImage: _selectedUser!.photoUrl != null
+                              ? CachedNetworkImageProvider(
+                                  _selectedUser!.photoUrl!)
+                              : null,
+                          child: _selectedUser!.photoUrl == null
+                              ? Text(_selectedUser!.initials,
+                                  style: GoogleFonts.poppins(fontSize: 16))
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(_selectedUser!.name,
+                                  style: GoogleFonts.cairo(
+                                      fontWeight: FontWeight.w600, fontSize: 16)),
+                              Text(_selectedUser!.email,
+                                  style: GoogleFonts.cairo(
+                                      fontSize: 12, color: AppColors.textHint)),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () => setState(() {
+                            _selectedUser = null;
+                            _currentBalance = null;
+                            _message = null;
+                            _amountCtrl.clear();
+                          }),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('💎', style: TextStyle(fontSize: 24)),
+                        const SizedBox(width: 8),
+                        Text(
+                          _currentBalance != null
+                              ? '$_currentBalance'
+                              : 'جاري التحميل...',
+                          style: GoogleFonts.poppins(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primary),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'توكنز',
+                          style: GoogleFonts.cairo(
+                              fontSize: 16, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Amount input
+            TextField(
+              controller: _amountCtrl,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'عدد التوكنز',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              style: GoogleFonts.cairo(),
+            ),
+            const SizedBox(height: 16),
+
+            // Action buttons
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: _loading ? null : _addTokens,
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: Text('إضافة', style: GoogleFonts.cairo()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: _loading ? null : _setBalance,
+                    icon: const Icon(Icons.edit_rounded, size: 18),
+                    label: Text('تعيين', style: GoogleFonts.cairo()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.secondary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: _loading ? null : _deductTokens,
+                    icon: const Icon(Icons.remove_rounded, size: 18),
+                    label: Text('خصم', style: GoogleFonts.cairo()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.callRed,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            if (_message != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                _message!,
+                style: GoogleFonts.cairo(
+                  color: _message!.contains('تم')
+                      ? AppColors.online
+                      : AppColors.callRed,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
   }
 }

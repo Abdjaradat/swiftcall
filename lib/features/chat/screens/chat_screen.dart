@@ -78,6 +78,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final other = widget.otherUser;
     return Scaffold(
       backgroundColor: AppColors.background,
+      resizeToAvoidBottomInset: true,
       appBar: _buildAppBar(other),
       body: BlocListener<ChatBloc, ChatState>(
         listener: (ctx, state) {
@@ -621,7 +622,12 @@ class _InputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+      padding: EdgeInsets.fromLTRB(
+        8,
+        8,
+        8,
+        8 + MediaQuery.of(context).viewInsets.bottom,
+      ),
       color: AppColors.surface,
       child: Row(
         children: [
