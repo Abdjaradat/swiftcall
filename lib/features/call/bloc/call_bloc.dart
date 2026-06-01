@@ -113,7 +113,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       return;
     }
 
-    // ── Firestore listener: remote rejected / missed → dismiss caller UI ──
+    // ── Firestore listener: remote rejected / missed / ended → dismiss caller UI ──
     _callStatusSub?.cancel();
     _callStatusSub = FirebaseFirestore.instance
         .collection('calls')
@@ -129,6 +129,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       } else if (status == 'missed') {
         _skipFirestoreWrite = true;
         _endReason = CallEndReason.noAnswer;
+        add(CallEnd());
+      } else if (status == 'ended') {
+        _skipFirestoreWrite = true;
+        _endReason = CallEndReason.normal;
         add(CallEnd());
       }
     });
@@ -206,6 +210,22 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       emit(CallFailed('فشل الاتصال'));
       return;
     }
+
+    // ── Firestore listener: caller ended / cancelled → dismiss receiver UI ──
+    _callStatusSub?.cancel();
+    _callStatusSub = FirebaseFirestore.instance
+        .collection('calls')
+        .doc(event.call.id)
+        .snapshots()
+        .listen((doc) {
+      if (!doc.exists || _activeCallId == null) return;
+      final status = doc.data()?['status'] as String?;
+      if (status == 'ended' || status == 'cancelled') {
+        _skipFirestoreWrite = true;
+        _endReason = CallEndReason.normal;
+        add(CallEnd());
+      }
+    });
 
     _watchForRemoteParticipant(
       room,
