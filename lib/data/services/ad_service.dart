@@ -8,7 +8,7 @@ class AdService {
   AdService._();
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Game ID الحقيقي من Unity Dashboard (حساب jaradatabdullah122)
+  // Game ID من Unity Dashboard (حساب jaradatabdullah122@gmail.com)
   // ─────────────────────────────────────────────────────────────────────────
   static const _androidGameId = '800000852';
   static const _iosGameId     = '800000852';
@@ -29,13 +29,15 @@ class AdService {
     if (_initialized) return;
     UnityAds.init(
       gameId: _gameId,
-      testMode: false,
+      testMode: false, // Production mode - إعلانات حقيقية
       onComplete: () {
+        print('✅ Unity Ads initialized successfully! GameID: $_gameId');
         _initialized = true;
         _loadRewarded();
         _loadInterstitial();
       },
       onFailed: (UnityAdsInitializationError error, String message) {
+        print('❌ Unity Ads initialization failed: $error - $message');
         _initialized = false;
       },
     );
@@ -43,20 +45,32 @@ class AdService {
 
   // ── Load helpers ──────────────────────────────────────────────────────────
   void _loadRewarded() {
+    print('🔄 Loading Rewarded Ad: $_placementRewarded');
     UnityAds.load(
       placementId: _placementRewarded,
-      onComplete: (String _) => _rewardedLoaded = true,
-      onFailed:   (String _, UnityAdsLoadError __, String ___) =>
-          _rewardedLoaded = false,
+      onComplete: (String placementId) {
+        print('✅ Rewarded Ad loaded: $placementId');
+        _rewardedLoaded = true;
+      },
+      onFailed: (String placementId, UnityAdsLoadError error, String message) {
+        print('❌ Rewarded Ad load failed: $placementId - $error - $message');
+        _rewardedLoaded = false;
+      },
     );
   }
 
   void _loadInterstitial() {
+    print('🔄 Loading Interstitial Ad: $_placementInterstitial');
     UnityAds.load(
       placementId: _placementInterstitial,
-      onComplete: (String _) => _interstitialLoaded = true,
-      onFailed:   (String _, UnityAdsLoadError __, String ___) =>
-          _interstitialLoaded = false,
+      onComplete: (String placementId) {
+        print('✅ Interstitial Ad loaded: $placementId');
+        _interstitialLoaded = true;
+      },
+      onFailed: (String placementId, UnityAdsLoadError error, String message) {
+        print('❌ Interstitial Ad load failed: $placementId - $error - $message');
+        _interstitialLoaded = false;
+      },
     );
   }
 
