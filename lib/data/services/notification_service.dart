@@ -251,7 +251,7 @@ class NotificationService {
       enableVibration: true,
       category: AndroidNotificationCategory.call,
       visibility: NotificationVisibility.public,
-      timeoutAfter: 45000,
+      timeoutAfter: 60000,
     );
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,

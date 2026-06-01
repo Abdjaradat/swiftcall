@@ -143,7 +143,7 @@ class CallForegroundService : Service() {
             .setOngoing(true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setSound(Uri.parse("android.resource://${packageName}/raw/ringtone"))
-            .setTimeoutAfter(45_000L)
+            .setTimeoutAfter(60_000L)
             .addAction(android.R.drawable.ic_menu_call,     "قبول",  answerPI)
             .addAction(android.R.drawable.ic_delete,        "رفض",   declinePI)
             .build()

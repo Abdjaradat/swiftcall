@@ -27,7 +27,7 @@ class AppConstants {
   static const String userIdKey          = 'userId';
 
   // Timeouts
-  static const Duration callTimeout    = Duration(seconds: 45);
+  static const Duration callTimeout    = Duration(seconds: 60);
   static const Duration typingTimeout  = Duration(seconds: 3);
 
   // Message limits
