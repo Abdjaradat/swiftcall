@@ -26,8 +26,8 @@ class MainActivity : FlutterActivity() {
     private val LISTENER_CHANNEL = "com.swiftcall.app/call_listener"
     private lateinit var channel: MethodChannel
     private lateinit var listenerChannel: MethodChannel
-    private lateinit var telecomManager: TelecomManager
-    private lateinit var phoneAccountHandle: PhoneAccountHandle
+    private var telecomManager: TelecomManager? = null
+    private var phoneAccountHandle: PhoneAccountHandle? = null
     private var wakeLock: PowerManager.WakeLock? = null
 
     companion object {
@@ -109,8 +109,17 @@ class MainActivity : FlutterActivity() {
             }
         }
 
-        telecomManager = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-        registerPhoneAccount()
+        // Initialize telecom manager safely (may fail, don't crash Flutter Engine)
+        try {
+            telecomManager = getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
+            if (telecomManager != null) {
+                registerPhoneAccount()
+            } else {
+                Log.w(TAG, "TelecomManager is null, phone account not registered")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize telecom manager: ${e.message}", e)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -178,19 +187,25 @@ class MainActivity : FlutterActivity() {
 
     private fun registerPhoneAccount() {
         try {
+            val tm = telecomManager ?: run {
+                Log.w(TAG, "TelecomManager is null, cannot register phone account")
+                return
+            }
+
             val componentName = ComponentName(packageName, CallConnectionService::class.java.name)
             phoneAccountHandle = PhoneAccountHandle(componentName, "SwiftCallConnectionServiceId")
 
-            val phoneAccount = PhoneAccount.builder(phoneAccountHandle, "SwiftCall")
+            val phoneAccount = PhoneAccount.builder(phoneAccountHandle!!, "SwiftCall")
                 .setCapabilities(
                     PhoneAccount.CAPABILITY_CALL_PROVIDER or
                     PhoneAccount.CAPABILITY_SUPPORTS_VIDEO_CALLING or
                     PhoneAccount.CAPABILITY_SELF_MANAGED
                 )
                 .build()
-            telecomManager.registerPhoneAccount(phoneAccount)
+            tm.registerPhoneAccount(phoneAccount)
+            Log.d(TAG, "Phone account registered successfully")
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to register phone account: ${e.message}")
+            Log.w(TAG, "Failed to register phone account: ${e.message}", e)
         }
     }
 

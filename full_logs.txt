@@ -1,0 +1,331 @@
+--------- beginning of main
+06-01 12:13:19.181   937  1019 I libPowerHal: perfUserScnCheckAll
+06-01 12:13:19.182   937  1019 I libPowerHal: perfScnDumpAll cmd:0
+06-01 12:13:19.182   937  1019 I libPowerHal: ========================
+06-01 12:13:19.183   937  1019 I libPowerHal: binder:912_2 - handle:261963, duration:0
+06-01 12:13:19.183   937  1019 I libPowerHal: binder:912_2 - handle:262667, duration:0
+06-01 12:13:19.183   937  1019 I libPowerHal: binder:912_2 - handle:251336, duration:0
+06-01 12:13:19.183   937  1019 I libPowerHal: ========================
+06-01 12:13:19.884   912   912 I mtkpower_client: perf_lock_acq, hdl:5378, dur:3000, num:10, pid:912, tid:912
+06-01 12:13:19.886   912   912 I mtkpower_client: ret_hdl:275181
+06-01 12:13:19.886   912   912 I mtkpower_client: perf_lock_acq, hdl:4096, dur:80, num:10, pid:912, tid:912
+06-01 12:13:19.887   937  1019 I libPowerHal: [perfLockAcq] idx:2 hdl:275181 hint:-1 pid:912 tid:912 duration:3000 lock_user:binder:912_2 => ret_hdl:275181
+06-01 12:13:19.888   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:1408300, param:30, pr:3
+06-01 12:13:19.888   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:408000 param:1645000 pr:3
+06-01 12:13:19.888   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:40c000 param:2000000 pr:3
+06-01 12:13:19.888   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:408100 param:1650000 pr:3
+06-01 12:13:19.889   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:40c100 param:2203000 pr:3
+06-01 12:13:19.889   937  1019 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(binder:912_2): 1645000 max(binder:912_2): -1 cluster[1] min(binder:912_2): 1650000 max(binder:912_2): -1
+06-01 12:13:19.889   937  1019 I libPowerHal: [perfLockAcq] Done for hdl : 275181
+06-01 12:13:19.889   912   912 I mtkpower_client: ret_hdl:275182
+06-01 12:13:19.889   937  1019 I libPowerHal: [perfLockAcq] idx:3 hdl:275182 hint:-1 pid:912 tid:912 duration:80 lock_user:binder:912_2 => ret_hdl:275182
+06-01 12:13:19.890   937  1019 I libPowerHal: [perfLockAcq] Done for hdl : 275182
+06-01 12:13:19.943   912   912 I mtkpower_client: perf_lock_rel, hdl:275181, tid:912
+06-01 12:13:19.945   912   912 I mtkpower_client: perf_lock_acq, hdl:5379, dur:80, num:6, pid:912, tid:912
+06-01 12:13:19.945   912   912 I mtkpower_client: ret_hdl:275183
+06-01 12:13:19.946   912   912 I mtkpower_client: perf_lock_acq, hdl:5379, dur:3000, num:4, pid:912, tid:912
+06-01 12:13:19.947   937  1019 I libPowerHal: [perfLockRel] hdl:275181, idx:2
+06-01 12:13:19.948   937  1019 I libPowerHal: [perfLockRel] Done for hdl : 275181
+06-01 12:13:19.949   937  1019 I libPowerHal: [perfLockAcq] idx:6 hdl:275183 hint:-1 pid:912 tid:912 duration:80 lock_user:binder:912_2 => ret_hdl:275183
+06-01 12:13:19.949   937  1019 I libPowerHal: [perfLockAcq] Done for hdl : 275183
+06-01 12:13:19.950   912   912 I mtkpower_client: ret_hdl:275184
+06-01 12:13:19.950   937  1019 I libPowerHal: [perfLockAcq] idx:2 hdl:275184 hint:-1 pid:912 tid:912 duration:3000 lock_user:binder:912_2 => ret_hdl:275184
+06-01 12:13:19.950   937  1019 I libPowerHal: [perfLockAcq] Done for hdl : 275184
+06-01 12:13:19.951   912   912 I mtkpower_client: perf_lock_acq, hdl:4099, dur:3000, num:18, pid:912, tid:912
+06-01 12:13:19.951   912   912 I mtkpower_client: ret_hdl:275185
+06-01 12:13:19.952   937  1019 I libPowerHal: cmdSetting - unknown cmd:1c3c000, scmd:(null) ,param_1:1
+06-01 12:13:19.952   937  1019 I libPowerHal: [perfLockAcq] idx:7 hdl:275185 hint:-1 pid:912 tid:912 duration:3000 lock_user:binder:912_2 => ret_hdl:275185
+06-01 12:13:19.952   937  1019 I libPowerHal: [setGPUFreq] binder:912_2 user set gpu freq min:4, max:-1
+06-01 12:13:19.952   937  1019 I libPowerHal: binder:912_2: set gpu opp level: 4
+06-01 12:13:19.952   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:19.953   937  1019 I libPowerHal: [setGPUFreq] Soft min/max = (4, 0); Hard min/max = (33, 0)
+06-01 12:13:19.953   937  1019 I libPowerHal: [setGPUFreq] final min/max = (4, 0)
+06-01 12:13:19.953   937  1019 I libPowerHal: binder:912_2: set gpu opp level: 4
+06-01 12:13:19.953   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:19.954   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:1408300, param:50, pr:3
+06-01 12:13:19.954   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:10007000, param:1, pr:3
+06-01 12:13:19.954   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:408000 param:1750000 pr:3
+06-01 12:13:19.955   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:408100 param:1903000 pr:3
+06-01 12:13:19.955   937  1019 I libPowerHal: [setDvfsrcDevFreqOpp] opp:1, freq:3200000000
+06-01 12:13:19.955   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:1000000 param:1 pr:3
+06-01 12:13:19.955   937  1019 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(binder:912_2): 1750000 max(binder:912_2): -1 cluster[1] min(binder:912_2): 1903000 max(binder:912_2): -1
+06-01 12:13:19.955   937  1019 I libPowerHal: [perfLockAcq] Done for hdl : 275185
+06-01 12:13:19.967  1842  2894 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.hihonor.android.launcher/com.hihonor.android.launcher.unihome.UniHomeLauncher pid=12931 activityId:249184258 state:0
+06-01 12:13:19.967   893   893 I MTK_APPList: [notifyAPPstate] com.hihonor.android.launcher/com.hihonor.android.launcher.unihome.UniHomeLauncher, pid=12931, activityId=249184258, uid=10093, state:PAUSED, fps:-1, win:0
+06-01 12:13:19.967   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 0
+06-01 12:13:19.967   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:19.967   893   893 I MTK_APPList: [notifyNetdUID] 10093
+06-01 12:13:19.968   893   893 I MTK_APPList: [notifyPID] 12931
+06-01 12:13:19.968   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 12931
+06-01 12:13:19.968   937   975 I mtkpower@impl: [setMode] type:5, enabled:1
+06-01 12:13:19.969   937  1019 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:275182
+06-01 12:13:19.969   937  1019 I libPowerHal: [perfLockRel] hdl:275182, idx:3
+06-01 12:13:19.970   937  1019 I libPowerHal: [perfLockRel] Done for hdl : 275182
+06-01 12:13:19.984   912   912 I mtkpower_client: perf_lock_acq, hdl:4400, dur:250, num:14, pid:912, tid:912
+06-01 12:13:19.984   912   912 I mtkpower_client: ret_hdl:275186
+06-01 12:13:19.985   937  1019 I libPowerHal: [perfLockAcq] idx:3 hdl:275186 hint:-1 pid:912 tid:912 duration:250 lock_user:binder:912_2 => ret_hdl:275186
+06-01 12:13:19.985   937  1019 I libPowerHal: [setGPUFreq] binder:912_2 user set gpu freq min:20, max:-1
+06-01 12:13:19.985   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:19.985   937  1019 I libPowerHal: [setGPUFreq] Soft min/max = (4, 0); Hard min/max = (33, 0)
+06-01 12:13:19.985   937  1019 I libPowerHal: [setGPUFreq] final min/max = (4, 0)
+06-01 12:13:19.985   937  1019 I libPowerHal: binder:912_2: set gpu opp level: 4
+06-01 12:13:19.985   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:19.985   937  1019 I libPowerHal: [perfLockAcq] Done for hdl : 275186
+06-01 12:13:19.986  1842  4696 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.hihonor.android.launcher/com.hihonor.android.launcher.unihome.UniHomeLauncher pid=12931 activityId:249184258 state:0
+06-01 12:13:19.986   893   893 I MTK_APPList: [notifyAPPstate] com.hihonor.android.launcher/com.hihonor.android.launcher.unihome.UniHomeLauncher, pid=12931, activityId=249184258, uid=10093, state:PAUSED, fps:-1, win:0
+06-01 12:13:19.986   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 0
+06-01 12:13:19.986   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:19.986   893   893 I MTK_APPList: [notifyNetdUID] 10093
+06-01 12:13:19.987   893   893 I MTK_APPList: [notifyPID] 12931
+06-01 12:13:19.988   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 12931
+06-01 12:13:20.029  1842  2894 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app.MainActivity pid=31746 activityId:100662596 state:1
+06-01 12:13:20.030   893   893 I MTK_APPList: [notifyAPPstate] com.swiftcall.app/com.swiftcall.app.MainActivity, pid=31746, activityId=100662596, uid=10543, state:RESUMED, fps:-1, win:0
+06-01 12:13:20.030   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 1
+06-01 12:13:20.030   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:31746, activityId:100662596, fps:-1, isMultiWindow:0
+06-01 12:13:20.030   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:20.030   893   893 I MTK_APPList: [notifyAPPstate] foreground:com.swiftcall.app, pid:31746, activityId:100662596, uid:10543
+06-01 12:13:20.030   893   893 I MTK_APPList: [notifyNetdUID] 10543
+06-01 12:13:20.031   937  1019 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:275183
+06-01 12:13:20.031   937  1019 I libPowerHal: [perfLockRel] hdl:275183, idx:6
+06-01 12:13:20.032   937  1019 I libPowerHal: [perfLockRel] Done for hdl : 275183
+06-01 12:13:20.033   893   893 I MTK_APPList: [notifyPID] 31746
+06-01 12:13:20.033   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 31746
+06-01 12:13:20.034   893   893 I MTK_APPList: [notifyAPPstate] pc:0, com.hihonor.android.launcher => com.swiftcall.app
+06-01 12:13:20.065   937   975 I mtkpower@impl: [setMode] type:6, enabled:1
+06-01 12:13:20.065   937   975 E mtkpower@impl: [setMode] unknown type
+06-01 12:13:20.236   937  1019 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:275186
+06-01 12:13:20.236   937  1019 I libPowerHal: [perfLockRel] hdl:275186, idx:3
+06-01 12:13:20.236   937  1019 I libPowerHal: [unsetGPUFreq] current min:4, max:0; scn_gpu_min:20, scn_gpu_max:-1; scn_gpu_min(HL):-1, scn_gpu_max(HL):-1
+06-01 12:13:20.236   937  1019 I libPowerHal: [setGPUFreq] Soft min/max = (4, 0); Hard min/max = (33, 0)
+06-01 12:13:20.236   937  1019 I libPowerHal: [setGPUFreq] final min/max = (4, 0)
+06-01 12:13:20.236   937  1019 I libPowerHal: binder:912_2: set gpu opp level: 4
+06-01 12:13:20.237   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:20.238   937  1019 I libPowerHal: [perfLockRel] Done for hdl : 275186
+06-01 12:13:20.342   937   975 I mtkpower@impl: [setMode] type:6, enabled:0
+06-01 12:13:20.342   937   975 E mtkpower@impl: [setMode] unknown type
+06-01 12:13:22.448   912   912 I mtkpower_client: perf_lock_acq, hdl:4098, dur:400, num:20, pid:912, tid:912
+06-01 12:13:22.449   912   912 I mtkpower_client: ret_hdl:275187
+06-01 12:13:22.449   937  1019 I libPowerHal: cmdSetting - unknown cmd:1c3c000, scmd:(null) ,param_1:1
+06-01 12:13:22.450   937  1019 I libPowerHal: [perfLockAcq] idx:3 hdl:275187 hint:-1 pid:912 tid:912 duration:400 lock_user:binder:912_2 => ret_hdl:275187
+06-01 12:13:22.450   937  1019 I libPowerHal: [setGPUFreq] binder:912_2 user set gpu freq min:4, max:-1
+06-01 12:13:22.450   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:22.450   937  1019 I libPowerHal: [setGPUFreq] Soft min/max = (4, 0); Hard min/max = (33, 0)
+06-01 12:13:22.450   937  1019 I libPowerHal: [setGPUFreq] final min/max = (4, 0)
+06-01 12:13:22.450   937  1019 I libPowerHal: binder:912_2: set gpu opp level: 4
+06-01 12:13:22.451   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:22.451   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:10005000, param:7000, pr:3
+06-01 12:13:22.451   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:408000 param:2000000 pr:3
+06-01 12:13:22.451   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:408100 param:2203000 pr:3
+06-01 12:13:22.451   937  1019 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(binder:912_2): 2000000 max(binder:912_2): -1 cluster[1] min(binder:912_2): 2203000 max(binder:912_2): -1
+06-01 12:13:22.451   937  1019 I libPowerHal: [perfLockAcq] Done for hdl : 275187
+06-01 12:13:22.852   937  1019 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:275187
+06-01 12:13:22.852   937  1019 I libPowerHal: [perfLockRel] hdl:275187, idx:3
+06-01 12:13:22.852   937  1019 I libPowerHal: [unsetGPUFreq] current min:4, max:0; scn_gpu_min:4, scn_gpu_max:-1; scn_gpu_min(HL):-1, scn_gpu_max(HL):-1
+06-01 12:13:22.852   937  1019 I libPowerHal: [setGPUFreq] Soft min/max = (4, 0); Hard min/max = (33, 0)
+06-01 12:13:22.852   937  1019 I libPowerHal: [setGPUFreq] final min/max = (4, 0)
+06-01 12:13:22.852   937  1019 I libPowerHal: binder:912_2: set gpu opp level: 4
+06-01 12:13:22.852   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:22.852   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:10005000 param:0, pr:6
+06-01 12:13:22.853   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:408000 param:1750000 pr:3
+06-01 12:13:22.853   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:408100 param:1903000 pr:3
+06-01 12:13:22.853   937  1019 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(binder:912_2): 1750000 max(binder:912_2): -1 cluster[1] min(binder:912_2): 1903000 max(binder:912_2): -1
+06-01 12:13:22.854   937  1019 I libPowerHal: [perfLockRel] Done for hdl : 275187
+06-01 12:13:22.951   937  1019 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:275184
+06-01 12:13:22.951   937  1019 I libPowerHal: [perfLockRel] hdl:275184, idx:2
+06-01 12:13:22.952   937  1019 I libPowerHal: [perfLockRel] Done for hdl : 275184
+06-01 12:13:22.955   937  1019 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:275185
+06-01 12:13:22.955   937  1019 I libPowerHal: [perfLockRel] hdl:275185, idx:7
+06-01 12:13:22.955   937  1019 I libPowerHal: [unsetGPUFreq] current min:4, max:0; scn_gpu_min:4, scn_gpu_max:-1; scn_gpu_min(HL):-1, scn_gpu_max(HL):-1
+06-01 12:13:22.955   937  1019 I libPowerHal: binder:912_2: set gpu opp level: 33
+06-01 12:13:22.955   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:22.955   937  1019 I libPowerHal: [setGPUFreq] Soft min/max = (33, 0); Hard min/max = (33, 0)
+06-01 12:13:22.955   937  1019 I libPowerHal: [setGPUFreq] final min/max = (33, 0)
+06-01 12:13:22.955   937  1019 I libPowerHal: binder:912_2: set gpu opp level: 33
+06-01 12:13:22.956   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:22.956   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:1408300 param:0, pr:6
+06-01 12:13:22.957   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:10007000 param:0, pr:6
+06-01 12:13:22.957   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:408000 param:-1 pr:6
+06-01 12:13:22.957   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:40c000 param:-1 pr:6
+06-01 12:13:22.957   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:408100 param:-1 pr:6
+06-01 12:13:22.958   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:40c100 param:-1 pr:6
+06-01 12:13:22.958   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:1000000 param:-1 pr:6
+06-01 12:13:22.959   937  1019 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(binder:912_2): -1 max(binder:912_2): -1 cluster[1] min(binder:912_2): -1 max(binder:912_2): -1
+06-01 12:13:22.959   937  1019 I libPowerHal: [perfLockRel] Done for hdl : 275185
+06-01 12:13:23.081  1842  2843 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.hihonor.android.pushagent/com.hihonor.android.pushagent pid=27066 activityId:27066 state:3
+06-01 12:13:23.082   893   893 I MTK_APPList: [notifyAPPstate] com.hihonor.android.pushagent/com.hihonor.android.pushagent, pid=27066, activityId=27066, uid=10035, state:DEAD, fps:-1, win:0
+06-01 12:13:23.082   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 1
+06-01 12:13:23.082   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:31746, activityId:100662596, fps:-1, isMultiWindow:0
+06-01 12:13:23.082   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:23.082   893   893 I MTK_APPList: [notifyAPPstate] pack:com.hihonor.android.pushagent, pid:27066, STATE_DEAD
+06-01 12:13:23.082   893   893 I MTK_APPList: [notifyNetdUID] 10543
+06-01 12:13:23.084   893   893 I MTK_APPList: [notifyPID] 31746
+06-01 12:13:23.084   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 31746
+06-01 12:13:25.076  1842  2725 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.facebook.appmanager/com.facebook.appmanager pid=22187 activityId:22187 state:3
+06-01 12:13:25.077   893   893 I MTK_APPList: [notifyAPPstate] com.facebook.appmanager/com.facebook.appmanager, pid=22187, activityId=22187, uid=10160, state:DEAD, fps:-1, win:0
+06-01 12:13:25.077   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 1
+06-01 12:13:25.077   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:31746, activityId:100662596, fps:-1, isMultiWindow:0
+06-01 12:13:25.077   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:25.077   893   893 I MTK_APPList: [notifyAPPstate] pack:com.facebook.appmanager, pid:22187, STATE_DEAD
+06-01 12:13:25.077   893   893 I MTK_APPList: [notifyNetdUID] 10543
+06-01 12:13:25.078   893   893 I MTK_APPList: [notifyPID] 31746
+06-01 12:13:25.079   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 31746
+06-01 12:13:26.634   937   975 I mtkpower@impl: [setMode] type:5, enabled:0
+06-01 12:13:26.636  1842  2838 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.hihonor.android.launcher/com.hihonor.android.launcher.unihome.UniHomeLauncher pid=12931 activityId:249184258 state:0
+06-01 12:13:26.637   893   893 I MTK_APPList: [notifyAPPstate] com.hihonor.android.launcher/com.hihonor.android.launcher.unihome.UniHomeLauncher, pid=12931, activityId=249184258, uid=10093, state:PAUSED, fps:-1, win:0
+06-01 12:13:26.637   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 1
+06-01 12:13:26.637   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:31746, activityId:100662596, fps:-1, isMultiWindow:0
+06-01 12:13:26.637   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:26.637   893   893 I MTK_APPList: [notifyNetdUID] 10543
+06-01 12:13:26.638   893   893 I MTK_APPList: [notifyPID] 31746
+06-01 12:13:26.639   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 31746
+06-01 12:13:26.769  1842  2896 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.google.android.cellbroadcastreceiver/com.google.android.cellbroadcastreceiver pid=30239 activityId:30239 state:3
+06-01 12:13:26.770   893   893 I MTK_APPList: [notifyAPPstate] com.google.android.cellbroadcastreceiver/com.google.android.cellbroadcastreceiver, pid=30239, activityId=30239, uid=10146, state:DEAD, fps:-1, win:0
+06-01 12:13:26.770   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 1
+06-01 12:13:26.770   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:31746, activityId:100662596, fps:-1, isMultiWindow:0
+06-01 12:13:26.770   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:26.770   893   893 I MTK_APPList: [notifyAPPstate] pack:com.google.android.cellbroadcastreceiver, pid:30239, STATE_DEAD
+06-01 12:13:26.770   893   893 I MTK_APPList: [notifyNetdUID] 10543
+06-01 12:13:26.772   893   893 I MTK_APPList: [notifyPID] 31746
+06-01 12:13:26.772   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 31746
+06-01 12:13:26.847  1842  2896 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.google.android.apps.wellbeing/com.google.android.apps.wellbeing pid=30208 activityId:30208 state:3
+06-01 12:13:26.848   893   893 I MTK_APPList: [notifyAPPstate] com.google.android.apps.wellbeing/com.google.android.apps.wellbeing, pid=30208, activityId=30208, uid=10123, state:DEAD, fps:-1, win:0
+06-01 12:13:26.848   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 1
+06-01 12:13:26.848   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:31746, activityId:100662596, fps:-1, isMultiWindow:0
+06-01 12:13:26.848   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:26.848   893   893 I MTK_APPList: [notifyAPPstate] pack:com.google.android.apps.wellbeing, pid:30208, STATE_DEAD
+06-01 12:13:26.849   893   893 I MTK_APPList: [notifyNetdUID] 10543
+06-01 12:13:26.851   893   893 I MTK_APPList: [notifyPID] 31746
+06-01 12:13:26.852   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 31746
+06-01 12:13:26.914  1842  2894 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.google.android.youtube/com.google.android.youtube pid=25045 activityId:25045 state:3
+06-01 12:13:26.915   893   893 I MTK_APPList: [notifyAPPstate] com.google.android.youtube/com.google.android.youtube, pid=25045, activityId=25045, uid=10138, state:DEAD, fps:-1, win:0
+06-01 12:13:26.915   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 1
+06-01 12:13:26.915   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:31746, activityId:100662596, fps:-1, isMultiWindow:0
+06-01 12:13:26.915   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:26.915   893   893 I MTK_APPList: [notifyAPPstate] pack:com.google.android.youtube, pid:25045, STATE_DEAD
+06-01 12:13:26.915   893   893 I MTK_APPList: [notifyNetdUID] 10543
+06-01 12:13:26.915   893   893 I MTK_APPList: [notifyPID] 31746
+06-01 12:13:26.916   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 31746
+06-01 12:13:29.792  1842  2894 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app.MainActivity pid=31746 activityId:100662596 state:0
+06-01 12:13:29.792   893   893 I MTK_APPList: [notifyAPPstate] com.swiftcall.app/com.swiftcall.app.MainActivity, pid=31746, activityId=100662596, uid=10543, state:PAUSED, fps:-1, win:0
+06-01 12:13:29.792   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 0
+06-01 12:13:29.792   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:29.792   893   893 I MTK_APPList: [notifyNetdUID] 10543
+06-01 12:13:29.794   893   893 I MTK_APPList: [notifyPID] 31746
+06-01 12:13:29.795   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 31746
+06-01 12:13:29.925   912   912 I mtkpower_client: perf_lock_acq, hdl:4098, dur:400, num:20, pid:912, tid:912
+06-01 12:13:29.925   912   912 I mtkpower_client: ret_hdl:275188
+06-01 12:13:29.926   937  1019 I libPowerHal: cmdSetting - unknown cmd:1c3c000, scmd:(null) ,param_1:1
+06-01 12:13:29.926   937  1019 I libPowerHal: [perfLockAcq] idx:2 hdl:275188 hint:-1 pid:912 tid:912 duration:400 lock_user:binder:912_2 => ret_hdl:275188
+06-01 12:13:29.926   937  1019 I libPowerHal: [setGPUFreq] binder:912_2 user set gpu freq min:4, max:-1
+06-01 12:13:29.926   937  1019 I libPowerHal: binder:912_2: set gpu opp level: 4
+06-01 12:13:29.927   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:29.927   937  1019 I libPowerHal: [setGPUFreq] Soft min/max = (4, 0); Hard min/max = (33, 0)
+06-01 12:13:29.927   937  1019 I libPowerHal: [setGPUFreq] final min/max = (4, 0)
+06-01 12:13:29.927   937  1019 I libPowerHal: binder:912_2: set gpu opp level: 4
+06-01 12:13:29.927   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:29.927   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:1408300, param:50, pr:3
+06-01 12:13:29.927   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:10005000, param:7000, pr:3
+06-01 12:13:29.927   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:10007000, param:1, pr:3
+06-01 12:13:29.927   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:408000 param:2000000 pr:3
+06-01 12:13:29.927   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:40c000 param:2000000 pr:3
+06-01 12:13:29.927   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:408100 param:2203000 pr:3
+06-01 12:13:29.927   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:40c100 param:2203000 pr:3
+06-01 12:13:29.928   937  1019 I libPowerHal: [setDvfsrcDevFreqOpp] opp:2, freq:2400000000
+06-01 12:13:29.928   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:1000000 param:2 pr:3
+06-01 12:13:29.928   937  1019 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(binder:912_2): 2000000 max(binder:912_2): -1 cluster[1] min(binder:912_2): 2203000 max(binder:912_2): -1
+06-01 12:13:29.928   937  1019 I libPowerHal: [perfLockAcq] Done for hdl : 275188
+06-01 12:13:29.961   912   912 I mtkpower_client: perf_lock_acq, hdl:13350, dur:600, num:12, pid:912, tid:912
+06-01 12:13:29.962   912   912 I mtkpower_client: ret_hdl:275189
+06-01 12:13:29.964   937  1019 I libPowerHal: [perfLockAcq] idx:3 hdl:275189 hint:-1 pid:912 tid:912 duration:600 lock_user:binder:912_2 => ret_hdl:275189
+06-01 12:13:29.965   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:2020000, param:15, pr:3
+06-01 12:13:29.965   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:1404300, param:1, pr:3
+06-01 12:13:29.965   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:203c000, param:100, pr:3
+06-01 12:13:29.965   937  1019 I libPowerHal: [perfLockAcq] Done for hdl : 275189
+06-01 12:13:29.999   937   975 I mtkpower@impl: [setMode] type:6, enabled:1
+06-01 12:13:29.999   937   975 E mtkpower@impl: [setMode] unknown type
+06-01 12:13:30.105  1842  2896 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app pid=31746 activityId:31746 state:3
+06-01 12:13:30.105   893   893 I MTK_APPList: [notifyAPPstate] com.swiftcall.app/com.swiftcall.app, pid=31746, activityId=31746, uid=10543, state:DEAD, fps:-1, win:0
+06-01 12:13:30.105   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 0
+06-01 12:13:30.105   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:30.105   893   893 I MTK_APPList: [notifyAPPstate] pack:com.swiftcall.app, pid:31746, STATE_DEAD
+06-01 12:13:30.105   893   893 I MTK_APPList: [notifyNetdUID] 10543
+06-01 12:13:30.105   893   893 I MTK_APPList: [notifyPID] 31746
+06-01 12:13:30.106   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 31746
+06-01 12:13:30.147  1842  2851 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app pid=31861 activityId:31861 state:3
+06-01 12:13:30.148   893   893 I MTK_APPList: [notifyAPPstate] com.swiftcall.app/com.swiftcall.app, pid=31861, activityId=31861, uid=99530, state:DEAD, fps:-1, win:0
+06-01 12:13:30.148   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 0
+06-01 12:13:30.148   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:30.148   893   893 I MTK_APPList: [notifyAPPstate] pack:com.swiftcall.app, pid:31861, STATE_DEAD
+06-01 12:13:30.148   893   893 I MTK_APPList: [notifyNetdUID] 10543
+06-01 12:13:30.149   893   893 I MTK_APPList: [notifyPID] 31746
+06-01 12:13:30.150   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 31746
+06-01 12:13:30.294  1842  1923 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.hihonor.android.launcher/com.hihonor.android.launcher.unihome.UniHomeLauncher pid=12931 activityId:249184258 state:1
+06-01 12:13:30.295   893   893 I MTK_APPList: [notifyAPPstate] com.hihonor.android.launcher/com.hihonor.android.launcher.unihome.UniHomeLauncher, pid=12931, activityId=249184258, uid=10093, state:RESUMED, fps:-1, win:0
+06-01 12:13:30.295   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 1
+06-01 12:13:30.295   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] com.hihonor.android.launcher/com.hihonor.android.launcher.unihome.UniHomeLauncher, pid:12931, activityId:249184258, fps:-1, isMultiWindow:0
+06-01 12:13:30.295   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:30.295   893   893 I MTK_APPList: [notifyAPPstate] foreground:com.hihonor.android.launcher, pid:12931, activityId:249184258, uid:10093
+06-01 12:13:30.295   893   893 I MTK_APPList: [notifyNetdUID] 10093
+06-01 12:13:30.296   893   893 I MTK_APPList: [notifyPID] 12931
+06-01 12:13:30.296   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 12931
+06-01 12:13:30.296   893   893 I MTK_APPList: [notifyAPPstate] pc:0, com.swiftcall.app => com.hihonor.android.launcher
+06-01 12:13:30.327   937  1019 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:275188
+06-01 12:13:30.327   937  1019 I libPowerHal: [perfLockRel] hdl:275188, idx:2
+06-01 12:13:30.327   937  1019 I libPowerHal: [unsetGPUFreq] current min:4, max:0; scn_gpu_min:4, scn_gpu_max:-1; scn_gpu_min(HL):-1, scn_gpu_max(HL):-1
+06-01 12:13:30.327   937  1019 I libPowerHal: binder:912_2: set gpu opp level: 33
+06-01 12:13:30.328   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:30.328   937  1019 I libPowerHal: [setGPUFreq] Soft min/max = (33, 0); Hard min/max = (33, 0)
+06-01 12:13:30.328   937  1019 I libPowerHal: [setGPUFreq] final min/max = (33, 0)
+06-01 12:13:30.328   937  1019 I libPowerHal: binder:912_2: set gpu opp level: 33
+06-01 12:13:30.328   937  1019 I libPowerHal: binder:912_2: set gpu opp level max: 0
+06-01 12:13:30.328   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:10005000 param:0, pr:6
+06-01 12:13:30.328   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:10007000 param:0, pr:6
+06-01 12:13:30.328   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:408000 param:-1 pr:6
+06-01 12:13:30.329   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:408100 param:-1 pr:6
+06-01 12:13:30.329   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:1000000 param:-1 pr:6
+06-01 12:13:30.330   937  1019 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(binder:912_2): -1 max(binder:912_2): -1 cluster[1] min(binder:912_2): -1 max(binder:912_2): -1
+06-01 12:13:30.330   937  1019 I libPowerHal: [perfLockRel] Done for hdl : 275188
+06-01 12:13:30.566   937  1019 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:275189
+06-01 12:13:30.566   937  1019 I libPowerHal: [perfLockRel] hdl:275189, idx:3
+06-01 12:13:30.566   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:2020000 param:1, pr:6
+06-01 12:13:30.567   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:1404300 param:0, pr:6
+06-01 12:13:30.567   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:1408300 param:0, pr:6
+06-01 12:13:30.568   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:203c000 param:100, pr:6
+06-01 12:13:30.568   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:40c000 param:-1 pr:6
+06-01 12:13:30.568   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:40c100 param:-1 pr:6
+06-01 12:13:30.569   937  1019 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(binder:912_2): -1 max(binder:912_2): -1 cluster[1] min(binder:912_2): -1 max(binder:912_2): -1
+06-01 12:13:30.569   937  1019 I libPowerHal: [perfLockRel] Done for hdl : 275189
+06-01 12:13:30.693   937   975 I mtkpower@impl: [setMode] type:6, enabled:0
+06-01 12:13:30.693   937   975 E mtkpower@impl: [setMode] unknown type
+06-01 12:13:31.103   912   912 I mtkpower_client: perf_lock_acq, hdl:4096, dur:80, num:10, pid:912, tid:912
+06-01 12:13:31.104   912   912 I mtkpower_client: ret_hdl:275190
+06-01 12:13:31.105   937  1019 I libPowerHal: [perfLockAcq] idx:2 hdl:275190 hint:-1 pid:912 tid:912 duration:80 lock_user:binder:912_2 => ret_hdl:275190
+06-01 12:13:31.107   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:1408300, param:30, pr:3
+06-01 12:13:31.107   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:408000 param:1645000 pr:3
+06-01 12:13:31.107   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:40c000 param:2000000 pr:3
+06-01 12:13:31.107   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:408100 param:1650000 pr:3
+06-01 12:13:31.107   937  1019 I libPowerHal: [PE] binder:912_2 update cmd:40c100 param:2203000 pr:3
+06-01 12:13:31.107   937  1019 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(binder:912_2): 1645000 max(binder:912_2): -1 cluster[1] min(binder:912_2): 1650000 max(binder:912_2): -1
+06-01 12:13:31.107   937  1019 I libPowerHal: [perfLockAcq] Done for hdl : 275190
+06-01 12:13:31.167   943 27842 I APM_AudioPolicyManager: getOffloadSupport: SR=0, CM=0x0, Format=0x0, StreamType=0, BitRate=0, duration=0 us, has_video=0
+06-01 12:13:31.174   943 23720 I APM_AudioPolicyManager: getOffloadSupport: SR=0, CM=0x0, Format=0x0, StreamType=0, BitRate=0, duration=0 us, has_video=0
+06-01 12:13:31.188   937  1019 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:275190
+06-01 12:13:31.188   937  1019 I libPowerHal: [perfLockRel] hdl:275190, idx:2
+06-01 12:13:31.188   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:1408300 param:0, pr:6
+06-01 12:13:31.189   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:408000 param:-1 pr:6
+06-01 12:13:31.189   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:40c000 param:-1 pr:6
+06-01 12:13:31.189   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:408100 param:-1 pr:6
+06-01 12:13:31.189   937  1019 I libPowerHal: [PD] binder:912_2 update cmd:40c100 param:-1 pr:6
+06-01 12:13:31.190   937  1019 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(binder:912_2): -1 max(binder:912_2): -1 cluster[1] min(binder:912_2): -1 max(binder:912_2): -1
+06-01 12:13:31.190   937  1019 I libPowerHal: [perfLockRel] Done for hdl : 275190
+06-01 12:13:32.046  1842  3044 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app pid=31967 activityId:31967 state:3
+06-01 12:13:32.046   893   893 I MTK_APPList: [notifyAPPstate] com.swiftcall.app/com.swiftcall.app, pid=31967, activityId=31967, uid=10543, state:DEAD, fps:-1, win:0
+06-01 12:13:32.046   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_count: 1
+06-01 12:13:32.046   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] com.hihonor.android.launcher/com.hihonor.android.launcher.unihome.UniHomeLauncher, pid:12931, activityId:249184258, fps:-1, isMultiWindow:0
+06-01 12:13:32.046   893   893 I MTK_APPList: [getForegroundAPPCount] 1
+06-01 12:13:32.047   893   893 I MTK_APPList: [notifyAPPstate] pack:com.swiftcall.app, pid:31967, STATE_DEAD
+06-01 12:13:32.047   893   893 I MTK_APPList: [notifyNetdUID] 10093
+06-01 12:13:32.048   893   893 I MTK_APPList: [notifyPID] 12931
+06-01 12:13:32.048   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 12931
+06-01 12:13:32.816   943 23720 I APM_AudioPolicyManager: getOffloadSupport: SR=0, CM=0x0, Format=0x0, StreamType=0, BitRate=0, duration=0 us, has_video=0
+06-01 12:13:32.820   943 23720 I APM_AudioPolicyManager: getOffloadSupport: SR=0, CM=0x0, Format=0x0, StreamType=0, BitRate=0, duration=0 us, has_video=0
