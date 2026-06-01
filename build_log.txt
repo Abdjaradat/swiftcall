@@ -1,0 +1,72 @@
+
+Running Gradle task 'assembleRelease'...                        
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 15096 bytes (99.1% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Font asset "CupertinoIcons.ttf" was tree-shaken, reducing it from 257628 to 1712 bytes (99.3% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+
+FAILURE: Build completed with 2 failures.
+
+1: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':wakelock_plus:verifyReleaseResources'.
+> A failure occurred while executing com.android.build.gradle.tasks.VerifyLibraryResourcesTask$Action
+   > Path 'C:\SwiftCall\build\package_info_plus\intermediates\compiled_local_resources\release\compileReleaseLibraryResources\out' is not a readable directory.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':app:packageRelease'.
+> java.io.FileNotFoundException: C:\SwiftCall\build\app\outputs\apk\release\output-metadata.json (The system cannot find the path specified)
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+BUILD FAILED in 10m 2s
+Running Gradle task 'assembleRelease'...                          612.4s
+[!] Gradle threw an error while downloading artifacts from the network.
+Retrying Gradle Build: #1, wait time: 100ms
+Running Gradle task 'assembleRelease'...                        
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 15096 bytes (99.1% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Font asset "CupertinoIcons.ttf" was tree-shaken, reducing it from 257628 to 1712 bytes (99.3% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:processReleaseResources'.
+> A failure occurred while executing com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask$TaskAction
+   > Android resource linking failed
+     ERROR: C:\SwiftCall\build\app\intermediates\packaged_manifests\release\processReleaseManifestForPackage\AndroidManifest.xml:79: AAPT: error: resource mipmap/ic_launcher (aka com.swiftcall.app:mipmap/ic_launcher) not found.
+
+     ERROR: C:\SwiftCall\build\app\intermediates\packaged_manifests\release\processReleaseManifestForPackage\AndroidManifest.xml:79: AAPT: error: resource mipmap/ic_launcher_round (aka com.swiftcall.app:mipmap/ic_launcher_round) not found.
+
+     ERROR: C:\SwiftCall\android\app\src\main\AndroidManifest.xml:68:9-96:20: AAPT: error: resource style/LaunchTheme (aka com.swiftcall.app:style/LaunchTheme) not found.
+
+     ERROR: C:\SwiftCall\android\app\src\main\AndroidManifest.xml:80:13-82:56: AAPT: error: resource style/NormalTheme (aka com.swiftcall.app:style/NormalTheme) not found.
+
+     ERROR: C:\Users\Abdul\.gradle\caches\8.10.2\transforms\1a229a824ca6e1228d255dc09be39fad\transformed\jetified-credentials-play-services-auth-1.2.0-rc01\AndroidManifest.xml:34:9-41:20: AAPT: error: resource style/Theme.Hidden (aka com.swiftcall.app:style/Theme.Hidden) not found.
+
+     ERROR: C:\Users\Abdul\.gradle\caches\8.10.2\transforms\4609ebef77645603f1fa257ef8a47215\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:9-122: AAPT: error: resource integer/google_play_services_version (aka com.swiftcall.app:integer/google_play_services_version) not found.
+
+     ERROR: C:\Users\Abdul\.gradle\caches\8.10.2\transforms\838016951581bc8fffbfd1bf3444553b\transformed\jetified-core-common-2.0.3\AndroidManifest.xml:14:9-18:65: AAPT: error: resource style/Theme.PlayCore.Transparent (aka com.swiftcall.app:style/Theme.PlayCore.Transparent) not found.
+
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 4m 11s
+Running Gradle task 'assembleRelease'...                          256.5s
+Gradle task assembleRelease failed with exit code 1

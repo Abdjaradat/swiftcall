@@ -73,3 +73,21 @@
 
 # ─── R8 full-mode compatibility ───────────────────────────────────────────────
 -allowaccessmodification
+
+# ─── Android 15 Compatibility ─────────────────────────────────────────────────
+# Keep all MainActivity methods (Android 15 may need them)
+-keepclassmembers class com.swiftcall.app.MainActivity {
+    *;
+}
+
+# Keep all FlutterActivity methods
+-keep class io.flutter.embedding.android.FlutterActivity { *; }
+-keep class io.flutter.embedding.android.FlutterActivityAndFragmentDelegate { *; }
+
+# Keep generic signatures for Gson (fixes TypeToken error)
+-keepattributes Signature
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+
+# Keep all notification classes (fixes flutter_local_notifications)
+-keep class com.dexterous.flutterlocalnotifications.** { *; }

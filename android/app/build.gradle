@@ -55,8 +55,8 @@ android {
     buildTypes {
         release {
             signingConfig    signingConfigs.release
-            minifyEnabled    true
-            shrinkResources  true
+            minifyEnabled    false  // Disabled for compatibility with Android 15
+            shrinkResources  false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
