@@ -72,6 +72,7 @@ class _SwiftCallAppState extends State<SwiftCallApp>
 
     _authBloc.stream.listen((state) {
       if (state is AuthAuthenticated) {
+        _cleanupStuckCalls(state.user.uid);
         _startIncomingCallListener(state.user.uid);
         _startIncomingGroupCallListener(state.user.uid);
       } else if (state is AuthUnauthenticated) {
@@ -108,6 +109,47 @@ class _SwiftCallAppState extends State<SwiftCallApp>
         NotificationService.pendingCallData = null;
       }
     });
+  }
+
+  // ── Cleanup stuck calls ──────────────────────────────────────────────────
+
+  Future<void> _cleanupStuckCalls(String myUid) async {
+    try {
+      // Clean up old ringing calls (older than 2 minutes)
+      final cutoffTime = DateTime.now().subtract(const Duration(minutes: 2));
+
+      // Clean up 1-1 calls
+      final stuckCalls = await FirebaseFirestore.instance
+          .collection('calls')
+          .where('receiverId', isEqualTo: myUid)
+          .where('status', isEqualTo: 'ringing')
+          .get();
+
+      for (final doc in stuckCalls.docs) {
+        final data = doc.data();
+        final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+        if (createdAt != null && createdAt.isBefore(cutoffTime)) {
+          await doc.reference.update({'status': 'missed'});
+        }
+      }
+
+      // Clean up group calls
+      final stuckGroupCalls = await FirebaseFirestore.instance
+          .collection('group_calls')
+          .where('participantUids', arrayContains: myUid)
+          .where('status', isEqualTo: 'ringing')
+          .get();
+
+      for (final doc in stuckGroupCalls.docs) {
+        final data = doc.data();
+        final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+        if (createdAt != null && createdAt.isBefore(cutoffTime)) {
+          await doc.reference.update({'status': 'ended'});
+        }
+      }
+    } catch (e) {
+      debugPrint('Error cleaning stuck calls: $e');
+    }
   }
 
   // ── Firestore incoming-call listener ─────────────────────────────────────
