@@ -23,9 +23,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final user = await AuthService.instance.getCurrentUserModel();
     if (user != null) {
       await AuthService.instance.setOnlineStatus(true);
-      // Start background Firestore listeners
-      await CallListenerServiceManager.start();
-      await CallListenerServiceManager.startMessageListener();
+      // Start background Firestore listeners (non-blocking, catch errors)
+      CallListenerServiceManager.start().catchError((e) {
+        print('Failed to start CallListenerService: $e');
+      });
+      CallListenerServiceManager.startMessageListener().catchError((e) {
+        print('Failed to start MessageListenerService: $e');
+      });
       emit(AuthAuthenticated(user));
     } else {
       emit(AuthUnauthenticated());
@@ -40,9 +44,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final user = await AuthService.instance.signInWithGoogle();
       if (user != null) {
-        // Start background Firestore listeners
-        await CallListenerServiceManager.start();
-        await CallListenerServiceManager.startMessageListener();
+        // Start background Firestore listeners (non-blocking)
+        CallListenerServiceManager.start().catchError((e) {
+          print('Failed to start CallListenerService: $e');
+        });
+        CallListenerServiceManager.startMessageListener().catchError((e) {
+          print('Failed to start MessageListenerService: $e');
+        });
         emit(AuthAuthenticated(user));
       } else {
         emit(AuthUnauthenticated());
@@ -61,9 +69,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final user = await AuthService.instance.signInWithEmail(
           event.email, event.password);
       if (user != null) {
-        // Start background Firestore listeners
-        await CallListenerServiceManager.start();
-        await CallListenerServiceManager.startMessageListener();
+        // Start background Firestore listeners (non-blocking)
+        CallListenerServiceManager.start().catchError((e) {
+          print('Failed to start CallListenerService: $e');
+        });
+        CallListenerServiceManager.startMessageListener().catchError((e) {
+          print('Failed to start MessageListenerService: $e');
+        });
         emit(AuthAuthenticated(user));
       } else {
         emit(AuthError('البريد أو الباسورد غير صحيح'));
