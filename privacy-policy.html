@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سياسة الخصوصية - SwiftCall</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00D9FF;
+            --bg-dark: #0A0E27;
+            --bg-card: #141938;
+            --text: #FFFFFF;
+            --text-gray: #A0AEC0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .last-updated {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .content {
+            background: var(--bg-card);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem 0;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-gray);
+        }
+
+        ul {
+            margin: 1rem 0 1rem 2rem;
+            color: var(--text-gray);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-top: 2rem;
+            padding: 0.8rem 2rem;
+            border: 2px solid var(--primary);
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: var(--primary);
+            color: var(--bg-dark);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>سياسة الخصوصية</h1>
+            <p class="last-updated">آخر تحديث: يونيو 2026</p>
+        </header>
+
+        <div class="content">
+            <h2>1. المقدمة</h2>
+            <p>
+                نحن في SwiftCall نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية. توضح هذه السياسة كيفية جمع واستخدام وحماية معلوماتك عند استخدام تطبيقنا.
+            </p>
+
+            <h2>2. المعلومات التي نجمعها</h2>
+            <p>نقوم بجمع المعلومات التالية:</p>
+            <ul>
+                <li><strong>معلومات الحساب:</strong> الاسم، البريد الإلكتروني، رقم الهاتف، الصورة الشخصية</li>
+                <li><strong>معلومات المكالمات:</strong> تاريخ ومدة المكالمات (لحساب التوكنز)</li>
+                <li><strong>الرسائل:</strong> محتوى المحادثات والملفات المرسلة</li>
+                <li><strong>الموقع الجغرافي:</strong> عند مشاركة الموقع (اختياري)</li>
+                <li><strong>معلومات الجهاز:</strong> نوع الجهاز، نظام التشغيل، إصدار التطبيق</li>
+            </ul>
+
+            <h2>3. كيفية استخدام المعلومات</h2>
+            <p>نستخدم معلوماتك للأغراض التالية:</p>
+            <ul>
+                <li>توفير وتحسين خدمات المكالمات والمحادثات</li>
+                <li>إدارة نظام التوكنز وعمليات الشراء</li>
+                <li>إرسال الإشعارات المهمة</li>
+                <li>تحسين تجربة المستخدم</li>
+                <li>منع الاحتيال والاستخدام غير المصرح به</li>
+            </ul>
+
+            <h2>4. مشاركة المعلومات</h2>
+            <p>
+                نحن لا نبيع معلوماتك الشخصية لأطراف ثالثة. قد نشارك بياناتك مع:
+            </p>
+            <ul>
+                <li><strong>Firebase/Google:</strong> لخدمات المصادقة والتخزين السحابي</li>
+                <li><strong>LiveKit:</strong> لخدمات المكالمات الصوتية والمرئية</li>
+                <li><strong>Unity Ads:</strong> لعرض الإعلانات (بيانات محدودة)</li>
+            </ul>
+
+            <h2>5. أمن المعلومات</h2>
+            <p>
+                نستخدم تقنيات تشفير متقدمة لحماية بياناتك:
+            </p>
+            <ul>
+                <li>تشفير البيانات أثناء النقل (HTTPS/TLS)</li>
+                <li>تشفير البيانات المخزنة</li>
+                <li>Firebase Authentication للمصادقة الآمنة</li>
+                <li>قواعد أمان Firestore لحماية البيانات</li>
+            </ul>
+
+            <h2>6. حقوقك</h2>
+            <p>لديك الحق في:</p>
+            <ul>
+                <li>الوصول إلى بياناتك الشخصية</li>
+                <li>تعديل أو تحديث معلوماتك</li>
+                <li>حذف حسابك وجميع بياناتك</li>
+                <li>سحب الموافقة على جمع البيانات</li>
+                <li>تصدير بياناتك</li>
+            </ul>
+
+            <h2>7. الاحتفاظ بالبيانات</h2>
+            <p>
+                نحتفظببياناتك طالما كان حسابك نشطاً. عند حذف الحساب، يتم حذف جميع بياناتك خلال 30 يوماً.
+            </p>
+
+            <h2>8. خصوصية الأطفال</h2>
+            <p>
+                التطبيق غير موجه للأطفال دون 13 عاماً. لا نجمع معلومات من الأطفال عن قصد.
+            </p>
+
+            <h2>9. التغييرات على السياسة</h2>
+            <p>
+                قد نحدث هذه السياسة من وقت لآخر. سنبلغك بأي تغييرات مهمة عبر التطبيق.
+            </p>
+
+            <h2>10. الاتصال بنا</h2>
+            <p>
+                إذا كان لديك أي أسئلة حول سياسة الخصوصية:
+            </p>
+            <ul>
+                <li>البريد الإلكتروني: jaradatabdullah122@gmail.com</li>
+                <li>GitHub: <a href="https://github.com/Abdjaradat/swiftcall/issues" style="color: var(--primary);">افتح issue</a></li>
+            </ul>
+
+            <a href="index.html" class="back-link">← العودة للصفحة الرئيسية</a>
+        </div>
+    </div>
+</body>
+</html>

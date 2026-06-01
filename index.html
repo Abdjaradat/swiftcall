@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftCall - مكالمات فيديو وشات احترافي</title>
+    <meta name="description" content="تطبيق SwiftCall للمكالمات الصوتية والمرئية والمحادثات الفورية مع نظام توكنز ذكي">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00D9FF;
+            --primary-dark: #00A8CC;
+            --bg-dark: #0A0E27;
+            --bg-card: #141938;
+            --text: #FFFFFF;
+            --text-gray: #A0AEC0;
+            --accent: #7C3AED;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f4d 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            opacity: 0.1;
+            top: -250px;
+            right: -250px;
+            border-radius: 50%;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease 0.2s backwards;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease 0.4s backwards;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 217, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+            background: var(--bg-dark);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 217, 255, 0.2);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: var(--text-gray);
+            line-height: 1.8;
+        }
+
+        /* Screenshots Section */
+        .screenshots {
+            padding: 6rem 0;
+            background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-card) 100%);
+        }
+
+        .screenshots-carousel {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            padding: 2rem 0;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .screenshots-carousel::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .screenshots-carousel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .screenshots-carousel::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .screenshot-item {
+            flex: 0 0 300px;
+            scroll-snap-align: center;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .screenshot-item:hover {
+            transform: scale(1.05);
+        }
+
+        .screenshot-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .screenshot-placeholder {
+            width: 100%;
+            height: 600px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        /* Download Section */
+        .download {
+            padding: 6rem 0;
+            background: var(--bg-dark);
+            text-align: center;
+        }
+
+        .download-card {
+            background: var(--bg-card);
+            padding: 3rem;
+            border-radius: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+            border: 2px solid rgba(0, 217, 255, 0.3);
+        }
+
+        .download h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(0, 217, 255, 0.2);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-card);
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+            margin: 0 1rem;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--accent);
+        }
+
+        .footer-links {
+            margin: 2rem 0;
+        }
+
+        .copyright {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .screenshot-item {
+                flex: 0 0 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>SwiftCall</h1>
+                <p>مكالمات فيديو وشات احترافي مع نظام توكنز ذكي</p>
+                <div class="cta-buttons">
+                    <a href="https://github.com/Abdjaradat/swiftcall/releases/latest" class="btn btn-primary">
+                        📱 تحميل التطبيق
+                    </a>
+                    <a href="https://github.com/Abdjaradat/swiftcall" class="btn btn-secondary">
+                        💻 الكود المصدري
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">المميزات</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📹</div>
+                    <h3>مكالمات فيديو عالية الجودة</h3>
+                    <p>مكالمات صوتية ومرئية واضحة باستخدام تقنية LiveKit WebRTC</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>محادثات فورية</h3>
+                    <p>شات مباشر مع إرسال الصور والفيديوهات والملفات</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🪙</div>
+                    <h3>نظام التوكنز</h3>
+                    <p>نظام توكنز ذكي لشراء الدقائق ومشاهدة الإعلانات للحصول على رصيد مجاني</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🗺️</div>
+                    <h3>مشاركة الموقع</h3>
+                    <p>مشاركة الموقع الجغرافي المباشر مع الأصدقاء</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>مكالمات جماعية</h3>
+                    <p>مكالمات فيديو جماعية لعدة مستخدمين في نفس الوقت</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>أمان وخصوصية</h3>
+                    <p>تشفير كامل للمحادثات والمكالمات مع Firebase Authentication</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>واجهة عصرية</h3>
+                    <p>تصميم Dark Mode جذاب مع دعم كامل للغة العربية</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔔</div>
+                    <h3>إشعارات فورية</h3>
+                    <p>استلام إشعارات المكالمات والرسائل حتى عند إغلاق التطبيق</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshots Section -->
+    <section class="screenshots">
+        <div class="container">
+            <h2 class="section-title">لقطات الشاشة</h2>
+            <div class="screenshots-carousel">
+                <div class="screenshot-item">
+                    <div class="screenshot-placeholder">شاشة تسجيل الدخول</div>
+                </div>
+                <div class="screenshot-item">
+                    <div class="screenshot-placeholder">الشاشة الرئيسية</div>
+                </div>
+                <div class="screenshot-item">
+                    <div class="screenshot-placeholder">المحادثات</div>
+                </div>
+                <div class="screenshot-item">
+                    <div class="screenshot-placeholder">مكالمة فيديو</div>
+                </div>
+                <div class="screenshot-item">
+                    <div class="screenshot-placeholder">محفظة التوكنز</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section class="download">
+        <div class="container">
+            <div class="download-card">
+                <h2>جاهز للبدء؟</h2>
+                <div class="version-badge">الإصدار 1.0.12</div>
+                <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                    حمل التطبيق الآن واستمتع بتجربة اتصال احترافية
+                </p>
+                <a href="https://github.com/Abdjaradat/swiftcall/releases/latest/download/app-release.apk" class="btn btn-primary">
+                    ⬇️ تحميل APK
+                </a>
+                <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 1.5rem;">
+                    Android 7.0 فأحدث • حجم الملف: ~100MB
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="privacy-policy.html">سياسة الخصوصية</a>
+                <a href="https://github.com/Abdjaradat/swiftcall">GitHub</a>
+                <a href="https://github.com/Abdjaradat/swiftcall/issues">الدعم الفني</a>
+            </div>
+            <p class="copyright">
+                © 2026 SwiftCall. جميع الحقوق محفوظة.
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
