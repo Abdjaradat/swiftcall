@@ -10,6 +10,7 @@ import '../../../data/models/token_model.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/livekit_service.dart';
 import '../../../data/services/token_service.dart';
+import '../../../services/call_manager.dart';
 
 part 'call_event.dart';
 part 'call_state.dart';
@@ -120,17 +121,21 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         .doc(callId)
         .snapshots()
         .listen((doc) {
+      print('🟢 CALLER Listener: doc.exists=${doc.exists}, status=${doc.data()?['status']}');
       if (!doc.exists || _activeCallId == null) return;
       final status = doc.data()?['status'] as String?;
       if (status == 'rejected') {
+        print('🟢 CALLER detected rejected');
         _skipFirestoreWrite = true;
         _endReason = CallEndReason.rejected;
         add(CallEnd());
       } else if (status == 'missed') {
+        print('🟢 CALLER detected missed');
         _skipFirestoreWrite = true;
         _endReason = CallEndReason.noAnswer;
         add(CallEnd());
       } else if (status == 'ended') {
+        print('🟢 CALLER detected ended');
         _skipFirestoreWrite = true;
         _endReason = CallEndReason.normal;
         add(CallEnd());
@@ -217,15 +222,34 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         .collection('calls')
         .doc(event.call.id)
         .snapshots()
-        .listen((doc) {
-      if (!doc.exists || _activeCallId == null) return;
-      final status = doc.data()?['status'] as String?;
-      if (status == 'ended' || status == 'cancelled') {
-        _skipFirestoreWrite = true;
-        _endReason = CallEndReason.normal;
-        add(CallEnd());
-      }
-    });
+        .listen(
+      (doc) {
+        print('🔵 RECEIVER Listener: doc.exists=${doc.exists}, status=${doc.data()?['status']}, activeCallId=$_activeCallId');
+        if (!doc.exists) {
+          print('🔵 RECEIVER: doc deleted - ending call');
+          _skipFirestoreWrite = true;
+          _endReason = CallEndReason.normal;
+          if (!isClosed) add(CallEnd());
+          return;
+        }
+        if (_activeCallId == null) {
+          print('🔵 RECEIVER: activeCallId is null, ignoring');
+          return;
+        }
+        final status = doc.data()?['status'] as String?;
+        print('🔵 RECEIVER: checking status=$status');
+        if (status == 'ended' || status == 'cancelled') {
+          print('🔵 RECEIVER detected ended/cancelled - ending call');
+          _skipFirestoreWrite = true;
+          _endReason = CallEndReason.normal;
+          if (!isClosed) add(CallEnd());
+        }
+      },
+      onError: (error) {
+        print('🔴 RECEIVER Listener ERROR: $error');
+      },
+      cancelOnError: false,
+    );
 
     _watchForRemoteParticipant(
       room,
@@ -235,6 +259,9 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   }
 
   Future<void> _onReject(CallReject event, Emitter<CallState> emit) async {
+    // Stop native ringtone service
+    CallManager().stopCallForegroundService();
+
     try {
       await FirebaseFirestore.instance
           .collection('calls')
@@ -253,6 +280,9 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     _roomListener = null;
     _ringTimer?.cancel();
     _ringTimer = null;
+
+    // Stop native ringtone service
+    CallManager().stopCallForegroundService();
 
     final elapsed = _elapsed;
     _elapsed = Duration.zero;
@@ -339,6 +369,9 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     _ringTimer = null;
     _wasActive = true;
     _isVideo = isVideo;
+
+    // Stop native ringtone service
+    CallManager().stopCallForegroundService();
 
     LiveKitService.instance.enableSpeaker(isVideo);
     _elapsed = Duration.zero;

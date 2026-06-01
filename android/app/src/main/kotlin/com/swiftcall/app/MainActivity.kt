@@ -71,6 +71,10 @@ class MainActivity : FlutterActivity() {
                         result.success(true)
                     } else result.error("INVALID_ARGS", "Missing uuid", null)
                 }
+                "stopCallForegroundService" -> {
+                    stopCallForegroundService()
+                    result.success(true)
+                }
                 "getLastKnownLocation" -> result.success(getLastKnownLocation())
                 else -> result.notImplemented()
             }
@@ -155,39 +159,60 @@ class MainActivity : FlutterActivity() {
         val roomName    = intent.getStringExtra("roomName")    ?: ""
         val callType    = intent.getStringExtra("callType")    ?: "audio"
 
-        Log.d(TAG, "handleCallIntent: action=$action uuid=$uuid")
+        Log.d(TAG, "handleCallIntent: action=$action uuid=$uuid isFlutterEngineReady=$isFlutterEngineReady")
+
+        // Wait for Flutter engine to be ready before invoking methods
+        if (!isFlutterEngineReady || !::channel.isInitialized) {
+            Log.w(TAG, "Flutter engine not ready yet, deferring call intent handling")
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                handleCallIntent(intent)
+            }, 500)
+            return
+        }
 
         when (action) {
             "com.swiftcall.app.INCOMING_CALL" -> {
                 // App launched from notification tap — show incoming call screen in Flutter
-                channel.invokeMethod("showCallScreen", mapOf(
-                    "callId"      to uuid,
-                    "callerName"  to callerName,
-                    "callerPhoto" to callerPhoto,
-                    "hasVideo"    to hasVideo,
-                    "roomName"    to roomName,
-                    "callType"    to callType,
-                ))
+                try {
+                    channel.invokeMethod("showCallScreen", mapOf(
+                        "callId"      to uuid,
+                        "callerName"  to callerName,
+                        "callerPhoto" to callerPhoto,
+                        "hasVideo"    to hasVideo,
+                        "roomName"    to roomName,
+                        "callType"    to callType,
+                    ))
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error invoking showCallScreen: ${e.message}", e)
+                }
             }
             "com.swiftcall.app.ANSWER_CALL" -> {
                 // User tapped "Answer" on the notification
-                channel.invokeMethod("answerCallFromNative", mapOf(
-                    "callId"      to uuid,
-                    "callerName"  to callerName,
-                    "callerPhoto" to callerPhoto,
-                    "hasVideo"    to hasVideo,
-                    "roomName"    to roomName,
-                    "callType"    to callType,
-                ))
+                try {
+                    channel.invokeMethod("answerCallFromNative", mapOf(
+                        "callId"      to uuid,
+                        "callerName"  to callerName,
+                        "callerPhoto" to callerPhoto,
+                        "hasVideo"    to hasVideo,
+                        "roomName"    to roomName,
+                        "callType"    to callType,
+                    ))
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error invoking answerCallFromNative: ${e.message}", e)
+                }
                 // Stop ringing notification
                 stopService(Intent(this, CallForegroundService::class.java))
             }
             "com.swiftcall.app.DECLINE_CALL" -> {
                 // User tapped "Decline" on the notification
-                channel.invokeMethod("declineCallFromNative", mapOf(
-                    "callId"   to uuid,
-                    "hasVideo" to hasVideo,
-                ))
+                try {
+                    channel.invokeMethod("declineCallFromNative", mapOf(
+                        "callId"   to uuid,
+                        "hasVideo" to hasVideo,
+                    ))
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error invoking declineCallFromNative: ${e.message}", e)
+                }
                 stopService(Intent(this, CallForegroundService::class.java))
             }
         }
@@ -207,8 +232,6 @@ class MainActivity : FlutterActivity() {
 
             val phoneAccount = PhoneAccount.builder(phoneAccountHandle!!, "SwiftCall")
                 .setCapabilities(
-                    PhoneAccount.CAPABILITY_CALL_PROVIDER or
-                    PhoneAccount.CAPABILITY_SUPPORTS_VIDEO_CALLING or
                     PhoneAccount.CAPABILITY_SELF_MANAGED
                 )
                 .build()
@@ -251,6 +274,13 @@ class MainActivity : FlutterActivity() {
         } else {
             startService(serviceIntent)
         }
+    }
+
+    private fun stopCallForegroundService() {
+        val serviceIntent = Intent(this, CallForegroundService::class.java).apply {
+            putExtra("action", "stop")
+        }
+        stopService(serviceIntent)
     }
 
     private fun getLastKnownLocation(): Map<String, Double>? {
