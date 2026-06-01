@@ -1,0 +1,23 @@
+06-01 12:41:00.850  1842  2887 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app.MainActivity pid=9427 activityId:33592761 state:1
+06-01 12:41:00.851   893   893 I MTK_APPList: [notifyAPPstate] com.swiftcall.app/com.swiftcall.app.MainActivity, pid=9427, activityId=33592761, uid=10545, state:RESUMED, fps:-1, win:0
+06-01 12:41:00.851   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:9427, activityId:33592761, fps:-1, isMultiWindow:0
+06-01 12:41:00.851   893   893 I MTK_APPList: [notifyAPPstate] foreground:com.swiftcall.app, pid:9427, activityId:33592761, uid:10545
+06-01 12:41:00.852   893   893 I MTK_APPList: [notifyPID] 9427
+06-01 12:41:00.853   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 9427
+06-01 12:41:04.989  1842  2885 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app.MainActivity pid=9427 activityId:33592761 state:0
+06-01 12:41:04.989   893   893 I MTK_APPList: [notifyAPPstate] com.swiftcall.app/com.swiftcall.app.MainActivity, pid=9427, activityId=33592761, uid=10545, state:PAUSED, fps:-1, win:0
+06-01 12:41:04.990   893   893 I MTK_APPList: [notifyPID] 9427
+06-01 12:41:04.990   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 9427
+06-01 12:41:05.401   893   893 I MTK_APPList: [notifyPID] 9427
+06-01 12:41:05.402   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 9427
+06-01 12:41:06.139  1842  2850 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app.MainActivity pid=9427 activityId:33592761 state:0
+06-01 12:41:06.139   893   893 I MTK_APPList: [notifyAPPstate] com.swiftcall.app/com.swiftcall.app.MainActivity, pid=9427, activityId=33592761, uid=10545, state:PAUSED, fps:-1, win:0
+06-01 12:41:07.052  1842  2007 I mtkpower_client: [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app.MainActivity pid=9427 activityId:33592761 state:1
+06-01 12:41:07.052   893   893 I MTK_APPList: [notifyAPPstate] com.swiftcall.app/com.swiftcall.app.MainActivity, pid=9427, activityId=33592761, uid=10545, state:RESUMED, fps:-1, win:0
+06-01 12:41:07.052   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:9427, activityId:33592761, fps:-1, isMultiWindow:0
+06-01 12:41:07.052   893   893 I MTK_APPList: [notifyAPPstate] foreground:com.swiftcall.app, pid:9427, activityId:33592761, uid:10545
+06-01 12:41:07.053   893   893 I MTK_APPList: [notifyPID] 9427
+06-01 12:41:07.054   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 9427
+06-01 12:41:07.065   893   893 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:9427, activityId:33592761, fps:-1, isMultiWindow:0
+06-01 12:41:07.068   893   893 I MTK_APPList: [notifyPID] 9427
+06-01 12:41:07.069   937  1019 I libPowerHal: [perfSetSysInfo] pid type:24, 9427

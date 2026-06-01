@@ -37,10 +37,13 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+        Log.d(TAG, "✅ configureFlutterEngine() called!")
         super.configureFlutterEngine(flutterEngine)
+        Log.d(TAG, "✅ super.configureFlutterEngine() completed")
         flutterEngineReference = flutterEngine
         isFlutterEngineReady = true
 
+        Log.d(TAG, "Setting up MethodChannels...")
         channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
         channel.setMethodCallHandler { call, result ->
             when (call.method) {
@@ -111,8 +114,10 @@ class MainActivity : FlutterActivity() {
 
         // Initialize telecom manager safely (may fail, don't crash Flutter Engine)
         try {
+            Log.d(TAG, "Initializing TelecomManager...")
             telecomManager = getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
             if (telecomManager != null) {
+                Log.d(TAG, "TelecomManager obtained, registering phone account...")
                 registerPhoneAccount()
             } else {
                 Log.w(TAG, "TelecomManager is null, phone account not registered")
@@ -120,11 +125,16 @@ class MainActivity : FlutterActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize telecom manager: ${e.message}", e)
         }
+
+        Log.d(TAG, "✅ configureFlutterEngine() finished successfully!")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "✅ onCreate() called!")
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "✅ super.onCreate() completed")
         handleCallIntent(intent)
+        Log.d(TAG, "✅ onCreate() finished!")
     }
 
     override fun onNewIntent(intent: Intent) {

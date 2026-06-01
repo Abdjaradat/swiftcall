@@ -1,0 +1,50 @@
+I/mtkpower_client( 1842): [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app.MainActivity pid=13852 activityId:33464922 state:1
+I/MTK_APPList(  893): [notifyAPPstate] com.swiftcall.app/com.swiftcall.app.MainActivity, pid=13852, activityId=33464922, uid=10549, state:RESUMED, fps:-1, win:0
+I/MTK_APPList(  893): [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:13852, activityId:33464922, fps:-1, isMultiWindow:0
+I/MTK_APPList(  893): [notifyAPPstate] foreground:com.swiftcall.app, pid:13852, activityId:33464922, uid:10549
+I/MTK_APPList(  893): [notifyPID] 13852
+I/libPowerHal(  937): [perfSetSysInfo] pid type:24, 13852
+I/mtkpower_client( 1842): [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app.MainActivity pid=13852 activityId:33464922 state:0
+I/MTK_APPList(  893): [notifyAPPstate] com.swiftcall.app/com.swiftcall.app.MainActivity, pid=13852, activityId=33464922, uid=10549, state:PAUSED, fps:-1, win:0
+I/MTK_APPList(  893): [notifyPID] 13852
+I/libPowerHal(  937): [perfSetSysInfo] pid type:24, 13852
+I/mtkpower_client( 1842): [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app.MainActivity pid=13852 activityId:33464922 state:0
+I/MTK_APPList(  893): [notifyAPPstate] com.swiftcall.app/com.swiftcall.app.MainActivity, pid=13852, activityId=33464922, uid=10549, state:PAUSED, fps:-1, win:0
+I/mtkpower_client( 1842): [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app.MainActivity pid=13852 activityId:33464922 state:1
+I/MTK_APPList(  893): [notifyAPPstate] com.swiftcall.app/com.swiftcall.app.MainActivity, pid=13852, activityId=33464922, uid=10549, state:RESUMED, fps:-1, win:0
+I/MTK_APPList(  893): [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:13852, activityId:33464922, fps:-1, isMultiWindow:0
+I/MTK_APPList(  893): [notifyAPPstate] foreground:com.swiftcall.app, pid:13852, activityId:33464922, uid:10549
+I/MTK_APPList(  893): [notifyPID] 13852
+I/libPowerHal(  937): [perfSetSysInfo] pid type:24, 13852
+I/MTK_APPList(  893): [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.swiftcall.app.MainActivity, pid:13852, activityId:33464922, fps:-1, isMultiWindow:0
+I/MTK_APPList(  893): [notifyPID] 13852
+I/libPowerHal(  937): [perfSetSysInfo] pid type:24, 13852
+I/libPowerHal(  937): [PE] system_server update ONESHOT(set) cmd:1444200 param:13852 pr:3
+I/libPowerHal(  937): [PD] system_server update ONESHOT(unset) cmd:1444200 param:13852 pr:3
+I/libPowerHal(  937): [PE] system_server update ONESHOT(set) cmd:1444200 param:13852 pr:3
+I/libPowerHal(  937): [PD] system_server update ONESHOT(unset) cmd:1444200 param:13852 pr:3
+I/libPowerHal(  937): [PE] system_server update ONESHOT(set) cmd:1444300 param:13852 pr:3
+I/libPowerHal(  937): [PD] system_server update ONESHOT(unset) cmd:1444300 param:13852 pr:3
+I/libPowerHal(  937): [PE] system_server update ONESHOT(set) cmd:1444200 param:13852 pr:3
+I/mtkpower_client( 1842): [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app.MainActivity pid=13852 activityId:33464922 state:0
+I/MTK_APPList(  893): [notifyAPPstate] com.swiftcall.app/com.swiftcall.app.MainActivity, pid=13852, activityId=33464922, uid=10549, state:PAUSED, fps:-1, win:0
+I/MTK_APPList(  893): [notifyPID] 13852
+I/libPowerHal(  937): [perfSetSysInfo] pid type:24, 13852
+I/mtkpower_client( 1842): [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.google.android.gms.auth.api.signin.internal.SignInHubActivity pid=13852 activityId:194859513 state:1
+I/MTK_APPList(  893): [notifyAPPstate] com.swiftcall.app/com.google.android.gms.auth.api.signin.internal.SignInHubActivity, pid=13852, activityId=194859513, uid=10549, state:RESUMED, fps:-1, win:0
+I/MTK_APPList(  893): [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.google.android.gms.auth.api.signin.internal.SignInHubActivity, pid:13852, activityId:194859513, fps:-1, isMultiWindow:0
+I/MTK_APPList(  893): [notifyAPPstate] foreground:com.swiftcall.app, pid:13852, activityId:194859513, uid:10549
+I/mtkpower_client( 1842): [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.swiftcall.app.MainActivity pid=13852 activityId:33464922 state:0
+I/libPowerHal(  937): [PD] system_server update ONESHOT(unset) cmd:1444300 param:13852 pr:6
+I/MTK_APPList(  893): [notifyPID] 13852
+I/libPowerHal(  937): [perfSetSysInfo] pid type:24, 13852
+I/MTK_APPList(  893): [notifyAPPstate] com.swiftcall.app/com.swiftcall.app.MainActivity, pid=13852, activityId=33464922, uid=10549, state:PAUSED, fps:-1, win:0
+I/MTK_APPList(  893): [notifyAPPstate] multi_resumed_app_info[0] com.swiftcall.app/com.google.android.gms.auth.api.signin.internal.SignInHubActivity, pid:13852, activityId:194859513, fps:-1, isMultiWindow:0
+I/MTK_APPList(  893): [notifyPID] 13852
+I/libPowerHal(  937): [perfSetSysInfo] pid type:24, 13852
+I/mtkpower_client( 1842): [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.google.android.gms.auth.api.signin.internal.SignInHubActivity pid=13852 activityId:194859513 state:0
+I/MTK_APPList(  893): [notifyAPPstate] com.swiftcall.app/com.google.android.gms.auth.api.signin.internal.SignInHubActivity, pid=13852, activityId=194859513, uid=10549, state:PAUSED, fps:-1, win:0
+I/MTK_APPList(  893): [notifyPID] 13852
+I/libPowerHal(  937): [perfSetSysInfo] pid type:24, 13852
+I/mtkpower_client( 1842): [PowerHal_Wrap_notifyAppState] com.swiftcall.app/com.google.android.gms.auth.api.signin.internal.SignInHubActivity pid=13852 activityId:194859513 state:0
+I/MTK_APPList(  893): [notifyAPPstate] com.swiftcall.app/com.google.android.gms.auth.api.signin.internal.SignInHubActivity, pid=13852, activityId=194859513, uid=10549, state:PAUSED, fps:-1, win:0
