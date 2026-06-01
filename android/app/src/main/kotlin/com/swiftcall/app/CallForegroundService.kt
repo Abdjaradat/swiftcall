@@ -12,7 +12,9 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.telecom.DisconnectCause
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
@@ -28,9 +30,15 @@ class CallForegroundService : Service() {
         private const val NOTIFICATION_ID  = 12345
         private const val TAG              = "CallForegroundService"
         private const val PHONE_ACCOUNT_ID = "SwiftCallConnectionServiceId"
+        private const val AUTO_STOP_TIMEOUT = 60_000L  // 60 seconds
     }
 
     private var mediaPlayer: MediaPlayer? = null
+    private val autoStopHandler = Handler(Looper.getMainLooper())
+    private val autoStopRunnable = Runnable {
+        Log.w(TAG, "Auto-stopping service after timeout (no answer/decline)")
+        stopSelf()
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -49,13 +57,21 @@ class CallForegroundService : Service() {
 
                 startForegroundNotification(uuid, callerName, callerPhoto, hasVideo, roomName, callType)
                 reportToTelecom(uuid, callerName, hasVideo)
+
+                // Auto-stop after 60 seconds if user doesn't answer/decline
+                autoStopHandler.postDelayed(autoStopRunnable, AUTO_STOP_TIMEOUT)
+                Log.d(TAG, "Auto-stop timer started (60s)")
             }
             "end"  -> {
                 val uuid = intent?.getStringExtra("uuid")
                 if (uuid != null) CallConnectionService.reportCallEnded(uuid, DisconnectCause.LOCAL)
+                autoStopHandler.removeCallbacks(autoStopRunnable)
                 stopSelf()
             }
-            "stop" -> stopSelf()
+            "stop" -> {
+                autoStopHandler.removeCallbacks(autoStopRunnable)
+                stopSelf()
+            }
         }
         return START_NOT_STICKY
     }
@@ -224,7 +240,9 @@ class CallForegroundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        autoStopHandler.removeCallbacks(autoStopRunnable)
         stopRingtone()
         NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
+        Log.d(TAG, "Service destroyed")
     }
 }
