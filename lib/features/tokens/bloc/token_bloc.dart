@@ -37,10 +37,10 @@ class TokenBloc extends Bloc<TokenEvent, TokenState> {
   String? get _uid => _authService.currentUserId;
 
   Future<void> _onLoad(TokenLoadWallet event, Emitter<TokenState> emit) async {
-    emit(TokenLoading());
     try {
+      emit(TokenLoading());
       final uid = _uid;
-      if (uid == null) {
+      if (uid == null || uid.isEmpty) {
         emit(TokenError('يجب تسجيل الدخول أولاً'));
         return;
       }
@@ -50,7 +50,8 @@ class TokenBloc extends Bloc<TokenEvent, TokenState> {
     } catch (e, stack) {
       print('TokenBloc._onLoad ERROR: $e');
       print('STACK: $stack');
-      emit(TokenError('فشل تحميل المحفظة: ${e.toString()}'));
+      // Emit error instead of crashing
+      emit(TokenError('فشل تحميل المحفظة، حاول مجدداً'));
     }
   }
 

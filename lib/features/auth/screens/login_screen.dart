@@ -49,6 +49,7 @@ class _LoginScreenState extends State<LoginScreen>
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
+        resizeToAvoidBottomInset: true,
         body: Stack(
           children: [
             // ── Animated background blobs ──
@@ -76,16 +77,29 @@ class _LoginScreenState extends State<LoginScreen>
 
             // ── Main content ──
             SafeArea(
-              child: Column(
-                children: [
-                  const Spacer(flex: 2),
-                  const _LogoSection(),
-                  const Spacer(flex: 2),
-                  const _FeatureRow(),
-                  const Spacer(flex: 2),
-                  const _AuthForm(),
-                  const SizedBox(height: 40),
-                ],
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height -
+                        MediaQuery.of(context).padding.top -
+                        MediaQuery.of(context).padding.bottom,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Spacer(flex: 2),
+                        const _LogoSection(),
+                        const Spacer(flex: 2),
+                        const _FeatureRow(),
+                        const Spacer(flex: 2),
+                        const _AuthForm(),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

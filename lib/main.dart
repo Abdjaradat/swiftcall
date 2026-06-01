@@ -21,45 +21,96 @@ Future<void> _bgMessageHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseMessaging.onBackgroundMessage(_bgMessageHandler);
+  // Global error handler
+  FlutterError.onError = (details) {
+    debugPrint('Flutter Error: ${details.exceptionAsString()}');
+    debugPrint('Stack: ${details.stack}');
+  };
 
-  // Notifications
-  await NotificationService.instance.initialize();
+  bool isDarkMode = true;
+  String locale = 'ar';
+  bool onboardingDone = false;
 
-  // Update FCM token in Firestore on refresh
-  NotificationService.instance.onTokenRefresh((token) {
-    AuthService.instance.updateFcmToken(token);
-  });
+  try {
+    // Firebase
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    FirebaseMessaging.onBackgroundMessage(_bgMessageHandler);
+    debugPrint('✅ Firebase initialized');
+  } catch (e, stack) {
+    debugPrint('❌ Firebase initialization error: $e');
+    debugPrint('Stack: $stack');
+  }
 
-  // Network bypass (proxy) initialization
-  await NetworkBypassService.instance.initialize();
+  try {
+    // Notifications
+    await NotificationService.instance.initialize();
+    debugPrint('✅ NotificationService initialized');
 
-  // Unity Ads — تهيئة مسبقة لتحميل الإعلانات
-  AdService.instance.init();
+    // Update FCM token in Firestore on refresh
+    NotificationService.instance.onTokenRefresh((token) {
+      AuthService.instance.updateFcmToken(token);
+    });
+  } catch (e) {
+    debugPrint('❌ NotificationService error: $e');
+  }
 
-  // Timeago Arabic locale
-  timeago.setLocaleMessages('ar', timeago.ArMessages());
+  try {
+    // Network bypass (proxy) initialization
+    await NetworkBypassService.instance.initialize();
+    debugPrint('✅ NetworkBypassService initialized');
+  } catch (e) {
+    debugPrint('❌ NetworkBypassService error: $e');
+  }
 
-  // Preferences
-  final prefs = await SharedPreferences.getInstance();
-  final isDarkMode     = prefs.getBool(AppConstants.isDarkModeKey)    ?? true;
-  final locale         = prefs.getString(AppConstants.localeKey)      ?? 'ar';
-  final onboardingDone = prefs.getBool(AppConstants.onboardingDoneKey) ?? false;
+  try {
+    // Unity Ads — تهيئة مسبقة لتحميل الإعلانات
+    AdService.instance.init();
+    debugPrint('✅ AdService initialized');
+  } catch (e) {
+    debugPrint('❌ AdService error: $e');
+  }
 
-  // Lock to portrait
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  try {
+    // Timeago Arabic locale
+    timeago.setLocaleMessages('ar', timeago.ArMessages());
+  } catch (e) {
+    debugPrint('❌ Timeago error: $e');
+  }
 
-  // Transparent status bar
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
-  ));
+  try {
+    // Preferences
+    final prefs = await SharedPreferences.getInstance();
+    isDarkMode     = prefs.getBool(AppConstants.isDarkModeKey)    ?? true;
+    locale         = prefs.getString(AppConstants.localeKey)      ?? 'ar';
+    onboardingDone = prefs.getBool(AppConstants.onboardingDoneKey) ?? false;
+    debugPrint('✅ SharedPreferences loaded');
+  } catch (e, stack) {
+    debugPrint('❌ SharedPreferences error: $e');
+    debugPrint('Stack: $stack');
+    // Clear corrupted prefs and use defaults
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      debugPrint('✅ SharedPreferences cleared');
+    } catch (_) {}
+  }
+
+  try {
+    // Lock to portrait
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
+    // Transparent status bar
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+    ));
+  } catch (e) {
+    debugPrint('❌ SystemChrome error: $e');
+  }
 
   runApp(SwiftCallApp(
     isDarkMode: isDarkMode,

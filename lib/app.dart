@@ -295,10 +295,12 @@ class _SwiftCallAppState extends State<SwiftCallApp>
   }
 
   @override
+  @override
   void dispose() {
     AppSettingsNotifier.instance.removeListener(_onSettingsChanged);
     WidgetsBinding.instance.removeObserver(this);
     _incomingCallSub?.cancel();
+    _incomingGroupCallSub?.cancel();
     _authNotifier.dispose();
     _authBloc.close();
     super.dispose();

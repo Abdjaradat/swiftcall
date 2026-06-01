@@ -51,14 +51,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeLoadUsers event,
     Emitter<HomeState> emit,
   ) async {
-    // Auth guard: ensure user is logged in before querying Firestore
-    final myUid = AuthService.instance.currentUserId;
-    if (myUid == null || myUid.isEmpty) {
-      print('HomeBloc._onLoadUsers: User not authenticated, skipping');
-      return;
-    }
-
     try {
+      // Auth guard: ensure user is logged in before querying Firestore
+      final myUid = AuthService.instance.currentUserId;
+      if (myUid == null || myUid.isEmpty) {
+        print('HomeBloc._onLoadUsers: User not authenticated, skipping');
+        if (state is HomeLoaded) {
+          emit((state as HomeLoaded).copyWith(contacts: []));
+        }
+        return;
+      }
+
       final allUsers = await AuthService.instance.getAllUsers();
       final others =
           allUsers.where((u) => u.uid != myUid).toList();
@@ -78,8 +81,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     } catch (e, stack) {
       print('HomeBloc._onLoadUsers ERROR: $e');
       print('STACK: $stack');
+      // Emit error state instead of crashing
       if (state is HomeLoaded) {
         emit((state as HomeLoaded).copyWith(contacts: []));
+      } else {
+        emit(HomeError('فشل تحميل جهات الاتصال'));
       }
     }
   }
